@@ -1,0 +1,71 @@
+# https://taskfile.dev
+
+version: '3'
+
+dotenv: ['.env']
+
+vars:
+  GREETING: Hello, World!
+
+tasks:
+  default:
+    cmds:
+      - echo "{{.GREETING}}"
+    silent: true
+  migrate:
+    cmds:
+      - migrate -path db/migrations -database "postgres://${DIGIHUB_POSTGRES_USER}:${DIGIHUB_POSTGRES_PASSWORD}@${DIGIHUB_POSTGRES_HOST}:${DIGIHUB_POSTGRES_PORT}/${DIGIHUB_POSTGRES_DB}?sslmode=${DIGIHUB_POSTGRES_SSL_MODE}" {{.cmd}}
+  create-migration:
+    cmds:
+      - migrate create -ext sql -dir db/migrations/ {{.name}} -tz UTC
+  seed:
+    cmds:
+      - go run ./cmd/bin/main.go seed -total={{.total}} -table={{.table}}
+  dev:
+    cmds:
+      - go run ./cmd/bin/main.go
+  ws:
+    cmds:
+      - go run ./cmd/bin/main.go ws --port=8080
+  build-win:
+    platforms: [windows/amd64]
+    cmds:
+      - go build -o ./crowners-app.exe ./cmd/bin/main.go
+  build-linux:
+    platforms: [linux/amd64]
+    cmds:
+      - go build -o ./crowners-app ./cmd/bin/main.go
+  build:
+    cmds:
+      - task build-win
+      - task build-linux
+  run-win:
+    cmds:
+      - task build-win
+      - ./crowners-app.exe
+  run-linux:
+    cmds:
+      - task build-linux
+      - ./crowners-app
+  run:
+    cmds:
+      - task run-win
+      - task run-linux
+  consumer:
+    cmds:
+      - go run ./cmd/bin/main.go consumer
+  lint-fix:
+    cmds:
+      - gofmt -w .
+  lint-ci:
+    cmds:
+      - golangci-lint run
+  nats:
+    cmds:
+      - nats-server --js
+  commit:
+    cmds:
+      - task lint-fix
+      - task lint-ci
+      - git add .
+      - git commit -m "{{.msg}}"
