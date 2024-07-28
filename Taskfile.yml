@@ -30,11 +30,11 @@ tasks:
   build-win:
     platforms: [windows/amd64]
     cmds:
-      - go build -o ./crowners-app.exe ./cmd/bin/main.go
+      - go build -o ../binaries/digihub-app.exe ./cmd/bin/main.go
   build-linux:
     platforms: [linux/amd64]
     cmds:
-      - go build -o ./crowners-app ./cmd/bin/main.go
+      - go build -o ../binaries/digihub-app ./cmd/bin/main.go
   build:
     cmds:
       - task build-win
@@ -42,11 +42,11 @@ tasks:
   run-win:
     cmds:
       - task build-win
-      - ./crowners-app.exe
+      - ./digihub-app.exe
   run-linux:
     cmds:
       - task build-linux
-      - ./crowners-app
+      - ./digihub-app
   run:
     cmds:
       - task run-win
