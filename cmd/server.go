@@ -51,6 +51,12 @@ func RunServer(cmd *flag.FlagSet, args []string) {
 		log.Fatal().Err(err).Msg("Error while creating local storage directory")
 	}
 
+	// Application private storage
+	err = os.MkdirAll(envs.App.LocalStoragePrivatePath, 0700)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Error while creating local storage directory")
+	}
+
 	app.Static("/storage/public", envs.App.LocalStoragePublicPath)
 
 	// Application Middlewares
@@ -74,7 +80,7 @@ func RunServer(cmd *flag.FlagSet, args []string) {
 		adapter.WithValidator(validator.NewValidator()),
 	)
 
-	infrastructure.InitializeLogger(envs.App.Environtment, "app.log", logLevel)
+	infrastructure.InitializeLogger(envs.App.Environtment, envs.App.LogFile, logLevel)
 	app.Get("/metrics", monitor.New(monitor.Config{Title: "Digihub Dev Metrics"}))
 	route.SetupRoutes(app)
 

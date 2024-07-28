@@ -10,7 +10,6 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
-	"sync"
 	"syscall"
 	"time"
 
@@ -24,9 +23,6 @@ type Client struct {
 	UserId string
 }
 
-var clients = make(map[string]*Client)
-var clientsMutex sync.RWMutex
-var singleUsedToken = make(map[string]bool)
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -75,7 +71,7 @@ func RunWebsocket(cmd *flag.FlagSet, args []string) {
 		adapter.WithWebsocketServer(server),
 	)
 
-	infrastructure.InitializeLogger(envs.App.Environtment, "ws.log", logLevel)
+	infrastructure.InitializeLogger(envs.App.Environtment, envs.App.LogFileWs, logLevel)
 
 	quit := make(chan os.Signal, 1)
 

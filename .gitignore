@@ -1,5 +1,6 @@
 # files to ignore
 .env
+digihub-app
 
 # directories to ignore
 .idea

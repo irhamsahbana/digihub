@@ -21,7 +21,7 @@ func InitializeLogger(stage string, filename string, logLevel zerolog.Level) {
 		lumberjackLogger = &lumberjack.Logger{
 			MaxSize:  100, // megabytes
 			MaxAge:   14,  // days
-			Filename: "logs/" + filename,
+			Filename: filename,
 		}
 		writers = []io.Writer{zerolog.ConsoleWriter{Out: os.Stderr}, lumberjackLogger}
 		mw      = io.MultiWriter(writers...)

@@ -24,36 +24,16 @@ tasks:
   dev:
     cmds:
       - go run ./cmd/bin/main.go
+  daemon:
+    cmds:
+      - pmgo
   ws:
     cmds:
       - go run ./cmd/bin/main.go ws --port=8080
-  build-win:
-    platforms: [windows/amd64]
-    cmds:
-      - go build -o ../binaries/digihub-app.exe ./cmd/bin/main.go
-  build-linux:
-    platforms: [linux/amd64]
-    cmds:
-      - go build -o ../binaries/digihub-app ./cmd/bin/main.go
   build:
     cmds:
-      - task build-win
-      - task build-linux
-  run-win:
-    cmds:
-      - task build-win
-      - ./digihub-app.exe
-  run-linux:
-    cmds:
-      - task build-linux
-      - ./digihub-app
-  run:
-    cmds:
-      - task run-win
-      - task run-linux
-  consumer:
-    cmds:
-      - go run ./cmd/bin/main.go consumer
+      - go build -o ./digihub-app ./cmd/bin/main.go
+
   lint-fix:
     cmds:
       - gofmt -w .

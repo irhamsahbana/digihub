@@ -18,6 +18,8 @@ type Config struct {
 		Port                    string `env:"APP_PORT" env-default:"3000"`
 		WSPort                  string `env:"WS_PORT"`
 		LogLevel                string `env:"APP_LOG_LEVEL" env-default:"debug"`
+		LogFile                 string `env:"APP_LOG_FILE" env-default:"./logs/app.log"`
+		LogFileWs               string `env:"APP_LOG_FILE_WS" env-default:"./logs/ws.log"`
 		LocalStoragePublicPath  string `env:"LOCAL_STORAGE_PUBLIC_PATH" env-default:"./storage/public"`
 		LocalStoragePrivatePath string `env:"LOCAL_STORAGE_PRIVATE_PATH" env-default:"./storage/private"`
 	}
