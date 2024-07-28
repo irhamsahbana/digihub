@@ -52,7 +52,6 @@ func Error(errorMsg any) Response {
 	}
 
 	return Response{
-		"errors":  make(map[string][]string),
 		"success": false,
 		// "message": "Your request has been failed to process",
 		"message": "Permintaan Anda gagal diproses",

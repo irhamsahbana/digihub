@@ -5,7 +5,6 @@
 .idea
 .vscode
 logs
-storage
 tmp
 
 # executables to ignore

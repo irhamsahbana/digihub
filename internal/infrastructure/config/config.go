@@ -14,11 +14,12 @@ var (
 
 type Config struct {
 	App struct {
-		Environtment     string `env:"APP_ENV" env-default:"production"`
-		Port             string `env:"APP_PORT" env-default:"3000"`
-		WSPort           string `env:"WS_PORT"`
-		LogLevel         string `env:"APP_LOG_LEVEL" env-default:"debug"`
-		LocalStoragePath string `env:"LOCAL_STORAGE_PATH" env-default:"./storage"`
+		Environtment            string `env:"APP_ENV" env-default:"production"`
+		Port                    string `env:"APP_PORT" env-default:"3000"`
+		WSPort                  string `env:"WS_PORT"`
+		LogLevel                string `env:"APP_LOG_LEVEL" env-default:"debug"`
+		LocalStoragePublicPath  string `env:"LOCAL_STORAGE_PUBLIC_PATH" env-default:"./storage/public"`
+		LocalStoragePrivatePath string `env:"LOCAL_STORAGE_PRIVATE_PATH" env-default:"./storage/private"`
 	}
 	DB struct {
 		ConnectionTimeout int `env:"DB_CONN_TIMEOUT" env-default:"30" env-description:"database timeout in seconds"`

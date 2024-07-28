@@ -46,12 +46,12 @@ func RunServer(cmd *flag.FlagSet, args []string) {
 	app := fiber.New()
 
 	// Application Local Storage
-	err = os.MkdirAll(envs.App.LocalStoragePath, os.ModePerm)
+	err = os.MkdirAll(envs.App.LocalStoragePublicPath, os.ModePerm)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Error while creating local storage directory")
 	}
 
-	app.Static("/storage", envs.App.LocalStoragePath)
+	app.Static("/storage/public", envs.App.LocalStoragePublicPath)
 
 	// Application Middlewares
 	if envs.App.Environtment == "production" {
@@ -69,11 +69,9 @@ func RunServer(cmd *flag.FlagSet, args []string) {
 	// End Application Middlewares
 
 	adapter.Adapters.Sync(
-		adapter.WithVenamonGolog(),
 		adapter.WithRestServer(app),
 		adapter.WithDigihubPostgres(),
 		adapter.WithValidator(validator.NewValidator()),
-		adapter.WithDigihubStorage(),
 	)
 
 	infrastructure.InitializeLogger(envs.App.Environtment, "app.log", logLevel)
