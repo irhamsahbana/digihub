@@ -13,21 +13,7 @@ import (
 )
 
 func main() {
-	configPath := flag.String("path", "./", "path to config file")
-	configFilename := flag.String("filename", ".env", "config file name")
-	flag.Parse()
-
-	initialize(*configPath, *configFilename)
-	newOsArgs := []string{}
-
-	for _, arg := range os.Args {
-		if strings.Contains(arg, "-path") || strings.Contains(arg, "-filename") {
-			continue
-		}
-
-		newOsArgs = append(newOsArgs, arg)
-	}
-	os.Args = newOsArgs
+	os.Args = initialize()
 
 	serverCmd := flag.NewFlagSet("server", flag.ExitOnError)
 	seedCmd := flag.NewFlagSet("seed", flag.ExitOnError)
@@ -60,13 +46,34 @@ func main() {
 	}
 }
 
-func initialize(path, filename string) {
-	log.Info().Msgf("Initializing configuration with path: %s and filename: %s", path, filename)
+func initialize() (newArgs []string) {
+	configPath := flag.String("config_path", "./", "path to config file")
+	configFilename := flag.String("config_filename", ".env", "config file name")
+	flag.Parse()
+
+	var logCfg string
+	if *configPath == "./" {
+		logCfg = *configPath + *configFilename
+	} else {
+		logCfg = *configPath + "/" + *configFilename
+	}
+
+	log.Info().Msgf("Initializing configuration with config: %s", logCfg)
 
 	config.Configuration(
-		config.WithPath(path),
-		config.WithFilename(filename),
+		config.WithPath(*configPath),
+		config.WithFilename(*configFilename),
 	).Initialize()
 
 	adapter.Adapters = &adapter.Adapter{}
+
+	for _, arg := range os.Args {
+		if strings.Contains(arg, "config_path") || strings.Contains(arg, "config_filename") {
+			continue
+		}
+
+		newArgs = append(newArgs, arg)
+	}
+
+	return newArgs
 }
