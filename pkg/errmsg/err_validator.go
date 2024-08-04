@@ -75,6 +75,15 @@ func errorValidationHandler[T any](err error, payload *T) (int, map[string][]str
 		case "ulid":
 			// message = fmt.Sprintf("%s is not a valid ULID.", fieldInMsg)
 			message = fmt.Sprintf("%s bukan ULID yang valid.", fieldInMsg)
+		case "base64":
+			// message = fmt.Sprintf("%s is not a valid base64 format.", fieldInMsg)
+			message = fmt.Sprintf("%s bukan format base64 yang valid.", fieldInMsg)
+		case "base64url":
+			// message = fmt.Sprintf("%s is not a valid base64url format.", fieldInMsg)
+			message = fmt.Sprintf("%s bukan format base64url yang valid.", fieldInMsg)
+		case "base64rawurl":
+			// message = fmt.Sprintf("%s is not a valid base64rawurl format.", fieldInMsg)
+			message = fmt.Sprintf("%s bukan format base64rawurl yang valid.", fieldInMsg)
 		case "min":
 			// check if the field is a number or a string
 			if valueType.Kind() == reflect.Int || valueType.Kind() == reflect.Int8 || valueType.Kind() == reflect.Int16 || valueType.Kind() == reflect.Int32 || valueType.Kind() == reflect.Int64 || valueType.Kind() == reflect.Float32 || valueType.Kind() == reflect.Float64 {

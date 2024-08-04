@@ -1,7 +1,16 @@
 package ports
 
-type XxxRepository interface {
+import (
+	"codebase-app/internal/module/wac/entity"
+	"context"
+)
+
+var privateFolder = "storage/private"
+
+type WACRepository interface {
+	CreateWAC(ctx context.Context, req *entity.CreateWACRequest) error
 }
 
-type XxxService interface {
+type WACService interface {
+	CreateWAC(ctx context.Context, req *entity.CreateWACRequest) error
 }

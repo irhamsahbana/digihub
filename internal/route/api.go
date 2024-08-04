@@ -1,6 +1,7 @@
 package route
 
 import (
+	wacHandler "codebase-app/internal/module/wac/handler"
 	"codebase-app/pkg/response"
 
 	"github.com/gofiber/fiber/v2"
@@ -9,7 +10,9 @@ import (
 
 func SetupRoutes(app *fiber.App) {
 	// add /api prefix to all routes
-	// api := app.Group("/api")
+	api := app.Group("/api")
+
+	wacHandler.NewWacHandler().Register(api)
 
 	// fallback route
 	app.Use(func(c *fiber.Ctx) error {

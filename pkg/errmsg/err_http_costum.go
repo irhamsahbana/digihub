@@ -24,6 +24,14 @@ func NewHttpErrors(errCode int, opts ...Option) *HttpError {
 	return err
 }
 
+func (e *HttpError) Add(field, msg string) {
+	e.Errors[field] = append(e.Errors[field], msg)
+}
+
+func (e *HttpError) HasErrors() bool {
+	return len(e.Errors) > 0
+}
+
 type Option func(*HttpError)
 
 func WithMessage(msg string) Option {
