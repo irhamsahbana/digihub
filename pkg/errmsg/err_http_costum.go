@@ -24,6 +24,10 @@ func NewCustomErrors(errCode int, opts ...Option) *CustomError {
 	return err
 }
 
+func (e *CustomError) SetCode(code int) {
+	e.Code = code
+}
+
 func (e *CustomError) Add(field, msg string) {
 	e.Errors[field] = append(e.Errors[field], msg)
 }
