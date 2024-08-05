@@ -30,7 +30,7 @@ func NewWACService(repo ports.WACRepository) *wacService {
 }
 
 func (s *wacService) CreateWAC(ctx context.Context, req *entity.CreateWACRequest) error {
-	errs := errmsg.NewHttpErrors(http.StatusBadRequest)
+	errs := errmsg.NewCustomErrors(http.StatusBadRequest)
 
 	for i, vc := range req.VehicleConditions {
 		idx := strconv.Itoa(i)

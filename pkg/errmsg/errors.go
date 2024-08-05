@@ -27,7 +27,7 @@ func Errors[T any](err error, payloads ...*T) (code int, errors any) {
 	}
 
 	// CUSTOM ERRORS
-	if errHttp, ok := err.(*HttpError); ok {
+	if errHttp, ok := err.(*CustomError); ok {
 		code, errors = errorCustomHandler(errHttp)
 	}
 

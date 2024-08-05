@@ -1,17 +1,17 @@
 package errmsg
 
-type HttpError struct {
+type CustomError struct {
 	Code   int
 	Errors map[string][]string
 	Msg    string
 }
 
-func (e *HttpError) Error() string {
+func (e *CustomError) Error() string {
 	return e.Msg
 }
 
-func NewHttpErrors(errCode int, opts ...Option) *HttpError {
-	err := &HttpError{
+func NewCustomErrors(errCode int, opts ...Option) *CustomError {
+	err := &CustomError{
 		Code:   errCode,
 		Errors: make(map[string][]string),
 		Msg:    "Permintaan Anda gagal diproses",
@@ -24,28 +24,28 @@ func NewHttpErrors(errCode int, opts ...Option) *HttpError {
 	return err
 }
 
-func (e *HttpError) Add(field, msg string) {
+func (e *CustomError) Add(field, msg string) {
 	e.Errors[field] = append(e.Errors[field], msg)
 }
 
-func (e *HttpError) HasErrors() bool {
+func (e *CustomError) HasErrors() bool {
 	return len(e.Errors) > 0
 }
 
-type Option func(*HttpError)
+type Option func(*CustomError)
 
 func WithMessage(msg string) Option {
-	return func(err *HttpError) {
+	return func(err *CustomError) {
 		err.Msg = msg
 	}
 }
 
 func WithErrors(field string, msg string) Option {
-	return func(err *HttpError) {
+	return func(err *CustomError) {
 		err.Errors[field] = append(err.Errors[field], msg)
 	}
 }
 
-func errorCustomHandler(err *HttpError) (int, *HttpError) {
+func errorCustomHandler(err *CustomError) (int, *CustomError) {
 	return err.Code, err
 }

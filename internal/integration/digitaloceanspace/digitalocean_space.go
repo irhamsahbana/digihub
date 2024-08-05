@@ -35,7 +35,7 @@ func (d *dospace) UploadFile(ctx context.Context, req *entity.UploadFileRequest)
 	var res = entity.UploadFileResponse{}
 
 	if req.File == nil {
-		return res, errmsg.NewHttpErrors(400, errmsg.WithErrors("file", "file is required."))
+		return res, errmsg.NewCustomErrors(400, errmsg.WithErrors("file", "file is required."))
 	}
 
 	var (
@@ -93,7 +93,7 @@ func (d *dospace) ListFiles(ctx context.Context) ([]types.Object, error) {
 		page, err := paginator.NextPage(ctx)
 		if err != nil {
 			log.Error().Err(err).Msg("integration::dospace-ListFiles failed to get page of results")
-			return objects, errmsg.NewHttpErrors(500, errmsg.WithMessage("failed to get page of results"))
+			return objects, errmsg.NewCustomErrors(500, errmsg.WithMessage("failed to get page of results"))
 		}
 
 		objects = append(objects, page.Contents...)

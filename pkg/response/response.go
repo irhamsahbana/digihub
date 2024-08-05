@@ -35,7 +35,7 @@ func Error(errorMsg any) Response {
 		}
 	}
 
-	if errHttp, ok := errorMsg.(*errmsg.HttpError); ok {
+	if errHttp, ok := errorMsg.(*errmsg.CustomError); ok {
 		return Response{
 			"errors":  errHttp.Errors,
 			"success": false,
