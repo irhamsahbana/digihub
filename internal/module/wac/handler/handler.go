@@ -60,9 +60,10 @@ func (h *wachHandler) createWAC(c *fiber.Ctx) error {
 }
 
 func (h *wachHandler) getWAC(c *fiber.Ctx) error {
-	filePath := filepath.Join("storage", "private", "01J4D6QWF1TW0BC756Y2Q5VC87.jpg")
+	filePath := filepath.Join("storage", "private", "01J4JWY298AMC7S9MTZ5ZBAWDD.png")
 	// Check if file exists
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		log.Error().Err(err).Msg("handler::getWAC - File not found")
 		return c.Status(fiber.StatusNotFound).SendString("File not found")
 	}
 

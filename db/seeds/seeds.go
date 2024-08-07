@@ -42,10 +42,13 @@ func (s *Seed) run(table string, total int) {
 		s.vehicleTypesSeed()
 	case "branches":
 		s.branchesSeed(total)
+	case "sections":
+		s.sectionSeed()
 	case "users":
 		s.usersSeed(total)
 	case "all":
 		s.rolesSeed()
+		s.sectionSeed()
 		s.vehicleTypesSeed()
 		s.potenciesSeed()
 		s.areasSeed()
@@ -176,9 +179,10 @@ func (s *Seed) areasSeed() {
 
 func (s *Seed) potenciesSeed() {
 	potencyMaps := []map[string]any{
-		{"id": "01J3VHA25VY2WPBNSNP9RA61ST", "name": "Leads to General Review"},
-		{"id": "01J3VHA25VY2WPBNSNP9XZDWAG", "name": "Leads to Body Paint"},
-		{"id": "01J3VHA25VY2WPBNSNPB9P9FQ3", "name": "Leads to Used-car"},
+		{"id": ulid.Make().String(), "name": "Leads to General Repair"},
+		{"id": ulid.Make().String(), "name": "Leads to Body Paint"},
+		{"id": ulid.Make().String(), "name": "Leads to OtoXpert"},
+		{"id": ulid.Make().String(), "name": "Leads to Used-car"},
 	}
 
 	tx, err := s.db.BeginTxx(context.Background(), nil)
@@ -191,10 +195,11 @@ func (s *Seed) potenciesSeed() {
 			err = tx.Rollback()
 			log.Error().Err(err).Msg("Error rolling back transaction")
 			return
-		}
-		err = tx.Commit()
-		if err != nil {
-			log.Error().Err(err).Msg("Error committing transaction")
+		} else {
+			err = tx.Commit()
+			if err != nil {
+				log.Error().Err(err).Msg("Error committing transaction")
+			}
 		}
 	}()
 
@@ -335,6 +340,44 @@ func (s *Seed) branchesSeed(total int) {
 	log.Info().Msg("branches table seeded successfully")
 }
 
+func (s *Seed) sectionSeed() {
+	sectionMaps := []map[string]any{
+		{"id": ulid.Make().String(), "name": "General Repair"},
+		{"id": ulid.Make().String(), "name": "Body Paint"},
+		{"id": ulid.Make().String(), "name": "OtoXpert"},
+		{"id": ulid.Make().String(), "name": "Used-car"},
+	}
+
+	tx, err := s.db.BeginTxx(context.Background(), nil)
+	if err != nil {
+		log.Error().Err(err).Msg("Error starting transaction")
+		return
+	}
+	defer func() {
+		if err != nil {
+			err = tx.Rollback()
+			log.Error().Err(err).Msg("Error rolling back transaction")
+			return
+		} else {
+			err = tx.Commit()
+			if err != nil {
+				log.Error().Err(err).Msg("Error committing transaction")
+			}
+		}
+	}()
+
+	_, err = tx.NamedExec(`
+		INSERT INTO sections (id, name)
+		VALUES (:id, :name)
+	`, sectionMaps)
+	if err != nil {
+		log.Error().Err(err).Msg("Error creating sections")
+		return
+	}
+
+	log.Info().Msg("sections table seeded successfully")
+}
+
 // users
 func (s *Seed) usersSeed(total int) {
 	tx, err := s.db.BeginTxx(context.Background(), nil)
@@ -355,19 +398,15 @@ func (s *Seed) usersSeed(total int) {
 		}
 	}()
 
-	type roleData struct {
-		Id   string `db:"id"`
-		Name string `db:"name"`
-	}
-
-	type branchData struct {
+	type generalData struct {
 		Id   string `db:"id"`
 		Name string `db:"name"`
 	}
 
 	var (
-		roles    = make([]roleData, 0)
-		branches = make([]branchData, 0)
+		roles    = make([]generalData, 0)
+		branches = make([]generalData, 0)
+		sections = make([]generalData, 0)
 		userMaps = make([]map[string]any, 0)
 	)
 
@@ -383,14 +422,22 @@ func (s *Seed) usersSeed(total int) {
 		return
 	}
 
+	err = s.db.Select(&sections, `SELECT id, name FROM sections`)
+	if err != nil {
+		log.Error().Err(err).Msg("Error selecting sections")
+		return
+	}
+
 	for i := 0; i < total; i++ {
 		selectedRole := roles[gofakeit.Number(0, len(roles)-1)]
 		selectedBranch := branches[gofakeit.Number(0, len(branches)-1)]
+		selectedSection := sections[gofakeit.Number(0, len(sections)-1)]
 
 		dataUserToInsert := make(map[string]any)
 		dataUserToInsert["id"] = ulid.Make().String()
 		dataUserToInsert["role_id"] = selectedRole.Id
 		dataUserToInsert["branch_id"] = selectedBranch.Id
+		dataUserToInsert["section_id"] = selectedSection.Id
 		dataUserToInsert["name"] = gofakeit.Name()
 		dataUserToInsert["email"] = gofakeit.Email()
 		dataUserToInsert["password"] = "$2y$10$mVf4BKsfPSh/pjgHjvk.JOlGdkIYgBGyhaU9WQNMWpYskK9MZlb0G" // password
@@ -399,8 +446,8 @@ func (s *Seed) usersSeed(total int) {
 	}
 
 	_, err = tx.NamedExec(`
-		INSERT INTO users (id, role_id, branch_id, name, email, password)
-		VALUES (:id, :role_id, :branch_id, :name, :email, :password)
+		INSERT INTO users (id, role_id, branch_id, section_id, name, email, password)
+		VALUES (:id, :role_id, :branch_id, :section_id, :name, :email, :password)
 	`, userMaps)
 	if err != nil {
 		log.Error().Err(err).Msg("Error creating users")

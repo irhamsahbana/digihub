@@ -12,5 +12,6 @@ CREATE TABLE IF NOT EXISTS users (
     deleted_at TIMESTAMP WITH TIME ZONE,
 
     FOREIGN KEY (role_id) REFERENCES roles (id),
-    FOREIGN KEY (branch_id) REFERENCES branches (id)
+    FOREIGN KEY (branch_id) REFERENCES branches (id),
+    FOREIGN KEY (section_id) REFERENCES sections (id)
 );
