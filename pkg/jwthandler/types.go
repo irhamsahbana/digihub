@@ -7,9 +7,8 @@ import (
 )
 
 type CustomClaims struct {
-	UserId     string `json:"user_id"`
-	Role       string `json:"role"`
-	IsVerified bool   `json:"is_verified"`
+	UserId string `json:"user_id"`
+	Role   string `json:"role"`
 	jwt.RegisteredClaims
 }
 
@@ -22,7 +21,6 @@ type CostumClaimsWs struct {
 type CostumClaimsPayload struct {
 	UserId          string    `json:"user_id"`
 	Role            string    `json:"role"`
-	IsVerified      bool      `json:"is_verified"`
 	TokenExpiration time.Time `json:"token_expiration"`
 }
 

@@ -10,9 +10,8 @@ import (
 
 func GenerateTokenString(payload CostumClaimsPayload) (string, error) {
 	claims := CustomClaims{
-		UserId:     payload.UserId,
-		Role:       payload.Role,
-		IsVerified: payload.IsVerified,
+		UserId: payload.UserId,
+		Role:   payload.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   "user",
 			Issuer:    "codebase-app",

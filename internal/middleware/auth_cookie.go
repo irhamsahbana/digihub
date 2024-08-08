@@ -31,7 +31,6 @@ func AuthMiddleware(c *fiber.Ctx) error {
 	}
 
 	c.Locals("user_id", claims.UserId)
-	c.Locals("is_verified", claims.IsVerified)
 
 	// If the token is valid, pass the request to the next handler
 	return c.Next()
