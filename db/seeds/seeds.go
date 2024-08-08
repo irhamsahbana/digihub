@@ -445,6 +445,71 @@ func (s *Seed) usersSeed(total int) {
 		userMaps = append(userMaps, dataUserToInsert)
 	}
 
+	// {"id": ulid.Make().String(), "name": "General Repair"},
+	// {"id": ulid.Make().String(), "name": "Body Paint"},
+	// {"id": ulid.Make().String(), "name": "OtoXpert"},
+	// {"id": ulid.Make().String(), "name": "Used-car"},
+
+	var (
+		serviceAdvisorId   string
+		technicianId       string
+		secGeneralRepairId string
+		// secBodyPaintId     string
+		// secOtoXpertId      string
+		// secUsedCarId       string
+	)
+
+	// iterate over roles to get service advisor id
+	for _, role := range roles {
+		if role.Name == "technician" {
+			technicianId = role.Id
+			continue
+		}
+		if role.Name == "service_advisor" {
+			serviceAdvisorId = role.Id
+			continue
+		}
+	}
+
+	for _, section := range sections {
+		if section.Name == "General Repair" {
+			secGeneralRepairId = section.Id
+			continue
+		}
+		// if section.Name == "Body Paint" {
+		// 	secBodyPaintId = section.Id
+		// }
+		// if section.Name == "OtoXpert" {
+		// 	secOtoXpertId = section.Id
+		// }
+		// if section.Name == "Used-car" {
+		// 	secUsedCarId = section.Id
+		// }
+	}
+
+	advisorUser := map[string]any{
+		"id":         ulid.Make().String(),
+		"role_id":    serviceAdvisorId,
+		"branch_id":  branches[gofakeit.Number(0, len(branches)-1)].Id,
+		"section_id": secGeneralRepairId,
+		"name":       "Fhikar SA",
+		"email":      "sa@fake.com",
+		"password":   "$2y$10$mVf4BKsfPSh/pjgHjvk.JOlGdkIYgBGyhaU9WQNMWpYskK9MZlb0G", // password
+	}
+
+	techUser := map[string]any{
+		"id":         ulid.Make().String(),
+		"role_id":    technicianId,
+		"branch_id":  branches[gofakeit.Number(0, len(branches)-1)].Id,
+		"section_id": secGeneralRepairId,
+		"name":       "Fhikar Tech",
+		"email":      "tech@fake.com",
+		"password":   "$2y$10$mVf4BKsfPSh/pjgHjvk.JOlGdkIYgBGyhaU9WQNMWpYskK9MZlb0G", // password
+	}
+
+	userMaps = append(userMaps, advisorUser)
+	userMaps = append(userMaps, techUser)
+
 	_, err = tx.NamedExec(`
 		INSERT INTO users (id, role_id, branch_id, section_id, name, email, password)
 		VALUES (:id, :role_id, :branch_id, :section_id, :name, :email, :password)
