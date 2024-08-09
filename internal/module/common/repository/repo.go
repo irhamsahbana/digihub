@@ -130,6 +130,8 @@ func (r *commonRepository) GetEmployees(ctx context.Context, req *entity.GetEmpl
 		} else if req.Role == "technician" {
 			query.WriteString("AND usr.role_id = (SELECT id FROM roles WHERE name = 'technician')")
 		}
+	} else {
+		query.WriteString("AND usr.role_id IN (SELECT id FROM roles WHERE name IN ('service_advisor', 'technician'))")
 	}
 
 	if req.BranchId != "" {
