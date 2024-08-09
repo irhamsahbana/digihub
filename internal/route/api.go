@@ -1,6 +1,7 @@
 package route
 
 import (
+	commonHandler "codebase-app/internal/module/common/handler"
 	userHandler "codebase-app/internal/module/user/handler"
 	wacHandler "codebase-app/internal/module/wac/handler"
 	"codebase-app/pkg/response"
@@ -15,6 +16,7 @@ func SetupRoutes(app *fiber.App) {
 
 	wacHandler.NewWacHandler().Register(api)
 	userHandler.NewUserHandler().Register(api)
+	commonHandler.NewCommonHandler().Register(api)
 
 	// fallback route
 	app.Use(func(c *fiber.Ctx) error {
