@@ -39,7 +39,8 @@ tasks:
       - immortalctl stop digihub-dev
       # - immortalctl halt digihub-dev
       - mv ./digihub-app ../binaries/digihub-dev
-      - immortal -c ../binaries/digihub-dev/digihub-dev.yaml
+      # - immortal -c ../binaries/digihub-dev/digihub-dev.yaml
+      - immortalctl start digihub-dev
       - immortalctl status
   lint-fix:
     cmds:
