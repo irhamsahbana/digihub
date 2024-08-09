@@ -35,6 +35,7 @@ tasks:
       - go build -o ./digihub-app ./cmd/bin/main.go
   build-dev:
     cmds:
+      - git pull
       - go build -o ./digihub-app ./cmd/bin/main.go
       - immortalctl stop digihub-dev
       # - immortalctl halt digihub-dev
