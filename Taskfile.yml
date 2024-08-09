@@ -40,6 +40,7 @@ tasks:
       - immortalctl halt digihub-dev
       - mv ./digihub-app ../binaries/digihub-dev
       - immortal -c ../binaries/digihub-dev/digihub-dev.yaml
+      - immortalctl status
   lint-fix:
     cmds:
       - gofmt -w .
