@@ -445,14 +445,10 @@ func (s *Seed) usersSeed(total int) {
 		userMaps = append(userMaps, dataUserToInsert)
 	}
 
-	// {"id": ulid.Make().String(), "name": "General Repair"},
-	// {"id": ulid.Make().String(), "name": "Body Paint"},
-	// {"id": ulid.Make().String(), "name": "OtoXpert"},
-	// {"id": ulid.Make().String(), "name": "Used-car"},
-
 	var (
-		serviceAdvisorId   string
-		technicianId       string
+		serviceAdvisorId string
+		technicianId     string
+
 		secGeneralRepairId string
 		// secBodyPaintId     string
 		// secOtoXpertId      string

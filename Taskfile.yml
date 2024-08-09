@@ -33,7 +33,12 @@ tasks:
   build:
     cmds:
       - go build -o ./digihub-app ./cmd/bin/main.go
-
+  build-dev:
+    cmds:
+      - go build -o ./digihub-app ./cmd/bin/main.go
+      - pid=$(immortalctl status | awk '/immortal/{print $1}') && kill $pid
+      - mv ./digihub-app ../binaries/
+      - immortalctl -c ../binaries/immortal.yaml
   lint-fix:
     cmds:
       - gofmt -w .
