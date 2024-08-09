@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"codebase-app/internal/adapter"
+	"codebase-app/internal/module/common/entity"
 	"codebase-app/internal/module/common/ports"
 	"codebase-app/internal/module/common/repository"
 	"codebase-app/internal/module/common/service"
@@ -8,6 +10,7 @@ import (
 	"codebase-app/pkg/response"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/rs/zerolog/log"
 )
 
 type commonHandler struct {
@@ -65,5 +68,30 @@ func (h *commonHandler) GetVehicleTypes(c *fiber.Ctx) error {
 }
 
 func (h *commonHandler) GetEmployees(c *fiber.Ctx) error {
-	return nil
+	var (
+		req = new(entity.GetEmployeesRequest)
+		ctx = c.Context()
+		v   = adapter.Adapters.Validator
+	)
+
+	if err := c.QueryParser(req); err != nil {
+		log.Error().Err(err).Msg("handler::GetEmployees - Failed to parse request")
+		return c.Status(fiber.StatusBadRequest).JSON(response.Error(err))
+	}
+
+	req.SetDefault()
+
+	if err := v.Validate(req); err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("handler::GetEmployees - Invalid request")
+		code, errs := errmsg.Errors(err, req)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	result, err := h.service.GetEmployees(ctx, req)
+	if err != nil {
+		code, errs := errmsg.Errors[error](err)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	return c.JSON(response.Success(result, ""))
 }

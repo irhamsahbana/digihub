@@ -440,6 +440,7 @@ func (s *Seed) usersSeed(total int) {
 		dataUserToInsert["section_id"] = selectedSection.Id
 		dataUserToInsert["name"] = gofakeit.Name()
 		dataUserToInsert["email"] = gofakeit.Email()
+		dataUserToInsert["whatsapp_number"] = gofakeit.Phone()
 		dataUserToInsert["password"] = "$2y$10$mVf4BKsfPSh/pjgHjvk.JOlGdkIYgBGyhaU9WQNMWpYskK9MZlb0G" // password
 
 		userMaps = append(userMaps, dataUserToInsert)
@@ -484,31 +485,33 @@ func (s *Seed) usersSeed(total int) {
 	}
 
 	advisorUser := map[string]any{
-		"id":         ulid.Make().String(),
-		"role_id":    serviceAdvisorId,
-		"branch_id":  branches[gofakeit.Number(0, len(branches)-1)].Id,
-		"section_id": secGeneralRepairId,
-		"name":       "Fhikar SA",
-		"email":      "sa@fake.com",
-		"password":   "$2y$10$mVf4BKsfPSh/pjgHjvk.JOlGdkIYgBGyhaU9WQNMWpYskK9MZlb0G", // password
+		"id":              ulid.Make().String(),
+		"role_id":         serviceAdvisorId,
+		"branch_id":       branches[gofakeit.Number(0, len(branches)-1)].Id,
+		"section_id":      secGeneralRepairId,
+		"name":            "Fhikar SA",
+		"email":           "sa@fake.com",
+		"whatsapp_number": gofakeit.Phone(),
+		"password":        "$2y$10$mVf4BKsfPSh/pjgHjvk.JOlGdkIYgBGyhaU9WQNMWpYskK9MZlb0G", // password
 	}
 
 	techUser := map[string]any{
-		"id":         ulid.Make().String(),
-		"role_id":    technicianId,
-		"branch_id":  branches[gofakeit.Number(0, len(branches)-1)].Id,
-		"section_id": secGeneralRepairId,
-		"name":       "Fhikar Tech",
-		"email":      "tech@fake.com",
-		"password":   "$2y$10$mVf4BKsfPSh/pjgHjvk.JOlGdkIYgBGyhaU9WQNMWpYskK9MZlb0G", // password
+		"id":              ulid.Make().String(),
+		"role_id":         technicianId,
+		"branch_id":       branches[gofakeit.Number(0, len(branches)-1)].Id,
+		"section_id":      secGeneralRepairId,
+		"name":            "Fhikar Tech",
+		"email":           "tech@fake.com",
+		"whatsapp_number": gofakeit.Phone(),
+		"password":        "$2y$10$mVf4BKsfPSh/pjgHjvk.JOlGdkIYgBGyhaU9WQNMWpYskK9MZlb0G", // password
 	}
 
 	userMaps = append(userMaps, advisorUser)
 	userMaps = append(userMaps, techUser)
 
 	_, err = tx.NamedExec(`
-		INSERT INTO users (id, role_id, branch_id, section_id, name, email, password)
-		VALUES (:id, :role_id, :branch_id, :section_id, :name, :email, :password)
+		INSERT INTO users (id, role_id, branch_id, section_id, name, email, password, whatsapp_number)
+		VALUES (:id, :role_id, :branch_id, :section_id, :name, :email, :password, :whatsapp_number)
 	`, userMaps)
 	if err != nil {
 		log.Error().Err(err).Msg("Error creating users")
