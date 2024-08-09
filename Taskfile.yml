@@ -37,7 +37,7 @@ tasks:
     cmds:
       - go build -o ./digihub-app ./cmd/bin/main.go
       - immortalctl stop digihub-dev
-      - immortalctl halt digihub-dev
+      # - immortalctl halt digihub-dev
       - mv ./digihub-app ../binaries/digihub-dev
       - immortal -c ../binaries/digihub-dev/digihub-dev.yaml
       - immortalctl status
