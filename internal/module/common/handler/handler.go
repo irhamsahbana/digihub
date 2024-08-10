@@ -2,6 +2,7 @@ package handler
 
 import (
 	"codebase-app/internal/adapter"
+	m "codebase-app/internal/middleware"
 	"codebase-app/internal/module/common/entity"
 	"codebase-app/internal/module/common/ports"
 	"codebase-app/internal/module/common/repository"
@@ -29,7 +30,7 @@ func NewCommonHandler() *commonHandler {
 }
 
 func (h *commonHandler) Register(router fiber.Router) {
-	master := router.Group("/masters")
+	master := router.Group("/masters", m.AuthBearer)
 
 	master.Get("/areas", h.GetAreas)
 	master.Get("/potencies", h.GetPotencies)
@@ -70,9 +71,11 @@ func (h *commonHandler) GetVehicleTypes(c *fiber.Ctx) error {
 
 func (h *commonHandler) GetEmployees(c *fiber.Ctx) error {
 	var (
-		req = new(entity.GetEmployeesRequest)
-		ctx = c.Context()
-		v   = adapter.Adapters.Validator
+		req   = new(entity.GetEmployeesRequest)
+		ctx   = c.Context()
+		local = m.Locals{}
+		l     = local.GetLocals(c)
+		v     = adapter.Adapters.Validator
 	)
 
 	if err := c.QueryParser(req); err != nil {
@@ -81,6 +84,7 @@ func (h *commonHandler) GetEmployees(c *fiber.Ctx) error {
 	}
 
 	req.SetDefault()
+	req.UserId = l.UserId
 
 	if err := v.Validate(req); err != nil {
 		log.Error().Err(err).Any("payload", req).Msg("handler::GetEmployees - Invalid request")

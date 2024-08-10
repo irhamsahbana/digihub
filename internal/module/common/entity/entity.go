@@ -1,10 +1,13 @@
 package entity
 
 type GetEmployeesRequest struct {
-	Page     int    `query:"page" validate:"required"`
-	Paginate int    `query:"paginate" validate:"required"`
-	Role     string `query:"role" validate:"omitempty,oneof=service_advisor technician"`
-	BranchId string `query:"branch_id" validate:"omitempty,exist=branches.id"`
+	UserId string
+
+	Page      int    `query:"page" validate:"required"`
+	Paginate  int    `query:"paginate" validate:"required"`
+	Role      string `query:"role" validate:"omitempty,oneof=service_advisor technician"`
+	BranchId  string `query:"branch_id" validate:"omitempty,exist=branches.id"`
+	IncludeMe bool   `query:"include_me"`
 }
 
 func (r *GetEmployeesRequest) SetDefault() {

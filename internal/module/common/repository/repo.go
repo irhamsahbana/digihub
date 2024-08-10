@@ -163,14 +163,19 @@ func (r *commonRepository) GetEmployees(ctx context.Context, req *entity.GetEmpl
 			1 = 1
 	`)
 
+	if !req.IncludeMe {
+		query.WriteString(" AND usr.id != ?")
+		args = append(args, req.UserId)
+	}
+
 	if req.Role != "" {
 		if req.Role == "service_advisor" {
-			query.WriteString("AND usr.role_id = (SELECT id FROM roles WHERE name = 'service_advisor')")
+			query.WriteString(" AND usr.role_id = (SELECT id FROM roles WHERE name = 'service_advisor')")
 		} else if req.Role == "technician" {
-			query.WriteString("AND usr.role_id = (SELECT id FROM roles WHERE name = 'technician')")
+			query.WriteString(" AND usr.role_id = (SELECT id FROM roles WHERE name = 'technician')")
 		}
 	} else {
-		query.WriteString("AND usr.role_id NOT IN (SELECT id FROM roles WHERE name = 'admin')")
+		query.WriteString(" AND usr.role_id NOT IN (SELECT id FROM roles WHERE name = 'admin')")
 	}
 
 	if req.BranchId != "" {
