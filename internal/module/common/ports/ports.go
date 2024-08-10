@@ -11,6 +11,7 @@ type CommonRepository interface {
 	GetVehicleTypes(ctx context.Context) ([]entity.CommonResponse, error)
 
 	GetEmployees(ctx context.Context, req *entity.GetEmployeesRequest) (entity.GetEmployeesResult, error)
+	GetBranches(ctx context.Context, req *entity.GetBranchesRequest) (entity.GetBranchesResponse, error)
 }
 
 type CommonService interface {
@@ -19,4 +20,5 @@ type CommonService interface {
 	GetVehicleTypes(ctx context.Context) ([]entity.CommonResponse, error)
 
 	GetEmployees(ctx context.Context, req *entity.GetEmployeesRequest) (entity.GetEmployeesResponse, error)
+	GetBranches(ctx context.Context, req *entity.GetBranchesRequest) (entity.GetBranchesResponse, error)
 }

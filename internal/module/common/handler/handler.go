@@ -35,6 +35,7 @@ func (h *commonHandler) Register(router fiber.Router) {
 	master.Get("/potencies", h.GetPotencies)
 	master.Get("/vehicle-types", h.GetVehicleTypes)
 	master.Get("/employees", h.GetEmployees)
+	master.Get("/branches", h.GetBranches)
 }
 
 func (h *commonHandler) GetAreas(c *fiber.Ctx) error {
@@ -88,6 +89,35 @@ func (h *commonHandler) GetEmployees(c *fiber.Ctx) error {
 	}
 
 	result, err := h.service.GetEmployees(ctx, req)
+	if err != nil {
+		code, errs := errmsg.Errors[error](err)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	return c.JSON(response.Success(result, ""))
+}
+
+func (h *commonHandler) GetBranches(c *fiber.Ctx) error {
+	var (
+		req = new(entity.GetBranchesRequest)
+		ctx = c.Context()
+		v   = adapter.Adapters.Validator
+	)
+
+	if err := c.QueryParser(req); err != nil {
+		log.Error().Err(err).Msg("handler::GetBranches - Failed to parse request")
+		return c.Status(fiber.StatusBadRequest).JSON(response.Error(err))
+	}
+
+	req.SetDefault()
+
+	if err := v.Validate(req); err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("handler::GetBranches - Invalid request")
+		code, errs := errmsg.Errors(err, req)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	result, err := h.service.GetBranches(ctx, req)
 	if err != nil {
 		code, errs := errmsg.Errors[error](err)
 		return c.Status(code).JSON(response.Error(errs))

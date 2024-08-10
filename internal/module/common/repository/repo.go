@@ -23,6 +23,45 @@ func NewCommonRepository() *commonRepository {
 	}
 }
 
+func (r *commonRepository) GetBranches(ctx context.Context, req *entity.GetBranchesRequest) (entity.GetBranchesResponse, error) {
+	type dao struct {
+		TotalData int `db:"total_data"`
+		entity.CommonResponse
+	}
+
+	var (
+		result entity.GetBranchesResponse
+		data   = make([]dao, 0, req.Paginate)
+	)
+
+	query := `
+		SELECT
+			COUNT(*) OVER() AS total_data,
+			id, name
+		FROM
+			branches
+		LIMIT ? OFFSET ?
+	`
+
+	err := r.db.SelectContext(ctx, &data, r.db.Rebind(query), req.Paginate, (req.Page-1)*req.Paginate)
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::GetBranches - Failed to get branches")
+		return result, err
+	}
+
+	for _, d := range data {
+		result.Items = append(result.Items, d.CommonResponse)
+	}
+
+	if len(data) > 0 {
+		result.Meta.TotalData = data[0].TotalData
+	}
+
+	result.Meta.CountTotalPage(req.Page, req.Paginate, result.Meta.TotalData)
+
+	return result, nil
+}
+
 func (r *commonRepository) GetAreas(ctx context.Context) ([]entity.AreaResponse, error) {
 	var (
 		result = make([]entity.AreaResponse, 0)

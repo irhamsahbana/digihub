@@ -18,6 +18,10 @@ func NewCommonService(repo ports.CommonRepository) *commonService {
 	}
 }
 
+func (s *commonService) GetBranches(ctx context.Context, req *entity.GetBranchesRequest) (entity.GetBranchesResponse, error) {
+	return s.repo.GetBranches(ctx, req)
+}
+
 func (s *commonService) GetAreas(ctx context.Context) ([]entity.AreaResponse, error) {
 	return s.repo.GetAreas(ctx)
 }
@@ -29,6 +33,7 @@ func (s *commonService) GetPotencies(ctx context.Context) ([]entity.CommonRespon
 func (s *commonService) GetVehicleTypes(ctx context.Context) ([]entity.CommonResponse, error) {
 	return s.repo.GetVehicleTypes(ctx)
 }
+
 func (s *commonService) GetEmployees(ctx context.Context, req *entity.GetEmployeesRequest) (entity.GetEmployeesResponse, error) {
 	var (
 		resp entity.GetEmployeesResponse
