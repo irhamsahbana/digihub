@@ -131,7 +131,7 @@ func (r *commonRepository) GetEmployees(ctx context.Context, req *entity.GetEmpl
 			query.WriteString("AND usr.role_id = (SELECT id FROM roles WHERE name = 'technician')")
 		}
 	} else {
-		query.WriteString("AND usr.role_id IN (SELECT id FROM roles WHERE name IN ('service_advisor', 'technician'))")
+		query.WriteString("AND usr.role_id NOT IN (SELECT id FROM roles WHERE name = 'admin')")
 	}
 
 	if req.BranchId != "" {
@@ -139,9 +139,7 @@ func (r *commonRepository) GetEmployees(ctx context.Context, req *entity.GetEmpl
 		args = append(args, req.BranchId)
 	}
 
-	query.WriteString(`
-		LIMIT ? OFFSET ?
-	`)
+	query.WriteString(`LIMIT ? OFFSET ?`)
 	args = append(args, req.Paginate, (req.Page-1)*req.Paginate)
 
 	err := r.db.SelectContext(ctx, &data, r.db.Rebind(query.String()), args...)

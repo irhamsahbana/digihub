@@ -1,6 +1,7 @@
 package route
 
 import (
+	integlocalstorage "codebase-app/internal/integration/localstorage"
 	commonHandler "codebase-app/internal/module/common/handler"
 	userHandler "codebase-app/internal/module/user/handler"
 	wacHandler "codebase-app/internal/module/wac/handler"
@@ -11,10 +12,12 @@ import (
 )
 
 func SetupRoutes(app *fiber.App) {
+	storage := integlocalstorage.NewLocalStorageIntegration()
+
 	// add /api prefix to all routes
 	api := app.Group("/api")
 
-	wacHandler.NewWacHandler().Register(api)
+	wacHandler.NewWacHandler(storage).Register(api)
 	userHandler.NewUserHandler().Register(api)
 	commonHandler.NewCommonHandler().Register(api)
 

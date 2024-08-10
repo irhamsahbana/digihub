@@ -8,9 +8,9 @@ import (
 var privateFolder = "storage/private"
 
 type WACRepository interface {
-	CreateWAC(ctx context.Context, req *entity.CreateWACRequest) error
+	CreateWAC(ctx context.Context, req *entity.CreateWACRequest) (entity.CreateWACResponse, error)
 }
 
 type WACService interface {
-	CreateWAC(ctx context.Context, req *entity.CreateWACRequest) error
+	CreateWAC(ctx context.Context, req *entity.CreateWACRequest) (entity.CreateWACResponse, error)
 }

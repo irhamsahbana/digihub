@@ -1,96 +1,59 @@
 package service
 
 import (
+	integstorage "codebase-app/internal/integration/localstorage"
+
 	"codebase-app/internal/module/wac/entity"
 	"codebase-app/internal/module/wac/ports"
 	"codebase-app/pkg/errmsg"
 	"context"
-	"encoding/base64"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strconv"
 
-	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 )
 
 type wacService struct {
-	repo ports.WACRepository
+	repo    ports.WACRepository
+	storage integstorage.LocalStorageContract
 }
 
-var privateFolder = "storage/private"
+const PRIVATE_FOLDER = "storage/private"
 
 var _ ports.WACService = &wacService{}
 
-func NewWACService(repo ports.WACRepository) *wacService {
+func NewWACService(
+	repo ports.WACRepository,
+	s integstorage.LocalStorageContract) *wacService {
 	return &wacService{
-		repo: repo,
+		repo:    repo,
+		storage: s,
 	}
 }
 
-func (s *wacService) CreateWAC(ctx context.Context, req *entity.CreateWACRequest) error {
-	errs := errmsg.NewCustomErrors(http.StatusBadRequest)
+func (s *wacService) CreateWAC(ctx context.Context, req *entity.CreateWACRequest) (entity.CreateWACResponse, error) {
+	var (
+		resp entity.CreateWACResponse
+		errs = errmsg.NewCustomErrors(http.StatusBadRequest)
+	)
 
 	for i, vc := range req.VehicleConditions {
 		idx := strconv.Itoa(i)
+		key := "vehicle_conditions[" + idx + "].image"
 
-		fileContent, err := base64.StdEncoding.DecodeString(vc.Image)
+		path, err := s.storage.Save(vc.Image, PRIVATE_FOLDER)
 		if err != nil {
-			log.Error().Err(err).Msg("service::CreateWAC - Failed to decode base64 image")
-			errs.Add("vehicle_conditions["+idx+"].image", "gagal mendecode gambar.")
+			log.Error().Err(err).Any("payload", req).Msg("service::CreateWAC - Failed to save image")
+			errs.Add(key, "gambar gagal disimpan.")
 			continue
 		}
 
-		mimeType := detectMimeType(fileContent)
-
-		if !acceptMimeType(mimeType) {
-			log.Error().Err(err).Msg("service::CreateWAC - Invalid image format")
-			errs.Add("vehicle_conditions["+idx+"].image", "format gambar tidak valid.")
-			continue
-		}
-
-		ext := extensionFromMimeType(mimeType)
-
-		filename := ulid.Make().String() + "." + ext
-		filePath := filepath.Join(privateFolder, filename)
-		err = os.WriteFile(filePath, fileContent, 0644)
-		if err != nil {
-			log.Error().Err(err).Msg("service::CreateWAC - Failed to write file")
-			errs.Add("vehicle_conditions["+idx+"].image", "gambar gagal disimpan.")
-			continue
-		}
+		req.VehicleConditions[i].Path = path
 	}
 
 	if errs.HasErrors() {
-		return errs
+		return resp, errs
 	}
 
 	return s.repo.CreateWAC(ctx, req)
-}
-
-func detectMimeType(data []byte) string {
-	mimeType := http.DetectContentType(data)
-
-	return mimeType
-}
-
-func extensionFromMimeType(mimeType string) string {
-	switch mimeType {
-	case "image/jpeg":
-		return "jpg"
-	case "image/png":
-		return "png"
-	default:
-		return ""
-	}
-}
-
-func acceptMimeType(mimeType string) bool {
-	switch mimeType {
-	case "image/jpeg", "image/png":
-		return true
-	default:
-		return false
-	}
 }

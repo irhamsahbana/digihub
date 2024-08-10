@@ -26,13 +26,6 @@ func (l *Locals) GetLocals(c *fiber.Ctx) Locals {
 		log.Warn().Msg("middleware::Locals-GetLocals failed to get role from locals")
 	}
 
-	isVerified, ok := c.Locals("is_verified").(bool)
-	if ok {
-		l.IsVerified = isVerified
-	} else {
-		log.Warn().Msg("middleware::Locals-GetLocals failed to get is_verified from locals")
-	}
-
 	return *l
 }
 

@@ -2,6 +2,8 @@ package handler
 
 import (
 	"codebase-app/internal/adapter"
+	integstorage "codebase-app/internal/integration/localstorage"
+	m "codebase-app/internal/middleware"
 	"codebase-app/internal/module/wac/entity"
 	"codebase-app/internal/module/wac/ports"
 	"codebase-app/internal/module/wac/repository"
@@ -19,25 +21,29 @@ type wachHandler struct {
 	service ports.WACService
 }
 
-func NewWacHandler() *wachHandler {
+func NewWacHandler(storage integstorage.LocalStorageContract) *wachHandler {
 	handler := &wachHandler{}
 
 	repo := repository.NewWACRepository()
-	handler.service = service.NewWACService(repo)
+	handler.service = service.NewWACService(repo, storage)
 
 	return handler
 }
 
 func (h *wachHandler) Register(router fiber.Router) {
-	router.Post("/wac/documents", h.createWAC)
-	router.Get("/wac/documents", h.getWAC)
+	wac := router.Group("/wac")
+
+	wac.Post("/documents", m.AuthBearer, h.createWAC)
+	wac.Get("/documents", h.getWAC)
 }
 
 func (h *wachHandler) createWAC(c *fiber.Ctx) error {
 	var (
-		req = &entity.CreateWACRequest{}
-		ctx = c.Context()
-		v   = adapter.Adapters.Validator
+		req   = new(entity.CreateWACRequest)
+		ctx   = c.Context()
+		v     = adapter.Adapters.Validator
+		local = m.Locals{}
+		l     = local.GetLocals(c)
 	)
 
 	if err := c.BodyParser(req); err != nil {
@@ -45,18 +51,21 @@ func (h *wachHandler) createWAC(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(response.Error(err))
 	}
 
+	req.UserId = l.GetUserId()
+
 	if err := v.Validate(req); err != nil {
 		log.Error().Err(err).Msg("handler::createWAC - Invalid input")
 		code, errs := errmsg.Errors(err, req)
 		return c.Status(code).JSON(response.Error(errs))
 	}
 
-	if err := h.service.CreateWAC(ctx, req); err != nil {
+	resp, err := h.service.CreateWAC(ctx, req)
+	if err != nil {
 		code, errs := errmsg.Errors[error](err)
 		return c.Status(code).JSON(response.Error(errs))
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(response.Success(nil, ""))
+	return c.Status(fiber.StatusCreated).JSON(response.Success(resp, ""))
 }
 
 func (h *wachHandler) getWAC(c *fiber.Ctx) error {
