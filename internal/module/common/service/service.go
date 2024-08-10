@@ -18,7 +18,7 @@ func NewCommonService(repo ports.CommonRepository) *commonService {
 	}
 }
 
-func (s *commonService) GetAreas(ctx context.Context) ([]entity.CommonResponse, error) {
+func (s *commonService) GetAreas(ctx context.Context) ([]entity.AreaResponse, error) {
 	return s.repo.GetAreas(ctx)
 }
 

@@ -23,14 +23,14 @@ func NewCommonRepository() *commonRepository {
 	}
 }
 
-func (r *commonRepository) GetAreas(ctx context.Context) ([]entity.CommonResponse, error) {
+func (r *commonRepository) GetAreas(ctx context.Context) ([]entity.AreaResponse, error) {
 	var (
-		result = make([]entity.CommonResponse, 0)
+		result = make([]entity.AreaResponse, 0)
 	)
 
 	query := `
 		SELECT
-			id, name
+			id, name, type
 		FROM
 			areas
 	`

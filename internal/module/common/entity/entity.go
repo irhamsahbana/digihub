@@ -37,6 +37,11 @@ type CommonResponse struct {
 	Name string `json:"name" db:"name"`
 }
 
+type AreaResponse struct {
+	CommonResponse
+	Type string `json:"type" db:"type"`
+}
+
 /*
 	Results
 */
