@@ -38,6 +38,7 @@ func (s *commonService) GetEmployees(ctx context.Context, req *entity.GetEmploye
 	var (
 		resp entity.GetEmployeesResponse
 	)
+	resp.Items = make([]entity.EmployeeItem, 0, req.Paginate)
 
 	result, err := s.repo.GetEmployees(ctx, req)
 	if err != nil {
