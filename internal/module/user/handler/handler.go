@@ -2,6 +2,7 @@ package handler
 
 import (
 	"codebase-app/internal/adapter"
+	m "codebase-app/internal/middleware"
 	"codebase-app/internal/module/user/entity"
 	"codebase-app/internal/module/user/ports"
 	"codebase-app/internal/module/user/repository"
@@ -33,6 +34,7 @@ func (h *userHandler) Register(router fiber.Router) {
 	auth := router.Group("/authentications/login")
 
 	auth.Post("/", h.login)
+	router.Get("/users/profiles", m.AuthBearer, h.getProfile)
 }
 
 func (h *userHandler) login(c *fiber.Ctx) error {
@@ -54,6 +56,25 @@ func (h *userHandler) login(c *fiber.Ctx) error {
 	}
 
 	res, err := h.service.Login(ctx, req)
+	if err != nil {
+		code, errs := errmsg.Errors[error](err)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	return c.JSON(response.Success(res, ""))
+}
+
+func (h *userHandler) getProfile(c *fiber.Ctx) error {
+	var (
+		req   = new(entity.GetProfileRequest)
+		ctx   = c.Context()
+		local = m.Locals{}
+		l     = local.GetLocals(c)
+	)
+
+	req.UserId = l.UserId
+
+	res, err := h.service.GetProfile(ctx, req)
 	if err != nil {
 		code, errs := errmsg.Errors[error](err)
 		return c.Status(code).JSON(response.Error(errs))

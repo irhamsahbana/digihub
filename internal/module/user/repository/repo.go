@@ -91,3 +91,69 @@ func (r *userRepository) Login(ctx context.Context, req *entity.LoginRequest) (e
 
 	return res, nil
 }
+
+func (r *userRepository) GetProfile(ctx context.Context, req *entity.GetProfileRequest) (entity.GetProfileResponse, error) {
+	type dao struct {
+		Id          string `db:"id"`
+		Name        string `db:"name"`
+		Email       string `db:"email"`
+		WANum       string `db:"whatsapp_number"`
+		BranchId    string `db:"branch_id"`
+		BranchName  string `db:"branch_name"`
+		SectionId   string `db:"section_id"`
+		SectionName string `db:"section_name"`
+		RoleId      string `db:"role_id"`
+		RoleName    string `db:"role_name"`
+	}
+
+	var (
+		res  entity.GetProfileResponse
+		data = new(dao)
+	)
+
+	query := `
+		SELECT
+			u.id,
+			u.name,
+			u.email,
+			u.whatsapp_number,
+			b.id as branch_id,
+			b.name as branch_name,
+			s.id as section_id,
+			s.name as section_name,
+			r.id as role_id,
+			r.name as role_name
+		FROM
+			users u
+		LEFT JOIN
+			branches b ON u.branch_id = b.id
+		LEFT JOIN
+			sections s ON u.section_id = s.id
+		LEFT JOIN
+			roles r ON u.role_id = r.id
+		WHERE u.id = ?
+	`
+
+	err := r.db.GetContext(ctx, data, r.db.Rebind(query), req.UserId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Warn().Err(err).Any("payload", req).Msg("repo::GetProfile - user not found")
+			return res, errmsg.NewCustomErrors(404, errmsg.WithMessage("User not found"))
+		}
+		log.Error().Err(err).Any("payload", req).Msg("repo::GetProfile - failed to get user data")
+		return res, err
+	}
+
+	res.Branch.Id = data.BranchId
+	res.Branch.Name = data.BranchName
+	res.Section.Id = data.SectionId
+	res.Section.Name = data.SectionName
+	res.Role.Id = data.RoleId
+	res.Role.Name = data.RoleName
+	res.Id = data.Id
+	res.Name = data.Name
+	res.Email = data.Email
+	res.WANum = data.WANum
+
+	return res, nil
+}

@@ -63,3 +63,8 @@ type EmployeeResult struct {
 	SectionName string `db:"section_name"`
 	RoleName    string `db:"role_name"`
 }
+
+type GetProfileResponse struct {
+	Id     string         `json:"id" db:"id"`
+	Branch CommonResponse `json:"branch"`
+}

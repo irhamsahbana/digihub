@@ -178,7 +178,7 @@ func (r *commonRepository) GetEmployees(ctx context.Context, req *entity.GetEmpl
 		args = append(args, req.BranchId)
 	}
 
-	query.WriteString(`LIMIT ? OFFSET ?`)
+	query.WriteString(` LIMIT ? OFFSET ?`)
 	args = append(args, req.Paginate, (req.Page-1)*req.Paginate)
 
 	err := r.db.SelectContext(ctx, &data, r.db.Rebind(query.String()), args...)

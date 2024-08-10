@@ -14,3 +14,22 @@ type LoginResponse struct {
 	Role        string    `json:"role"`
 	ExpiredAt   time.Time `json:"expired_at"`
 }
+
+type CommonResponse struct {
+	Id   string `json:"id" db:"id"`
+	Name string `json:"name" db:"name"`
+}
+
+type GetProfileRequest struct {
+	UserId string
+}
+
+type GetProfileResponse struct {
+	Id      string         `json:"id" db:"id"`
+	Name    string         `json:"name" db:"name"`
+	Email   string         `json:"email" db:"email"`
+	WANum   string         `json:"whatsapp_number" db:"whatsapp_number"`
+	Role    CommonResponse `json:"role"`
+	Branch  CommonResponse `json:"branch"`
+	Section CommonResponse `json:"section"`
+}
