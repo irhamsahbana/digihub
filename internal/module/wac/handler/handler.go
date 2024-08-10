@@ -10,8 +10,6 @@ import (
 	"codebase-app/internal/module/wac/service"
 	"codebase-app/pkg/errmsg"
 	"codebase-app/pkg/response"
-	"os"
-	"path/filepath"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
@@ -31,9 +29,9 @@ func NewWacHandler(storage integstorage.LocalStorageContract) *wachHandler {
 }
 
 func (h *wachHandler) Register(router fiber.Router) {
-	wac := router.Group("/wac")
+	wac := router.Group("/wac", m.AuthBearer)
 
-	wac.Post("/documents", m.AuthBearer, h.createWAC)
+	wac.Post("/documents", h.createWAC)
 	wac.Get("/documents", h.getWAC)
 }
 
@@ -47,14 +45,14 @@ func (h *wachHandler) createWAC(c *fiber.Ctx) error {
 	)
 
 	if err := c.BodyParser(req); err != nil {
-		log.Error().Err(err).Msg("handler::createWAC - Failed to parse request body")
+		log.Error().Err(err).Any("payload", req).Msg("handler::createWAC - Failed to parse request body")
 		return c.Status(fiber.StatusBadRequest).JSON(response.Error(err))
 	}
 
 	req.UserId = l.GetUserId()
 
 	if err := v.Validate(req); err != nil {
-		log.Error().Err(err).Msg("handler::createWAC - Invalid input")
+		log.Error().Err(err).Any("payload", req).Msg("handler::createWAC - Invalid input")
 		code, errs := errmsg.Errors(err, req)
 		return c.Status(code).JSON(response.Error(errs))
 	}
@@ -69,18 +67,47 @@ func (h *wachHandler) createWAC(c *fiber.Ctx) error {
 }
 
 func (h *wachHandler) getWAC(c *fiber.Ctx) error {
-	filePath := filepath.Join("storage", "private", "01J4JWY298AMC7S9MTZ5ZBAWDD.png")
-	// Check if file exists
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		log.Error().Err(err).Msg("handler::getWAC - File not found")
-		return c.Status(fiber.StatusNotFound).SendString("File not found")
+	// filePath := filepath.Join("storage", "private", "01J4JWY298AMC7S9MTZ5ZBAWDD.png")
+	// // Check if file exists
+	// if _, err := os.Stat(filePath); os.IsNotExist(err) {
+	// 	log.Error().Err(err).Msg("handler::getWAC - File not found")
+	// 	return c.Status(fiber.StatusNotFound).SendString("File not found")
+	// }
+
+	// fileBytes, err := os.ReadFile(filePath)
+	// if err != nil {
+	// 	return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	// }
+
+	// return c.Send(fileBytes)
+
+	var (
+		req   = new(entity.GetWACsRequest)
+		ctx   = c.Context()
+		v     = adapter.Adapters.Validator
+		local = m.Locals{}
+		l     = local.GetLocals(c)
+	)
+
+	if err := c.QueryParser(req); err != nil {
+		log.Warn().Err(err).Any("payload", req).Msg("handler::getWAC - Failed to parse request query")
+		return c.Status(fiber.StatusBadRequest).JSON(response.Error(err))
 	}
 
-	fileBytes, err := os.ReadFile(filePath)
+	req.SetDefault()
+	req.UserId = l.GetUserId()
+
+	if err := v.Validate(req); err != nil {
+		log.Warn().Err(err).Any("payload", req).Msg("handler::getWAC - Invalid input")
+		code, errs := errmsg.Errors(err, req)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	resp, err := h.service.GetWACs(ctx, req)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+		code, errs := errmsg.Errors[error](err)
+		return c.Status(code).JSON(response.Error(errs))
 	}
 
-	return c.Send(fileBytes)
-
+	return c.Status(fiber.StatusOK).JSON(response.Success(resp, ""))
 }
