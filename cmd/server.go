@@ -82,6 +82,7 @@ func RunServer(cmd *flag.FlagSet, args []string) {
 
 	infrastructure.InitializeLogger(envs.App.Environtment, envs.App.LogFile, logLevel)
 	app.Get("/metrics", monitor.New(monitor.Config{Title: "Digihub Dev Metrics"}))
+	app.Static("/storage", envs.App.LocalStoragePrivatePath)
 	route.SetupRoutes(app)
 
 	// Run server in goroutine

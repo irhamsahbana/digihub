@@ -61,3 +61,7 @@ func (s *wacService) CreateWAC(ctx context.Context, req *entity.CreateWACRequest
 func (s *wacService) GetWACs(ctx context.Context, req *entity.GetWACsRequest) (entity.GetWACsResponse, error) {
 	return s.repo.GetWACs(ctx, req)
 }
+
+func (s *wacService) GetWAC(ctx context.Context, req *entity.GetWACRequest) (entity.GetWACResponse, error) {
+	return s.repo.GetWAC(ctx, req)
+}
