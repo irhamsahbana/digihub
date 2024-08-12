@@ -65,3 +65,29 @@ func (s *wacService) GetWACs(ctx context.Context, req *entity.GetWACsRequest) (e
 func (s *wacService) GetWAC(ctx context.Context, req *entity.GetWACRequest) (entity.GetWACResponse, error) {
 	return s.repo.GetWAC(ctx, req)
 }
+
+func (s *wacService) OfferWAC(ctx context.Context, req *entity.OfferWACRequest) (entity.OfferWACResponse, error) {
+	var (
+		resp entity.OfferWACResponse
+	)
+
+	isCreator, err := s.repo.IsWACCreator(ctx, req.UserId, req.Id)
+	if err != nil {
+		return resp, err
+	}
+
+	if !isCreator {
+		return resp, errmsg.NewCustomErrors(403, errmsg.WithMessage("Anda bukan pembuat walk around check ini"))
+	}
+
+	isOffered, err := s.repo.IsWACOffered(ctx, req.Id)
+	if err != nil {
+		return resp, err
+	}
+
+	if isOffered {
+		return resp, errmsg.NewCustomErrors(403, errmsg.WithMessage("Walk around check sudah ditawarkan"))
+	}
+
+	return s.repo.OfferWAC(ctx, req)
+}

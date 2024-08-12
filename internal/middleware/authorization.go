@@ -8,7 +8,7 @@ import (
 func AuthRole(authorizedRoles []string) func(*fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
 		forbiddenResponse := fiber.Map{
-			"message": "Forbidden",
+			"message": "Terlarang: role anda tidak diizinkan untuk mengakses resource ini",
 			"success": false,
 		}
 

@@ -31,9 +31,10 @@ func NewWacHandler(storage integstorage.LocalStorageContract) *wachHandler {
 func (h *wachHandler) Register(router fiber.Router) {
 	wac := router.Group("/wac", m.AuthBearer)
 
-	wac.Post("/documents", h.createWAC)
+	wac.Post("/documents", m.AuthRole([]string{"service_advisor"}), h.createWAC)
 	wac.Get("/documents", h.getWACs)
 	wac.Get("/documents/:id", h.getWAC)
+	wac.Patch("/documents/:id/offerings", m.AuthRole([]string{"service_advisor"}), h.OfferWAC)
 }
 
 func (h *wachHandler) createWAC(c *fiber.Ctx) error {
@@ -53,7 +54,7 @@ func (h *wachHandler) createWAC(c *fiber.Ctx) error {
 	req.UserId = l.GetUserId()
 
 	if err := v.Validate(req); err != nil {
-		log.Error().Err(err).Any("payload", req).Msg("handler::createWAC - Invalid input")
+		log.Warn().Err(err).Any("payload", req).Msg("handler::createWAC - Invalid input")
 		code, errs := errmsg.Errors(err, req)
 		return c.Status(code).JSON(response.Error(errs))
 	}
@@ -116,6 +117,38 @@ func (h *wachHandler) getWAC(c *fiber.Ctx) error {
 	}
 
 	resp, err := h.service.GetWAC(ctx, req)
+	if err != nil {
+		code, errs := errmsg.Errors[error](err)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(response.Success(resp, ""))
+}
+
+func (h *wachHandler) OfferWAC(c *fiber.Ctx) error {
+	var (
+		req   = new(entity.OfferWACRequest)
+		ctx   = c.Context()
+		v     = adapter.Adapters.Validator
+		local = m.Locals{}
+		l     = local.GetLocals(c)
+	)
+
+	if err := c.BodyParser(req); err != nil {
+		log.Warn().Err(err).Msg("handler::OfferWAC - Failed to parse request body")
+		return c.Status(fiber.StatusBadRequest).JSON(response.Error(err))
+	}
+
+	req.Id = c.Params("id")
+	req.UserId = l.GetUserId()
+
+	if err := v.Validate(req); err != nil {
+		log.Warn().Err(err).Any("payload", req).Msg("handler::OfferWAC - Invalid input")
+		code, errs := errmsg.Errors(err, req)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	resp, err := h.service.OfferWAC(ctx, req)
 	if err != nil {
 		code, errs := errmsg.Errors[error](err)
 		return c.Status(code).JSON(response.Error(errs))
