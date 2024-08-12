@@ -82,19 +82,25 @@ func (r *wacRepository) GetWACs(ctx context.Context, req *entity.GetWACsRequest)
 	}
 
 	// today := time.Now().In(time.FixedZone("WITA", 28800)).Format("2006-01-02") // WITA
-	today := time.Now().Format("2006-01-02")
+	uniqueItems := make(map[string]struct{})
+	today := time.Now().UTC().Format("2006-01-02")
 	length := len(data)
 	for length > 0 {
 		length--
 		d := data[length]
 
 		// date := d.CreatedAt.In(time.FixedZone("WITA", 28800)).Format("2006-01-02")
-		date := d.CreatedAt.Format("2006-01-02")
+		date := d.CreatedAt.UTC().Format("2006-01-02")
 		if today == date {
 			date = "Hari ini"
 		}
 
-		res.Items[date] = append(res.Items[date], d.WacItem)
+		if _, ok := uniqueItems[d.WacItem.Id]; !ok {
+			uniqueItems[d.WacItem.Id] = struct{}{}
+			res.Items[date] = append(res.Items[date], d.WacItem)
+		}
+
+		// res.Items[date] = append(res.Items[date], d.WacItem)
 	}
 
 	if len(data) > 0 {
