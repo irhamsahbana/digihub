@@ -47,7 +47,7 @@ func (h *wachHandler) Register(router fiber.Router) {
 	)
 
 	wac.Patch(
-		"/documents/:id/wip",
+		"/documents/:id/wips",
 		m.AuthRole([]string{"service_advisor"}),
 		h.MarkWIP,
 	)
@@ -216,11 +216,6 @@ func (h *wachHandler) MarkWIP(c *fiber.Ctx) error {
 		local = m.Locals{}
 		l     = local.GetLocals(c)
 	)
-
-	if err := c.BodyParser(req); err != nil {
-		log.Warn().Err(err).Msg("handler::MarkWIP - Failed to parse request body")
-		return c.Status(fiber.StatusBadRequest).JSON(response.Error(err))
-	}
 
 	req.Id = c.Params("id")
 	req.UserId = l.GetUserId()
