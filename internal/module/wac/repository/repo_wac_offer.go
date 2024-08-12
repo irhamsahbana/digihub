@@ -39,7 +39,8 @@ func (r *wacRepository) OfferWAC(ctx context.Context, req *entity.OfferWACReques
 			walk_around_check_conditions
 		SET
 			is_interested = :is_interested,
-			notes = :notes
+			notes = :notes,
+			updated_at = NOW()
 		WHERE
 			id = :id
 			AND walk_around_check_id = :walk_around_check_id
@@ -66,7 +67,8 @@ func (r *wacRepository) OfferWAC(ctx context.Context, req *entity.OfferWACReques
 		UPDATE
 			walk_around_checks
 		SET
-			status = 'offered'
+			status = 'offered',
+			updated_at = NOW()
 		WHERE
 			id = ?
 	`
@@ -109,7 +111,8 @@ func (r *wacRepository) OfferWACUsedCard(ctx context.Context, req *entity.OfferW
 		UPDATE
 			walk_around_checks
 		SET
-			status = 'offered'
+			status = 'offered',
+			updated_at = NOW()
 		WHERE
 			id = ?
 	`
@@ -124,7 +127,8 @@ func (r *wacRepository) OfferWACUsedCard(ctx context.Context, req *entity.OfferW
 		UPDATE
 			walk_around_check_conditions
 		SET
-			is_interested = ?
+			is_interested = ?,
+			updated_at = NOW()
 		WHERE
 			walk_around_check_id = ?
 	`

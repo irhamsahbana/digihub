@@ -80,14 +80,68 @@ func (s *wacService) OfferWAC(ctx context.Context, req *entity.OfferWACRequest) 
 		return resp, errmsg.NewCustomErrors(403, errmsg.WithMessage("Anda bukan pembuat walk around check ini"))
 	}
 
-	isOffered, err := s.repo.IsWACOffered(ctx, req.Id)
+	isCreated, err := s.repo.IsWACStatus(ctx, req.Id, "created")
 	if err != nil {
 		return resp, err
 	}
 
-	if isOffered {
-		return resp, errmsg.NewCustomErrors(403, errmsg.WithMessage("Walk around check sudah ditawarkan"))
+	if !isCreated {
+		return resp, errmsg.NewCustomErrors(403, errmsg.WithMessage("Walk around check telah ditawarkan"))
 	}
 
 	return s.repo.OfferWAC(ctx, req)
+}
+
+func (s *wacService) AddRevenue(ctx context.Context, req *entity.AddWACRevenueRequest) (entity.AddWACRevenueResponse, error) {
+	var (
+		resp entity.AddWACRevenueResponse
+	)
+	resp.Id = req.Id
+
+	isCreator, err := s.repo.IsWACCreator(ctx, req.UserId, req.Id)
+	if err != nil {
+		return resp, err
+	}
+
+	if !isCreator {
+		return resp, errmsg.NewCustomErrors(403, errmsg.WithMessage("Anda bukan pembuat walk around check ini"))
+	}
+
+	isStatusWIP, err := s.repo.IsWACStatus(ctx, req.Id, "wip")
+	if err != nil {
+		return resp, err
+	}
+
+	if !isStatusWIP {
+		return resp, errmsg.NewCustomErrors(403, errmsg.WithMessage("Walk around check belum ditandai sebagai WIP"))
+	}
+
+	return resp, s.repo.AddRevenue(ctx, req)
+}
+
+func (s *wacService) MarkWIP(ctx context.Context, req *entity.MarkWIPRequest) (entity.MarkWIPResponse, error) {
+	var (
+		resp entity.MarkWIPResponse
+	)
+	resp.Id = req.Id
+
+	isCreator, err := s.repo.IsWACCreator(ctx, req.UserId, req.Id)
+	if err != nil {
+		return resp, err
+	}
+
+	if !isCreator {
+		return resp, errmsg.NewCustomErrors(403, errmsg.WithMessage("Anda bukan pembuat walk around check ini"))
+	}
+
+	isOffered, err := s.repo.IsWACStatus(ctx, req.Id, "offered")
+	if err != nil {
+		return resp, err
+	}
+
+	if !isOffered {
+		return resp, errmsg.NewCustomErrors(403, errmsg.WithMessage("Walk around check belum ditawarkan"))
+	}
+
+	return resp, s.repo.MarkWIP(ctx, req)
 }

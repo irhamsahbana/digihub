@@ -25,21 +25,21 @@ func (r *wacRepository) IsWACCreator(ctx context.Context, userId, WACId string) 
 	return isCreator, nil
 }
 
-func (r *wacRepository) IsWACOffered(ctx context.Context, WACId string) (bool, error) {
+func (r *wacRepository) IsWACStatus(ctx context.Context, WACId, status string) (bool, error) {
 	query := `
 		SELECT EXISTS(
 			SELECT 1
 			FROM walk_around_checks
-			WHERE id = ? AND status != 'created'
+			WHERE id = ? AND status = ?
 		)
 	`
 
-	var isOffered bool
-	err := r.db.GetContext(ctx, &isOffered, r.db.Rebind(query), WACId)
+	var isStatus bool
+	err := r.db.GetContext(ctx, &isStatus, r.db.Rebind(query), WACId, status)
 	if err != nil {
-		log.Error().Err(err).Msg("repository::IsWACOffered - An error occurred")
+		log.Error().Err(err).Msg("repository::IsWACStatus - An error occurred")
 		return false, err
 	}
 
-	return isOffered, nil
+	return isStatus, nil
 }

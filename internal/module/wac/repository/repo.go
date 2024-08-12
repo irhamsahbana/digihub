@@ -275,19 +275,44 @@ func (r *wacRepository) GetWAC(ctx context.Context, req *entity.GetWACRequest) (
 	return res, nil
 }
 
-// func PathToURL(path *string) *string {
-// 	// devide path by /, then get the last index
-// 	// then join it with the base url
-// 	if path == nil {
-// 		return nil
-// 	}
+func (r *wacRepository) AddRevenue(ctx context.Context, req *entity.AddWACRevenueRequest) error {
+	query := `
+		UPDATE
+			walk_around_checks
+		SET
+			invoice_number = ?,
+			revenue = ?,
+			status = 'completed',
+			updated_at = NOW()
+		WHERE
+			id = ?
+	`
 
-// 	file := strings.Split(*path, "/")
-// 	if len(file) == 0 {
-// 		return nil
-// 	}
-// 	base := config.Envs.App.BaseURL
-// 	url := base + "/storage/" + file[len(file)-1]
+	_, err := r.db.ExecContext(ctx, r.db.Rebind(query), req.InvoiceNumber, req.TotalRevenue, req.Id)
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenue - failed to add revenue")
+		return err
+	}
 
-// 	return &url
-// }
+	return nil
+}
+
+func (r *wacRepository) MarkWIP(ctx context.Context, req *entity.MarkWIPRequest) error {
+	query := `
+		UPDATE
+			walk_around_checks
+		SET
+			status = 'wip',
+			updated_at = NOW()
+		WHERE
+			id = ?
+	`
+
+	_, err := r.db.ExecContext(ctx, r.db.Rebind(query), req.Id)
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::MarkWIP - failed to mark wac as wip")
+		return err
+	}
+
+	return nil
+}
