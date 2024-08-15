@@ -88,6 +88,27 @@ func (s *Seed) deleteAll() {
 		}
 	}()
 
+	_, err = tx.Exec(`DELETE FROM walk_around_check_conditions`)
+	if err != nil {
+		log.Error().Err(err).Msg("Error deleting walk around check conditions")
+		return
+	}
+	log.Info().Msg("walk around check conditions table deleted successfully")
+
+	_, err = tx.Exec(`DELETE FROM walk_around_checks`)
+	if err != nil {
+		log.Error().Err(err).Msg("Error deleting walk around checks")
+		return
+	}
+	log.Info().Msg("walk around checks table deleted successfully")
+
+	_, err = tx.Exec(`DELETE FROM clients`)
+	if err != nil {
+		log.Error().Err(err).Msg("Error deleting clients")
+		return
+	}
+	log.Info().Msg("clients table deleted successfully")
+
 	_, err = tx.Exec(`DELETE FROM users`)
 	if err != nil {
 		log.Error().Err(err).Msg("Error deleting users")
