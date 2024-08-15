@@ -1,4 +1,4 @@
-package entity
+package types
 
 type Meta struct {
 	Page      int `json:"page"`

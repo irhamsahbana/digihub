@@ -46,12 +46,6 @@ func (h *wachHandler) Register(router fiber.Router) {
 		h.AddRevenue,
 	)
 
-	wac.Patch(
-		"/documents/:id/wips",
-		m.AuthRole([]string{"service_advisor"}),
-		h.MarkWIP,
-	)
-
 	wac.Get("/documents", h.getWACs)
 	wac.Get("/documents/:id", h.getWAC)
 }
@@ -200,33 +194,6 @@ func (h *wachHandler) AddRevenue(c *fiber.Ctx) error {
 	}
 
 	resp, err := h.service.AddRevenue(ctx, req)
-	if err != nil {
-		code, errs := errmsg.Errors[error](err)
-		return c.Status(code).JSON(response.Error(errs))
-	}
-
-	return c.Status(fiber.StatusOK).JSON(response.Success(resp, ""))
-}
-
-func (h *wachHandler) MarkWIP(c *fiber.Ctx) error {
-	var (
-		req   = new(entity.MarkWIPRequest)
-		ctx   = c.Context()
-		v     = adapter.Adapters.Validator
-		local = m.Locals{}
-		l     = local.GetLocals(c)
-	)
-
-	req.Id = c.Params("id")
-	req.UserId = l.GetUserId()
-
-	if err := v.Validate(req); err != nil {
-		log.Warn().Err(err).Any("payload", req).Msg("handler::MarkWIP - Invalid input")
-		code, errs := errmsg.Errors(err, req)
-		return c.Status(code).JSON(response.Error(errs))
-	}
-
-	resp, err := h.service.MarkWIP(ctx, req)
 	if err != nil {
 		code, errs := errmsg.Errors[error](err)
 		return c.Status(code).JSON(response.Error(errs))

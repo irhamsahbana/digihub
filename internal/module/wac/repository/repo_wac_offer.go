@@ -67,7 +67,7 @@ func (r *wacRepository) OfferWAC(ctx context.Context, req *entity.OfferWACReques
 		UPDATE
 			walk_around_checks
 		SET
-			status = 'offered',
+			status = 'wip',
 			updated_at = NOW()
 		WHERE
 			id = ?

@@ -7,23 +7,24 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (r *wacRepository) AddWACRevenue(ctx context.Context, req *entity.AddWACRevenueRequest) (entity.AddWACRevenueResponse, error) {
-	var res entity.AddWACRevenueResponse
+func (r *wacRepository) AddRevenue(ctx context.Context, req *entity.AddWACRevenueRequest) error {
 	query := `
-		UPDATE walk_around_checks
-		SET invoice_number = ?, total_revenue = ?, status = 'completed'
+		UPDATE
+			walk_around_checks
+		SET
+			invoice_number = ?,
+			revenue = ?,
+			status = 'completed',
+			updated_at = NOW()
 		WHERE
 			id = ?
-			AND user_id = ?
-			AND status = 'wip'
 	`
 
-	_, err := r.db.ExecContext(ctx, r.db.Rebind(query), req.InvoiceNumber, req.TotalRevenue, req.Id, req.UserId)
+	_, err := r.db.ExecContext(ctx, r.db.Rebind(query), req.InvoiceNumber, req.TotalRevenue, req.Id)
 	if err != nil {
-		log.Error().Err(err).Msg("repository::AddWACRevenue - An error occurred")
-		return res, err
+		log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenue - failed to add revenue")
+		return err
 	}
 
-	res.Id = req.Id
-	return res, nil
+	return nil
 }

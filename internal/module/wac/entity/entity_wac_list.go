@@ -1,6 +1,9 @@
 package entity
 
-import "time"
+import (
+	"codebase-app/pkg/types"
+	"time"
+)
 
 type GetWACsRequest struct {
 	UserId string
@@ -23,7 +26,7 @@ func (r *GetWACsRequest) SetDefault() {
 
 type GetWACsResponse struct {
 	Items map[string][]WacItem `json:"items"`
-	Meta  Meta                 `json:"meta"`
+	Meta  types.Meta           `json:"meta"`
 }
 
 type WacItem struct {
