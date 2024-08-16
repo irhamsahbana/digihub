@@ -57,8 +57,6 @@ func RunServer(cmd *flag.FlagSet, args []string) {
 		log.Fatal().Err(err).Msg("Error while creating local storage directory")
 	}
 
-	app.Static("/storage/public", envs.App.LocalStoragePublicPath)
-
 	// Application Middlewares
 	if envs.App.Environtment == "production" {
 		app.Use(limiter.New(limiter.Config{
@@ -81,8 +79,8 @@ func RunServer(cmd *flag.FlagSet, args []string) {
 	)
 
 	infrastructure.InitializeLogger(envs.App.Environtment, envs.App.LogFile, logLevel)
-	app.Get("/metrics", monitor.New(monitor.Config{Title: "Digihub Dev Metrics"}))
-	app.Static("/storage", envs.App.LocalStoragePrivatePath)
+	app.Static("api/storage/public", envs.App.LocalStoragePublicPath)
+	app.Get("/metrics", monitor.New(monitor.Config{Title: envs.App.Name + envs.App.Environtment + "Metrics"}))
 	route.SetupRoutes(app)
 
 	// Run server in goroutine

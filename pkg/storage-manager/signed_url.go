@@ -33,3 +33,7 @@ func GenerateSignedURL(filename string, expiration time.Duration) string {
 
 	return u.String()
 }
+
+func GeneratePublicURL(filename string) string {
+	return config.Envs.App.BaseURL + "/api/storage/public/" + filename
+}

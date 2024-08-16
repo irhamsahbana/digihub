@@ -6,8 +6,10 @@ import (
 	"codebase-app/internal/module/user/ports"
 	"codebase-app/pkg/errmsg"
 	"codebase-app/pkg/jwthandler"
+	"codebase-app/pkg/storage-manager"
 	"context"
 	"database/sql"
+	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -94,16 +96,17 @@ func (r *userRepository) Login(ctx context.Context, req *entity.LoginRequest) (e
 
 func (r *userRepository) GetProfile(ctx context.Context, req *entity.GetProfileRequest) (entity.GetProfileResponse, error) {
 	type dao struct {
-		Id          string `db:"id"`
-		Name        string `db:"name"`
-		Email       string `db:"email"`
-		WANum       string `db:"whatsapp_number"`
-		BranchId    string `db:"branch_id"`
-		BranchName  string `db:"branch_name"`
-		SectionId   string `db:"section_id"`
-		SectionName string `db:"section_name"`
-		RoleId      string `db:"role_id"`
-		RoleName    string `db:"role_name"`
+		Id          string  `db:"id"`
+		Name        string  `db:"name"`
+		Email       string  `db:"email"`
+		WANum       string  `db:"whatsapp_number"`
+		Path        *string `db:"path"`
+		BranchId    string  `db:"branch_id"`
+		BranchName  string  `db:"branch_name"`
+		SectionId   string  `db:"section_id"`
+		SectionName string  `db:"section_name"`
+		RoleId      string  `db:"role_id"`
+		RoleName    string  `db:"role_name"`
 	}
 
 	var (
@@ -117,6 +120,7 @@ func (r *userRepository) GetProfile(ctx context.Context, req *entity.GetProfileR
 			u.name,
 			u.email,
 			u.whatsapp_number,
+			u.path,
 			b.id as branch_id,
 			b.name as branch_name,
 			s.id as section_id,
@@ -154,6 +158,22 @@ func (r *userRepository) GetProfile(ctx context.Context, req *entity.GetProfileR
 	res.Name = data.Name
 	res.Email = data.Email
 	res.WANum = data.WANum
+
+	// check if user has profile picture
+	// if yes, generate public url
+	if data.Path != nil {
+		var (
+			filePath = strings.Split(*data.Path, "/")
+			filename string
+		)
+
+		if len(filePath) > 0 {
+			filename = filePath[len(filePath)-1]
+		}
+
+		url := storage.GeneratePublicURL(filename)
+		res.Image = &url
+	}
 
 	return res, nil
 }

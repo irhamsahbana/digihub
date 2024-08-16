@@ -135,12 +135,12 @@ func (r *wacRepository) GetWAC(ctx context.Context, req *entity.GetWACRequest) (
 
 	for _, vc := range datavc {
 		var (
-			filepath = strings.Split(vc.Path, "/")
+			filePath = strings.Split(vc.Path, "/")
 			filename string
 		)
 
-		if len(filepath) > 0 {
-			filename = filepath[len(filepath)-1]
+		if len(filePath) > 0 {
+			filename = filePath[len(filePath)-1]
 		}
 
 		res.VehicleConditions = append(res.VehicleConditions, entity.VCondition{
@@ -166,7 +166,7 @@ func (r *wacRepository) GetWAC(ctx context.Context, req *entity.GetWACRequest) (
 					Name: vc.AUserName,
 				},
 			},
-			Image:        storage.GenerateSignedURL(filename, 5*time.Minute),
+			Image:        storage.GenerateSignedURL(filename, 1*time.Minute),
 			IsInterested: vc.IsInterested,
 			Notes:        vc.Notes,
 		})

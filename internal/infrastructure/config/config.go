@@ -14,6 +14,7 @@ var (
 
 type Config struct {
 	App struct {
+		Name                    string `env:"APP_NAME"`
 		Environtment            string `env:"APP_ENV" env-default:"production"`
 		BaseURL                 string `env:"APP_BASE_URL" env-default:"http://localhost:3000"`
 		Port                    string `env:"APP_PORT" env-default:"3000"`
