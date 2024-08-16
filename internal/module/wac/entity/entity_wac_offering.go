@@ -9,9 +9,9 @@ type OfferWACRequest struct {
 }
 
 type OfferCondition struct {
-	Id           string  `json:"id" validate:"ulid"`
-	IsInterested bool    `json:"is_interested"`
-	Notes        *string `json:"notes" validate:"omitempty,max=255"`
+	Id           string  `json:"id" db:"id" validate:"ulid"`
+	IsInterested bool    `json:"is_interested" db:"is_interested"`
+	Notes        *string `json:"notes" db:"notes" validate:"omitempty,max=255"`
 }
 
 type OfferWACResponse struct {

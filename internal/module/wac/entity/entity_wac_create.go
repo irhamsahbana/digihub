@@ -1,7 +1,7 @@
 package entity
 
 type CreateWACRequest struct {
-	UserId string
+	UserId string `validate:"required,ulid,exist=users.id"`
 
 	Name                      string             `json:"name" validate:"required"`
 	VehicleRegistrationNumber string             `json:"vehicle_registration_number" validate:"min=3,max=15"`
@@ -18,6 +18,12 @@ type VehicleCondition struct {
 	Notes            *string `json:"notes"`
 
 	Path string
+}
+
+func (r *CreateWACRequest) RemoveBase64() {
+	for i := range r.VehicleConditions {
+		r.VehicleConditions[i].Image = ""
+	}
 }
 
 type CreateWACResponse struct {

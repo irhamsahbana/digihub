@@ -38,29 +38,20 @@ func (r *wacRepository) OfferWAC(ctx context.Context, req *entity.OfferWACReques
 		UPDATE
 			walk_around_check_conditions
 		SET
-			is_interested = :is_interested,
-			notes = :notes,
+			is_interested = ?,
+			notes = ?,
 			updated_at = NOW()
 		WHERE
-			id = :id
-			AND walk_around_check_id = :walk_around_check_id
+			id = ?
+			AND walk_around_check_id = ?
 	`
 
-	dataMap := make([]map[string]any, 0, len(req.VConditions))
-
-	for _, v := range req.VConditions {
-		dataMap = append(dataMap, map[string]any{
-			"id":                   v.Id,
-			"walk_around_check_id": req.Id,
-			"is_interested":        v.IsInterested,
-			"notes":                v.Notes,
-		})
-	}
-
-	_, err = tx.NamedExecContext(ctx, query, dataMap)
-	if err != nil {
-		log.Error().Err(err).Any("payload", req).Msg("repo::OfferWAC - Failed to update walk around check conditions")
-		return res, err
+	for _, c := range req.VConditions {
+		_, err = tx.ExecContext(ctx, r.db.Rebind(query), c.IsInterested, c.Notes, c.Id, req.Id)
+		if err != nil {
+			log.Error().Err(err).Any("payload", req).Msg("repo::OfferWAC - Failed to update walk around check conditions")
+			return res, err
+		}
 	}
 
 	query = `

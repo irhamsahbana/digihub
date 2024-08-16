@@ -29,11 +29,13 @@ func (r *wacRepository) CreateWAC(ctx context.Context, req *entity.CreateWACRequ
 		if err != nil {
 			err := tx.Rollback()
 			if err != nil {
+				req.RemoveBase64()
 				log.Error().Err(err).Any("payload", req).Msg("repo::CreateWAC - Failed to rollback transaction")
 			}
 		} else {
 			err = tx.Commit()
 			if err != nil {
+				req.RemoveBase64()
 				log.Error().Err(err).Any("payload", req).Msg("repo::CreateWAC - Failed to commit transaction")
 			}
 		}
@@ -45,6 +47,7 @@ func (r *wacRepository) CreateWAC(ctx context.Context, req *entity.CreateWACRequ
 	// Get client Id or create new client if not exists
 	clientId, err := r.getClientId(ctx, tx, req)
 	if err != nil {
+		req.RemoveBase64()
 		log.Error().Err(err).Any("payload", req).Msg("repo::CreateWAC - Failed to get client id")
 		return result, err
 	}
@@ -52,6 +55,7 @@ func (r *wacRepository) CreateWAC(ctx context.Context, req *entity.CreateWACRequ
 	// Get user data
 	userData, err := r.getUserData(ctx, tx, req.UserId)
 	if err != nil {
+		req.RemoveBase64()
 		log.Error().Err(err).Any("payload", req).Msg("repo::CreateWAC - Failed to get user data")
 		return result, err
 	}
@@ -59,6 +63,7 @@ func (r *wacRepository) CreateWAC(ctx context.Context, req *entity.CreateWACRequ
 	// Create walk around check record
 	err = r.createWACRecord(ctx, tx, wacId, userData, clientId, req.UserId)
 	if err != nil {
+		req.RemoveBase64()
 		log.Error().Err(err).Any("payload", req).Msg("repo::CreateWAC - Failed to create walk around check record")
 		return result, err
 	}
@@ -66,6 +71,7 @@ func (r *wacRepository) CreateWAC(ctx context.Context, req *entity.CreateWACRequ
 	// Create walk around check conditions
 	err = r.createWACConditions(ctx, tx, wacId, req.VehicleConditions)
 	if err != nil {
+		req.RemoveBase64()
 		log.Error().Err(err).Any("payload", req).Msg("repo::CreateWAC - Failed to create walk around check conditions")
 		return result, err
 	}
@@ -86,10 +92,12 @@ func (r *wacRepository) getClientId(ctx context.Context, tx *sqlx.Tx, req *entit
 			VALUES (?, ?, ?, ?, ?)`
 			_, err = tx.ExecContext(ctx, r.db.Rebind(query), clientId, req.Name, req.VehicleTypeId, req.VehicleRegistrationNumber, req.WhatsAppNumber)
 			if err != nil {
+				req.RemoveBase64()
 				log.Error().Err(err).Any("payload", req).Msg("repo::CreateWAC - Failed to create new client")
 				return "", err
 			}
 		} else {
+			req.RemoveBase64()
 			log.Error().Err(err).Any("payload", req).Msg("repo::CreateWAC - Failed to get client id")
 			return "", err
 		}
@@ -102,7 +110,7 @@ func (r *wacRepository) getUserData(ctx context.Context, tx *sqlx.Tx, userId str
 	query := `SELECT id, branch_id, section_id FROM users WHERE id = ?`
 	err := tx.GetContext(ctx, &u, r.db.Rebind(query), userId)
 	if err != nil {
-		log.Error().Err(err).Any("payload", userId).Msg("repo::CreateWAC - Failed to get user data")
+		log.Error().Err(err).Any("user_id", userId).Msg("repo::CreateWAC - Failed to get user data")
 		return u, err
 	}
 	return u, nil
@@ -114,7 +122,8 @@ func (r *wacRepository) createWACRecord(ctx context.Context, tx *sqlx.Tx, wacId 
 	VALUES (?, ?, ?, ?, ?)`
 	_, err := tx.ExecContext(ctx, r.db.Rebind(query), wacId, u.BranchId, u.SectionId, userId, clientId)
 	if err != nil {
-		log.Error().Err(err).Msg("repo::CreateWAC - Failed to create walk around check")
+		log.Error().Err(err).Any("wac_id", wacId).Any("user_id", userId).
+			Msg("repo::CreateWAC - Failed to create walk around check")
 	}
 	return err
 }
