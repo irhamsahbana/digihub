@@ -29,6 +29,7 @@ type GetProfileResponse struct {
 	Name    string         `json:"name" db:"name"`
 	Email   string         `json:"email" db:"email"`
 	WANum   string         `json:"whatsapp_number" db:"whatsapp_number"`
+	Image   *string        `json:"image"`
 	Role    CommonResponse `json:"role"`
 	Branch  CommonResponse `json:"branch"`
 	Section CommonResponse `json:"section"`
