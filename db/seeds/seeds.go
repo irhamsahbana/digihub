@@ -156,8 +156,8 @@ func (s *Seed) deleteAll() {
 
 func (s *Seed) areasSeed() {
 	areaMaps := []map[string]any{
-		{"id": ulid.Make().String(), "name": "Kap Mesin", "type": "exterior"},
-		{"id": ulid.Make().String(), "name": "Bumper Depan", "type": "exterior"},
+		{"id": ulid.Make().String(), "name": "Kap mesin", "type": "exterior"},
+		{"id": ulid.Make().String(), "name": "Atap ruang mesin", "type": "exterior"},
 		{"id": ulid.Make().String(), "name": "Pintu kanan depan", "type": "exterior"},
 		{"id": ulid.Make().String(), "name": "Pintu kanan tengah", "type": "exterior"},
 		{"id": ulid.Make().String(), "name": "Pintu kanan belakang", "type": "exterior"},
@@ -165,8 +165,11 @@ func (s *Seed) areasSeed() {
 		{"id": ulid.Make().String(), "name": "Pintu kiri tengah", "type": "exterior"},
 		{"id": ulid.Make().String(), "name": "Pintu kiri belakang", "type": "exterior"},
 		{"id": ulid.Make().String(), "name": "Pintu belakang", "type": "exterior"},
-		{"id": ulid.Make().String(), "name": "Bumper Belakang", "type": "exterior"},
-		{"id": ulid.Make().String(), "name": "Atap Ruang Mesin", "type": "exterior"},
+		{"id": ulid.Make().String(), "name": "Bumper depan", "type": "exterior"},
+		{"id": ulid.Make().String(), "name": "Bumper belakang", "type": "exterior"},
+		{"id": ulid.Make().String(), "name": "Kemudi", "type": "interior"},
+		{"id": ulid.Make().String(), "name": "Penumpang tengah", "type": "interior"},
+		{"id": ulid.Make().String(), "name": "Penumpang belakang", "type": "interior"},
 	}
 
 	tx, err := s.db.BeginTxx(context.Background(), nil)
