@@ -80,7 +80,7 @@ func RunServer(cmd *flag.FlagSet, args []string) {
 
 	infrastructure.InitializeLogger(envs.App.Environtment, envs.App.LogFile, logLevel)
 	app.Static("api/storage/public", envs.App.LocalStoragePublicPath)
-	app.Get("/metrics", monitor.New(monitor.Config{Title: envs.App.Name + envs.App.Environtment + "Metrics"}))
+	app.Get("/metrics", monitor.New(monitor.Config{Title: envs.App.Name + " " + envs.App.Environtment + " " + "Metrics"}))
 	route.SetupRoutes(app)
 
 	// Run server in goroutine
