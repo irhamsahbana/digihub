@@ -124,7 +124,7 @@ func (r *wacRepository) OfferWACUsedCard(ctx context.Context, req *entity.OfferW
 			walk_around_check_id = ?
 	`
 
-	_, err = tx.ExecContext(ctx, r.db.Rebind(query), false, req.Id)
+	_, err = tx.ExecContext(ctx, r.db.Rebind(query), true, req.Id)
 	if err != nil {
 		log.Error().Err(err).Any("payload", req).Msg("repo::OfferWACUsedCard - Failed to update walk around check conditions")
 		return res, err
