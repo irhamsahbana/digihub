@@ -4,6 +4,7 @@ import (
 	integlocalstorage "codebase-app/internal/integration/localstorage"
 	m "codebase-app/internal/middleware"
 	commonHandler "codebase-app/internal/module/common/handler"
+	dashboardHandler "codebase-app/internal/module/dashboard/handler"
 	userHandler "codebase-app/internal/module/user/handler"
 	wacHandler "codebase-app/internal/module/wac/handler"
 
@@ -25,6 +26,7 @@ func SetupRoutes(app *fiber.App) {
 	wacHandler.NewWacHandler(storage).Register(api)
 	userHandler.NewUserHandler().Register(api)
 	commonHandler.NewCommonHandler().Register(api)
+	dashboardHandler.NewDashboardHandler().Register(api)
 
 	// fallback route
 	app.Use(func(c *fiber.Ctx) error {
@@ -36,7 +38,7 @@ func SetupRoutes(app *fiber.App) {
 			ip     = c.IP()                           // get the request IP
 		)
 
-		log.Trace().
+		log.Debug().
 			Str("method", method).
 			Str("path", path).
 			Str("query", query).
