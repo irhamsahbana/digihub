@@ -66,10 +66,9 @@ func (h *userHandler) login(c *fiber.Ctx) error {
 
 func (h *userHandler) getProfile(c *fiber.Ctx) error {
 	var (
-		req   = new(entity.GetProfileRequest)
-		ctx   = c.Context()
-		local = m.Locals{}
-		l     = local.GetLocals(c)
+		req = new(entity.GetProfileRequest)
+		ctx = c.Context()
+		l   = m.GetLocals(c)
 	)
 
 	req.UserId = l.UserId

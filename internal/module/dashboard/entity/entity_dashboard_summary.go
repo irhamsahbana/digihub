@@ -2,11 +2,12 @@ package entity
 
 type WACSummaryRequest struct {
 	UserId string
-
-	Month string `json:"month" validate:"required,date=yyyy-mm"`
+	// month format 2021-01
+	Month string `query:"month" validate:"required,datetime=2006-01"`
 }
 
 type WACSummaryResponse struct {
+	Month                  string         `json:"month"`
 	WACCounts              int            `json:"wac_counts" db:"wac_counts"`
 	TotalLeadDistributions int            `json:"total_lead_distributions" db:"total_lead_distributions"`
 	Summaries              []Summary      `json:"summaries"`

@@ -52,11 +52,10 @@ func (h *wachHandler) Register(router fiber.Router) {
 
 func (h *wachHandler) createWAC(c *fiber.Ctx) error {
 	var (
-		req   = new(entity.CreateWACRequest)
-		ctx   = c.Context()
-		v     = adapter.Adapters.Validator
-		local = m.Locals{}
-		l     = local.GetLocals(c)
+		req = new(entity.CreateWACRequest)
+		ctx = c.Context()
+		v   = adapter.Adapters.Validator
+		l   = m.GetLocals(c)
 	)
 
 	if err := c.BodyParser(req); err != nil {
@@ -83,11 +82,10 @@ func (h *wachHandler) createWAC(c *fiber.Ctx) error {
 
 func (h *wachHandler) getWACs(c *fiber.Ctx) error {
 	var (
-		req   = new(entity.GetWACsRequest)
-		ctx   = c.Context()
-		v     = adapter.Adapters.Validator
-		local = m.Locals{}
-		l     = local.GetLocals(c)
+		req = new(entity.GetWACsRequest)
+		ctx = c.Context()
+		v   = adapter.Adapters.Validator
+		l   = m.GetLocals(c)
 	)
 
 	if err := c.QueryParser(req); err != nil {
@@ -140,11 +138,10 @@ func (h *wachHandler) getWAC(c *fiber.Ctx) error {
 
 func (h *wachHandler) OfferWAC(c *fiber.Ctx) error {
 	var (
-		req   = new(entity.OfferWACRequest)
-		ctx   = c.Context()
-		v     = adapter.Adapters.Validator
-		local = m.Locals{}
-		l     = local.GetLocals(c)
+		req = new(entity.OfferWACRequest)
+		ctx = c.Context()
+		v   = adapter.Adapters.Validator
+		l   = m.GetLocals(c)
 	)
 
 	if err := c.BodyParser(req); err != nil {
@@ -172,11 +169,10 @@ func (h *wachHandler) OfferWAC(c *fiber.Ctx) error {
 
 func (h *wachHandler) AddRevenue(c *fiber.Ctx) error {
 	var (
-		req   = new(entity.AddWACRevenueRequest)
-		ctx   = c.Context()
-		v     = adapter.Adapters.Validator
-		local = m.Locals{}
-		l     = local.GetLocals(c)
+		req = new(entity.AddWACRevenueRequest)
+		ctx = c.Context()
+		v   = adapter.Adapters.Validator
+		l   = m.GetLocals(c)
 	)
 
 	if err := c.BodyParser(req); err != nil {

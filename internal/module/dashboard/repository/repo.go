@@ -34,7 +34,9 @@ func (r *dashboardRepository) GetWACSummary(ctx context.Context, req *entity.WAC
 	)
 	res.Summaries = make([]entity.Summary, 0, 4)
 	res.DistributionOfLeads = make([]entity.Distribution, 0, 4)
+	res.Month = req.Month // 2006-01
 
+	// the timestamp is timestamp with timezone, so we need to convert it to Asia/Makassar timezone
 	query := `
 		SELECT
 			COUNT(wac.id) AS wac_counts
@@ -42,9 +44,10 @@ func (r *dashboardRepository) GetWACSummary(ctx context.Context, req *entity.WAC
 			walk_around_checks wac
 		WHERE
 			wac.user_id = ?
+			AND TO_CHAR(wac.created_at AT TIME ZONE 'Asia/Makassar', 'YYYY-MM') = ?
 	`
 
-	err := r.db.QueryRowxContext(ctx, r.db.Rebind(query), req.UserId).StructScan(&res)
+	err := r.db.QueryRowxContext(ctx, r.db.Rebind(query), req.UserId, req.Month).Scan(&res.WACCounts)
 	if err != nil {
 		log.Error().Err(err).Any("payload", req).Msg("repo::GetWACSummary - failed to get wac summary")
 		return res, err
@@ -63,7 +66,7 @@ func (r *dashboardRepository) GetWACSummary(ctx context.Context, req *entity.WAC
 		return res, err
 	}
 
-	// 	total potensial leads -> kondisi offered sudah dihitung, kondisi yang interest dan tidak interest
+	// total potensial leads -> kondisi offered sudah dihitung, kondisi yang interest dan tidak interest
 	// total leads -> kondisi wip baru dihitung, kondisi yang interest
 	// total wo/do -> kondisi completed baru dihitung, kondisi yang interest
 
@@ -82,10 +85,11 @@ func (r *dashboardRepository) GetWACSummary(ctx context.Context, req *entity.WAC
 			WHERE
 				wac.user_id = ?
 				AND wacc.potency_id = ?
+				AND TO_CHAR(wac.created_at AT TIME ZONE 'Asia/Makassar', 'YYYY-MM') = ?
 		`
 
 		var summary entity.Summary
-		err = r.db.QueryRowxContext(ctx, r.db.Rebind(query), req.UserId, potency.Id).StructScan(&summary)
+		err = r.db.QueryRowxContext(ctx, r.db.Rebind(query), req.UserId, potency.Id, req.Month).StructScan(&summary)
 		if err != nil {
 			log.Error().Err(err).Any("payload", req).Msg("repo::GetWACSummary - failed to get wac summary")
 			return res, err

@@ -11,7 +11,8 @@ type Locals struct {
 	IsVerified bool
 }
 
-func (l *Locals) GetLocals(c *fiber.Ctx) Locals {
+func GetLocals(c *fiber.Ctx) Locals {
+	l := Locals{}
 	userId, ok := c.Locals("user_id").(string)
 	if ok {
 		l.UserId = userId
@@ -26,7 +27,7 @@ func (l *Locals) GetLocals(c *fiber.Ctx) Locals {
 		log.Warn().Msg("middleware::Locals-GetLocals failed to get role from locals")
 	}
 
-	return *l
+	return l
 }
 
 func (l *Locals) GetUserId() string {

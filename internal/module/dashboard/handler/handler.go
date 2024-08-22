@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"codebase-app/internal/adapter"
 	"codebase-app/internal/middleware"
 	"codebase-app/internal/module/dashboard/entity"
 	"codebase-app/internal/module/dashboard/ports"
@@ -10,6 +11,7 @@ import (
 	"codebase-app/pkg/response"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/rs/zerolog/log"
 )
 
 type dashboardHandler struct {
@@ -34,10 +36,9 @@ func (h *dashboardHandler) Register(router fiber.Router) {
 
 func (h *dashboardHandler) GetLeadsTrends(c *fiber.Ctx) error {
 	var (
-		req   = new(entity.LeadTrendsRequest)
-		ctx   = c.Context()
-		local = middleware.Locals{}
-		l     = local.GetLocals(c)
+		req = new(entity.LeadTrendsRequest)
+		ctx = c.Context()
+		l   = middleware.GetLocals(c)
 	)
 
 	req.UserId = l.GetUserId()
@@ -53,13 +54,24 @@ func (h *dashboardHandler) GetLeadsTrends(c *fiber.Ctx) error {
 
 func (h *dashboardHandler) GetWACSummaries(c *fiber.Ctx) error {
 	var (
-		req   = new(entity.WACSummaryRequest)
-		ctx   = c.Context()
-		local = middleware.Locals{}
-		l     = local.GetLocals(c)
+		req = new(entity.WACSummaryRequest)
+		ctx = c.Context()
+		v   = adapter.Adapters.Validator
+		l   = middleware.GetLocals(c)
 	)
 
+	if err := c.QueryParser(req); err != nil {
+		log.Warn().Err(err).Msg("handler::GetWACSummaries - failed to parse query")
+		return c.Status(fiber.StatusBadRequest).JSON(response.Error(err.Error()))
+	}
+
 	req.UserId = l.GetUserId()
+
+	if err := v.Validate(req); err != nil {
+		log.Warn().Err(err).Any("payload", req).Msg("handler::GetWACSummaries - failed to validate request")
+		code, errs := errmsg.Errors(err, req)
+		return c.Status(code).JSON(response.Error(errs))
+	}
 
 	res, err := h.service.GetWACSummary(ctx, req)
 	if err != nil {

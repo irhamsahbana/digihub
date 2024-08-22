@@ -71,11 +71,10 @@ func (h *commonHandler) GetVehicleTypes(c *fiber.Ctx) error {
 
 func (h *commonHandler) GetEmployees(c *fiber.Ctx) error {
 	var (
-		req   = new(entity.GetEmployeesRequest)
-		ctx   = c.Context()
-		local = m.Locals{}
-		l     = local.GetLocals(c)
-		v     = adapter.Adapters.Validator
+		req = new(entity.GetEmployeesRequest)
+		ctx = c.Context()
+		l   = m.GetLocals(c)
+		v   = adapter.Adapters.Validator
 	)
 
 	if err := c.QueryParser(req); err != nil {
