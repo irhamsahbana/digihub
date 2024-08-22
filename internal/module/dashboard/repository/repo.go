@@ -5,7 +5,6 @@ import (
 	"codebase-app/internal/module/dashboard/entity"
 	"codebase-app/internal/module/dashboard/ports"
 	"context"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog/log"
@@ -23,82 +22,94 @@ func NewDashboardRepository() *dashboardRepository {
 	}
 }
 
-func (r *dashboardRepository) GetLeadsTrends(ctx context.Context, req *entity.LeadTrendsRequest) ([]entity.LeadTrendsResponse, error) {
-	var res = make([]entity.LeadTrendsResponse, 0)
+func (r *dashboardRepository) GetWACSummary(ctx context.Context, req *entity.WACSummaryRequest) (entity.WACSummaryResponse, error) {
+	type daoPotency struct {
+		Id   string `db:"id"`
+		Name string `db:"name"`
+	}
+
+	var (
+		res       entity.WACSummaryResponse
+		potencies = make([]daoPotency, 0, 4)
+	)
+	res.Summaries = make([]entity.Summary, 0, 4)
+	res.DistributionOfLeads = make([]entity.Distribution, 0, 4)
 
 	query := `
 		SELECT
-			TO_CHAR(wacc.created_at, 'YYYY/Mon') AS month,
-			SUM(
-				CASE
-					WHEN
-						wac.user_id = ?
-					THEN 1 ELSE 0 END
-			) AS review_conditions,
-			SUM(
-				CASE
-					WHEN
-						wac.user_id = ?
-						AND wacc.is_interested = TRUE
-					THEN 1 ELSE 0 END
-			) AS leads
+			COUNT(wac.id) AS wac_counts
 		FROM
-			walk_around_check_conditions wacc
-		LEFT JOIN
 			walk_around_checks wac
-			ON wac.id = wacc.walk_around_check_id
 		WHERE
-			wacc.created_at >= NOW() - INTERVAL '11 months'
-		GROUP BY
-			TO_CHAR(wacc.created_at, 'YYYY/Mon')
-		ORDER BY
-			TO_CHAR(wacc.created_at, 'YYYY/Mon') DESC
+			wac.user_id = ?
 	`
 
-	err := r.db.SelectContext(ctx, &res, r.db.Rebind(query), req.UserId, req.UserId)
+	err := r.db.QueryRowxContext(ctx, r.db.Rebind(query), req.UserId).StructScan(&res)
 	if err != nil {
-		log.Error().Err(err).Any("payload", req).Msg("repo::GetLeadsTrends - failed to get leads trends")
-		return nil, err
+		log.Error().Err(err).Any("payload", req).Msg("repo::GetWACSummary - failed to get wac summary")
+		return res, err
 	}
 
-	// feel the data if blank for 12 months
+	query = `
+		SELECT
+			id,
+			name
+		FROM
+			potencies
+	`
+	err = r.db.SelectContext(ctx, &potencies, r.db.Rebind(query))
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::GetWACSummary - failed to get wac summary")
+		return res, err
+	}
 
-	length := len(res)
+	// 	total potensial leads -> kondisi offered sudah dihitung, kondisi yang interest dan tidak interest
+	// total leads -> kondisi wip baru dihitung, kondisi yang interest
+	// total wo/do -> kondisi completed baru dihitung, kondisi yang interest
 
-	if length < 12 {
-		newRes := make([]entity.LeadTrendsResponse, 0)
-		for i := 0; i < 12; i++ {
-			month := time.Now().AddDate(0, -i, 0).Format("2006/Jan")
-			found := false
-			for j := 0; j < length; j++ {
-				if res[j].Month == month {
-					newRes = append(newRes, res[j])
-					found = true
-					break
-				}
-			}
-			if !found {
-				newRes = append(newRes, entity.LeadTrendsResponse{
-					Month:            month,
-					ReviewConditions: 0,
-					Leads:            0,
-				})
-			}
+	for _, potency := range potencies {
+		query = `
+			SELECT
+				'` + potency.Name + `' AS title,
+				COALESCE(SUM(1), 0) AS total_potencial_leads,
+				COALESCE(SUM(CASE WHEN wacc.is_interested = TRUE AND wac.status != 'offered' THEN 1 ELSE 0 END), 0) AS total_leads,
+				COALESCE(SUM(CASE WHEN wacc.is_interested = TRUE AND wac.status = 'completed' THEN 1 ELSE 0 END), 0) AS total_wo_do
+			FROM
+				walk_around_check_conditions wacc
+			LEFT JOIN
+				walk_around_checks wac
+				ON wac.id = wacc.walk_around_check_id
+			WHERE
+				wac.user_id = ?
+				AND wacc.potency_id = ?
+		`
+
+		var summary entity.Summary
+		err = r.db.QueryRowxContext(ctx, r.db.Rebind(query), req.UserId, potency.Id).StructScan(&summary)
+		if err != nil {
+			log.Error().Err(err).Any("payload", req).Msg("repo::GetWACSummary - failed to get wac summary")
+			return res, err
 		}
 
-		res = newRes
+		res.TotalLeadDistributions += summary.TotalLeads
+		res.Summaries = append(res.Summaries, summary)
 	}
 
-	// reverse the data
-	for i, j := 0, len(res)-1; i < j; i, j = i+1, j-1 {
-		res[i], res[j] = res[j], res[i]
+	// make percentage from total leads
+	for _, summary := range res.Summaries {
+		// make percentage 2 decimal, make sure the total lead distribution is not 0
+		var percentage float64
+
+		if res.TotalLeadDistributions != 0 {
+			percentage = float64(summary.TotalLeads) / float64(res.TotalLeadDistributions) * 100
+			percentage = float64(int(percentage*100)) / 100
+		}
+
+		res.DistributionOfLeads = append(res.DistributionOfLeads, entity.Distribution{
+			Title:      summary.Title,
+			Percentage: percentage,
+		})
 	}
-
-	return res, nil
-}
-
-func (r *dashboardRepository) GetWACSummary(ctx context.Context, req *entity.WACSummaryRequest) (entity.WACSummaryResponse, error) {
-	var res entity.WACSummaryResponse
 
 	return res, nil
 }

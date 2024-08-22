@@ -35,7 +35,7 @@ func (d *dospace) UploadFile(ctx context.Context, req *entity.UploadFileRequest)
 	var res = entity.UploadFileResponse{}
 
 	if req.File == nil {
-		return res, errmsg.NewCustomErrors(400, errmsg.WithErrors("file", "file is required."))
+		return res, errmsg.NewCustomErrors(400).Add("file", "file is required.")
 	}
 
 	var (

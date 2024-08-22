@@ -24,12 +24,14 @@ func NewCustomErrors(errCode int, opts ...Option) *CustomError {
 	return err
 }
 
-func (e *CustomError) SetCode(code int) {
+func (e *CustomError) SetCode(code int) *CustomError {
 	e.Code = code
+	return e
 }
 
-func (e *CustomError) Add(field, msg string) {
+func (e *CustomError) Add(field, msg string) *CustomError {
 	e.Errors[field] = append(e.Errors[field], msg)
+	return e
 }
 
 func (e *CustomError) HasErrors() bool {
@@ -41,12 +43,6 @@ type Option func(*CustomError)
 func WithMessage(msg string) Option {
 	return func(err *CustomError) {
 		err.Msg = msg
-	}
-}
-
-func WithErrors(field string, msg string) Option {
-	return func(err *CustomError) {
-		err.Errors[field] = append(err.Errors[field], msg)
 	}
 }
 

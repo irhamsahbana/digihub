@@ -29,6 +29,7 @@ func (h *dashboardHandler) Register(router fiber.Router) {
 	dashboard := router.Group("/dashboard", middleware.AuthBearer)
 
 	dashboard.Get("/lead-trends", h.GetLeadsTrends)
+	dashboard.Get("/wac-summaries", h.GetWACSummaries)
 }
 
 func (h *dashboardHandler) GetLeadsTrends(c *fiber.Ctx) error {
@@ -42,6 +43,25 @@ func (h *dashboardHandler) GetLeadsTrends(c *fiber.Ctx) error {
 	req.UserId = l.GetUserId()
 
 	res, err := h.service.GetLeadsTrends(ctx, req)
+	if err != nil {
+		code, errs := errmsg.Errors[error](err)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	return c.JSON(response.Success(res, ""))
+}
+
+func (h *dashboardHandler) GetWACSummaries(c *fiber.Ctx) error {
+	var (
+		req   = new(entity.WACSummaryRequest)
+		ctx   = c.Context()
+		local = middleware.Locals{}
+		l     = local.GetLocals(c)
+	)
+
+	req.UserId = l.GetUserId()
+
+	res, err := h.service.GetWACSummary(ctx, req)
 	if err != nil {
 		code, errs := errmsg.Errors[error](err)
 		return c.Status(code).JSON(response.Error(errs))
