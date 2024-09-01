@@ -94,7 +94,7 @@ func (r *wacRepository) AddRevenue(ctx context.Context, req *entity.AddWACRevenu
 		_, err = tx.ExecContext(ctx, r.db.Rebind(query),
 			ulid.Make().String(),
 			req.Id,
-			"Perlu dilakukan follow up dalam 7 hari karena ada kondisi yang perlu diperhatikan",
+			"perlu follow up",
 		)
 	}
 
