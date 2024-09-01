@@ -3,6 +3,7 @@ package repository
 import (
 	"codebase-app/internal/module/wac/entity"
 	"context"
+	"time"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
@@ -65,19 +66,20 @@ func (r *wacRepository) AddRevenue(ctx context.Context, req *entity.AddWACRevenu
 		return err
 	}
 
-	if isNeedFollowUp {
+	if isNeedFollowUp { // add 7 days from now in utc
+		followUpAt := time.Now().UTC().AddDate(0, 0, 7).Format("2006-01-02 15:04:05")
 		query = `
 			UPDATE
 				walk_around_checks
 			SET
 				is_needs_follow_up = TRUE,
 				updated_at = NOW(),
-				follow_up_at = NOW() + INTERVAL 7 DAY
+				follow_up_at = ?
 			WHERE
 				id = ?
 		`
 
-		_, err = tx.ExecContext(ctx, r.db.Rebind(query), req.Id)
+		_, err = tx.ExecContext(ctx, r.db.Rebind(query), followUpAt, req.Id)
 		if err != nil {
 			log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenue - failed to follow up")
 			return err
