@@ -203,10 +203,10 @@ func (s *Seed) areasSeed() {
 
 func (s *Seed) potenciesSeed() {
 	potencyMaps := []map[string]any{
-		{"id": ulid.Make().String(), "name": "Leads to General Repair"},
-		{"id": ulid.Make().String(), "name": "Leads to Body Paint"},
-		{"id": ulid.Make().String(), "name": "Leads to OtoXpert"},
-		{"id": ulid.Make().String(), "name": "Leads to Used-car"},
+		{"id": ulid.Make().String(), "name": "General Repair"},
+		{"id": ulid.Make().String(), "name": "Body Paint"},
+		{"id": ulid.Make().String(), "name": "OtoXpert"},
+		{"id": ulid.Make().String(), "name": "Used-car"},
 	}
 
 	tx, err := s.db.BeginTxx(context.Background(), nil)

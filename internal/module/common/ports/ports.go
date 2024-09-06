@@ -7,7 +7,7 @@ import (
 
 type CommonRepository interface {
 	GetAreas(ctx context.Context) ([]entity.AreaResponse, error)
-	GetPotencies(ctx context.Context) ([]entity.CommonResponse, error)
+	GetPotencies(ctx context.Context, req *entity.GetPotenciesRequest) ([]entity.GetPotencyResponse, error)
 	GetVehicleTypes(ctx context.Context) ([]entity.CommonResponse, error)
 
 	GetEmployees(ctx context.Context, req *entity.GetEmployeesRequest) (entity.GetEmployeesResult, error)
@@ -16,7 +16,7 @@ type CommonRepository interface {
 
 type CommonService interface {
 	GetAreas(ctx context.Context) ([]entity.AreaResponse, error)
-	GetPotencies(ctx context.Context) ([]entity.CommonResponse, error)
+	GetPotencies(ctx context.Context, req *entity.GetPotenciesRequest) ([]entity.GetPotencyResponse, error)
 	GetVehicleTypes(ctx context.Context) ([]entity.CommonResponse, error)
 
 	GetEmployees(ctx context.Context, req *entity.GetEmployeesRequest) (entity.GetEmployeesResponse, error)

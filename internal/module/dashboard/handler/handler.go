@@ -66,6 +66,7 @@ func (h *dashboardHandler) GetWACSummaries(c *fiber.Ctx) error {
 	}
 
 	req.UserId = l.GetUserId()
+	req.UserRole = l.GetRole()
 
 	if err := v.Validate(req); err != nil {
 		log.Warn().Err(err).Any("payload", req).Msg("handler::GetWACSummaries - failed to validate request")
@@ -73,11 +74,25 @@ func (h *dashboardHandler) GetWACSummaries(c *fiber.Ctx) error {
 		return c.Status(code).JSON(response.Error(errs))
 	}
 
-	res, err := h.service.GetWACSummary(ctx, req)
-	if err != nil {
-		code, errs := errmsg.Errors[error](err)
-		return c.Status(code).JSON(response.Error(errs))
+	if l.GetRole() == "technician" {
+		res, err := h.service.GetWACSummaryTechnician(ctx, req)
+		if err != nil {
+			code, errs := errmsg.Errors[error](err)
+			return c.Status(code).JSON(response.Error(errs))
+		}
+
+		return c.JSON(response.Success(res, ""))
 	}
 
-	return c.JSON(response.Success(res, ""))
+	if l.GetRole() == "service_advisor" {
+		res, err := h.service.GetWACSummary(ctx, req)
+		if err != nil {
+			code, errs := errmsg.Errors[error](err)
+			return c.Status(code).JSON(response.Error(errs))
+		}
+
+		return c.JSON(response.Success(res, ""))
+	}
+
+	return c.Status(fiber.StatusForbidden).JSON(response.Error("Forbidden access"))
 }

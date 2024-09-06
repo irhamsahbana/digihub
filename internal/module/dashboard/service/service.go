@@ -25,3 +25,7 @@ func (s *DashbaordService) GetLeadsTrends(ctx context.Context, request *entity.L
 func (s *DashbaordService) GetWACSummary(ctx context.Context, request *entity.WACSummaryRequest) (entity.WACSummaryResponse, error) {
 	return s.repo.GetWACSummary(ctx, request)
 }
+
+func (s *DashbaordService) GetWACSummaryTechnician(ctx context.Context, request *entity.WACSummaryRequest) (entity.WACSummaryResponse, error) {
+	return s.repo.GetWACSummaryTechnician(ctx, request)
+}

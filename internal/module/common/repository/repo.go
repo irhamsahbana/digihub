@@ -83,9 +83,18 @@ func (r *commonRepository) GetAreas(ctx context.Context) ([]entity.AreaResponse,
 	return result, nil
 }
 
-func (r *commonRepository) GetPotencies(ctx context.Context) ([]entity.CommonResponse, error) {
+func (r *commonRepository) GetPotencies(ctx context.Context, req *entity.GetPotenciesRequest) ([]entity.GetPotencyResponse, error) {
+	type userDao struct {
+		Id          string `db:"id"`
+		Name        string `db:"name"`
+		BranchId    string `db:"branch_id"`
+		BranchName  string `db:"branch_name"`
+		SectionName string `db:"section_name"`
+	}
 	var (
-		result = make([]entity.CommonResponse, 0)
+		result    = make([]entity.GetPotencyResponse, 0)
+		potencies = make([]entity.CommonResponse, 0)
+		user      = userDao{}
 	)
 
 	query := `
@@ -95,10 +104,53 @@ func (r *commonRepository) GetPotencies(ctx context.Context) ([]entity.CommonRes
 			potencies
 	`
 
-	err := r.db.SelectContext(ctx, &result, query)
+	err := r.db.SelectContext(ctx, &potencies, query)
 	if err != nil {
 		log.Error().Err(err).Msg("repo::GetPotencies - Failed to get potencies")
 		return nil, err
+	}
+
+	query = `
+		SELECT
+			usr.id, usr.name, usr.branch_id, br.name AS branch_name, sc.name AS section_name
+		FROM
+			users usr
+		LEFT JOIN
+			branches br ON usr.branch_id = br.id
+		LEFT JOIN
+			sections sc ON usr.section_id = sc.id
+		WHERE
+			usr.id = ?
+	`
+
+	err = r.db.GetContext(ctx, &user, r.db.Rebind(query), req.UserId)
+	if err != nil {
+		log.Error().Err(err).Msg("repo::GetPotencies - Failed to get potencies")
+		return nil, err
+	}
+
+	for _, p := range potencies {
+		potency := entity.GetPotencyResponse{
+			Id:   p.Id,
+			Name: p.Name,
+		}
+
+		if user.SectionName == p.Name {
+			u := entity.CommonResponse{
+				Id:   user.Id,
+				Name: user.Name,
+			}
+
+			b := entity.CommonResponse{
+				Id:   user.BranchId,
+				Name: user.BranchName,
+			}
+
+			potency.User = &u
+			potency.Branch = &b
+		}
+
+		result = append(result, potency)
 	}
 
 	return result, nil

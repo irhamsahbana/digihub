@@ -50,7 +50,14 @@ func (h *commonHandler) GetAreas(c *fiber.Ctx) error {
 }
 
 func (h *commonHandler) GetPotencies(c *fiber.Ctx) error {
-	result, err := h.service.GetPotencies(c.Context())
+	var (
+		req = new(entity.GetPotenciesRequest)
+		l   = m.GetLocals(c)
+	)
+
+	req.UserId = l.UserId
+
+	result, err := h.service.GetPotencies(c.Context(), req)
 	if err != nil {
 		code, errs := errmsg.Errors[error](err)
 		return c.Status(code).JSON(response.Error(errs))

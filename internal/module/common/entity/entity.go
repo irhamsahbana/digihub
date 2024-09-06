@@ -71,3 +71,14 @@ type GetProfileResponse struct {
 	Id     string         `json:"id" db:"id"`
 	Branch CommonResponse `json:"branch"`
 }
+
+type GetPotenciesRequest struct {
+	UserId string
+}
+
+type GetPotencyResponse struct {
+	Id     string          `json:"id" db:"id"`
+	Name   string          `json:"name" db:"name"`
+	User   *CommonResponse `json:"user"`
+	Branch *CommonResponse `json:"branch"`
+}

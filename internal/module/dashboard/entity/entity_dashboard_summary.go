@@ -1,7 +1,8 @@
 package entity
 
 type WACSummaryRequest struct {
-	UserId string
+	UserId   string
+	UserRole string
 	// month format 2021-01
 	Month string `query:"month" validate:"required,datetime=2006-01"`
 }

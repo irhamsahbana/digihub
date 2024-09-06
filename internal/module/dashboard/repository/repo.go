@@ -117,3 +117,11 @@ func (r *dashboardRepository) GetWACSummary(ctx context.Context, req *entity.WAC
 
 	return res, nil
 }
+
+func (r *dashboardRepository) GetWACSummaryTechnician(ctx context.Context, request *entity.WACSummaryRequest) (entity.WACSummaryResponse, error) {
+	var (
+		res entity.WACSummaryResponse
+	)
+
+	return res, nil
+}
