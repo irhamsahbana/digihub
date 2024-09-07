@@ -169,7 +169,7 @@ func (r *wacRepository) toCompletedWAC(ctx context.Context, tx *sqlx.Tx, req *en
 		SET
 			status = 'completed',
 			total_follow_ups = total_potential_leads,
-			is_need_follow_up = TRUE,
+			is_needs_follow_up = TRUE,
 			follow_up_at = ?,
 			updated_at = NOW()
 		WHERE
