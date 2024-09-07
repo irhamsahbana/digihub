@@ -102,6 +102,7 @@ func (r *wacRepository) OfferWACUsedCard(ctx context.Context, req *entity.OfferW
 		UPDATE
 			walk_around_checks
 		SET
+			is_used_car = TRUE,
 			status = 'offered',
 			updated_at = NOW()
 		WHERE

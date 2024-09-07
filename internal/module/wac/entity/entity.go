@@ -19,6 +19,7 @@ type GetWACResponse struct {
 	ClientName           string       `json:"client_name"`
 	VehicleLicenseNumber string       `json:"vehicle_license_number"`
 	WhatsappNumber       string       `json:"whatsapp_number"`
+	IsUsedCar            bool         `json:"is_used_car"`
 	IsOffered            bool         `json:"is_offered"`
 	InvoiceNumber        *string      `json:"invoice_number"`
 	Revenue              float64      `json:"revenue"`

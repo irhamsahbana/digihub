@@ -20,6 +20,7 @@ func (r *wacRepository) GetWAC(ctx context.Context, req *entity.GetWACRequest) (
 		VTypeId     string  `db:"vehicle_type_id"`
 		VTypeName   string  `db:"vehicle_type_name"`
 		ClientWANum string  `db:"whatsapp_number"`
+		IsUsedCar   bool    `db:"is_used_car"`
 		IsOffered   bool    `db:"is_offered"`
 		InvoiceNum  *string `db:"invoice_number"`
 		Revenue     float64 `db:"revenue"`
@@ -59,6 +60,7 @@ func (r *wacRepository) GetWAC(ctx context.Context, req *entity.GetWACRequest) (
 			vt.id AS vehicle_type_id,
 			vt.name AS vehicle_type_name,
 			c.phone AS whatsapp_number,
+			wac.is_used_car,
 			CASE
 				WHEN wac.status = 'offered' THEN TRUE
 				ELSE FALSE
