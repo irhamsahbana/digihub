@@ -5,6 +5,9 @@ import (
 	"codebase-app/internal/module/dashboard/entity"
 	"codebase-app/internal/module/dashboard/ports"
 	"context"
+	"fmt"
+	"strings"
+	"unicode"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog/log"
@@ -28,9 +31,18 @@ func (r *dashboardRepository) GetWACSummary(ctx context.Context, req *entity.WAC
 		Name string `db:"name"`
 	}
 
+	type daoArea struct {
+		Id    string `db:"id"`
+		Area  string `db:"area"`
+		Types string `db:"type"`
+		Leads int    `db:"leads"`
+		Key   string
+	}
+
 	var (
 		res       entity.WACSummaryResponse
 		potencies = make([]daoPotency, 0, 4)
+		areas     = make([]daoArea, 0, 20)
 	)
 	res.Summaries = make([]entity.Summary, 0, 4)
 	res.DistributionOfLeads = make([]entity.Distribution, 0, 4)
@@ -112,6 +124,81 @@ func (r *dashboardRepository) GetWACSummary(ctx context.Context, req *entity.WAC
 		res.DistributionOfLeads = append(res.DistributionOfLeads, entity.Distribution{
 			Title:      summary.Title,
 			Percentage: percentage,
+		})
+	}
+
+	query = `
+		SELECT
+			id,
+			name AS area,
+			type
+		FROM
+			areas
+	`
+
+	err = r.db.SelectContext(ctx, &areas, r.db.Rebind(query))
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::GetWACSummary - failed to get wac summary")
+		return res, err
+	}
+
+	queryArea := `
+		SELECT
+	`
+	lastIndex := len(areas) - 1
+
+	for idx, area := range areas {
+		// replace all non-alphanumeric characters with underscore
+		key := strings.Map(func(r rune) rune {
+			if unicode.IsLetter(r) || unicode.IsNumber(r) {
+				return r
+			}
+			return '_'
+		}, area.Area)
+		// to lower case
+		key = strings.ToLower(key)
+		areas[idx].Key = key
+
+		queryArea += `
+			COALESCE(SUM(CASE WHEN wacc.area_id = '` + area.Id + `' THEN 1 ELSE 0 END), 0) AS ` + key + `
+		`
+		if idx != lastIndex {
+			queryArea += ", "
+		}
+	}
+
+	queryArea += `
+		FROM
+			walk_around_check_conditions wacc
+		LEFT JOIN
+			walk_around_checks wac
+			ON wac.id = wacc.walk_around_check_id
+		WHERE
+			wac.user_id = ?
+			AND TO_CHAR(wac.created_at AT TIME ZONE 'Asia/Makassar', 'YYYY-MM') = ?
+	`
+
+	fmt.Println(queryArea)
+
+	TrendArea := make(map[string]any)
+
+	err = r.db.QueryRowxContext(ctx, r.db.Rebind(queryArea), req.UserId, req.Month).MapScan(TrendArea)
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::GetWACSummary - failed to get wac summary")
+		return res, err
+	}
+
+	for _, area := range areas {
+		key := area.Key
+		leads, ok := TrendArea[key]
+		if !ok {
+			leads = 0
+		}
+
+		res.ServiceTrends = append(res.ServiceTrends, entity.Trend{
+			Types: area.Types,
+			Area:  area.Area,
+			Leads: leads,
 		})
 	}
 

@@ -13,6 +13,7 @@ type WACSummaryResponse struct {
 	TotalLeadDistributions int            `json:"total_lead_distributions" db:"total_lead_distributions"`
 	Summaries              []Summary      `json:"summaries"`
 	DistributionOfLeads    []Distribution `json:"distribution_of_leads"`
+	ServiceTrends          []Trend        `json:"service_trends"`
 }
 
 type Summary struct {
@@ -25,4 +26,10 @@ type Summary struct {
 type Distribution struct {
 	Title      string  `json:"title"`
 	Percentage float64 `json:"percentage"`
+}
+
+type Trend struct {
+	Types string `json:"type" db:"type"`
+	Area  string `json:"area" db:"area"`
+	Leads any    `json:"leads" db:"leads"` // actual type is int
 }
