@@ -109,7 +109,7 @@ func (r *wacRepository) OfferWACUsedCard(ctx context.Context, req *entity.OfferW
 		SET
 			is_used_car = TRUE,
 			total_leads = COALESCE((SELECT SUM(1) FROM walk_around_check_conditions WHERE walk_around_check_id = ?), 0),
-			status = 'offered',
+			status = 'wip',
 			updated_at = NOW()
 		WHERE
 			id = ?
