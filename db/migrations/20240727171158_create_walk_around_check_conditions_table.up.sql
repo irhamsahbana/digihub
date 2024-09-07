@@ -4,6 +4,9 @@ CREATE TABLE IF NOT EXISTS walk_around_check_conditions (
     area_id CHAR(26) NOT NULL,
     potency_id CHAR(26) NOT NULL,
 
+    invoice_number VARCHAR(255),
+    revenue DECIMAL(19, 4) DEFAULT 0.0000 NOT NULL,
+
     assigned_branch_id CHAR(26),
     assigned_section_id CHAR(26),
     assigned_user_id CHAR(26),
@@ -20,5 +23,6 @@ CREATE TABLE IF NOT EXISTS walk_around_check_conditions (
     FOREIGN KEY (potency_id) REFERENCES potencies (id),
     FOREIGN KEY (assigned_branch_id) REFERENCES branches (id),
     FOREIGN KEY (assigned_section_id) REFERENCES sections (id),
-    FOREIGN KEY (assigned_user_id) REFERENCES users (id)
+    FOREIGN KEY (assigned_user_id) REFERENCES users (id),
+    UNIQUE (invoice_number)
 );

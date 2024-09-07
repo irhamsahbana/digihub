@@ -167,6 +167,8 @@ func (s *Seed) areasSeed() {
 		{"id": ulid.Make().String(), "name": "Pintu belakang", "type": "exterior"},
 		{"id": ulid.Make().String(), "name": "Bumper depan", "type": "exterior"},
 		{"id": ulid.Make().String(), "name": "Bumper belakang", "type": "exterior"},
+		{"id": ulid.Make().String(), "name": "Ban", "type": "exterior"},
+		{"id": ulid.Make().String(), "name": "Baterai/Aki", "type": "exterior"},
 		{"id": ulid.Make().String(), "name": "Kemudi", "type": "interior"},
 		{"id": ulid.Make().String(), "name": "Penumpang tengah", "type": "interior"},
 		{"id": ulid.Make().String(), "name": "Penumpang belakang", "type": "interior"},

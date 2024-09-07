@@ -46,6 +46,12 @@ func (h *wachHandler) Register(router fiber.Router) {
 		h.AddRevenue,
 	)
 
+	wac.Patch(
+		"/documents/:id/revenues-v2",
+		m.AuthRole([]string{"service_advisor"}),
+		h.AddRevenues,
+	)
+
 	wac.Get("/documents", h.getWACs)
 	wac.Get("/documents/:id", h.getWAC)
 }
@@ -190,6 +196,40 @@ func (h *wachHandler) AddRevenue(c *fiber.Ctx) error {
 	}
 
 	resp, err := h.service.AddRevenue(ctx, req)
+	if err != nil {
+		code, errs := errmsg.Errors[error](err)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(response.Success(resp, ""))
+}
+
+func (h *wachHandler) AddRevenues(c *fiber.Ctx) error {
+	var (
+		req = new(entity.AddWACRevenuesRequest)
+		ctx = c.Context()
+		v   = adapter.Adapters.Validator
+		l   = m.GetLocals(c)
+	)
+	req.Revenues = make([]entity.WACRevenue, 0)
+
+	// unmarshal request body to req.Revenues
+
+	if err := c.BodyParser(&req.Revenues); err != nil {
+		log.Warn().Err(err).Msg("handler::AddRevenues - Failed to parse request body")
+		return c.Status(fiber.StatusBadRequest).JSON(response.Error(err))
+	}
+
+	req.Id = c.Params("id")
+	req.UserId = l.GetUserId()
+
+	if err := v.Validate(req); err != nil {
+		log.Warn().Err(err).Any("payload", req).Msg("handler::AddRevenues - Invalid input")
+		code, errs := errmsg.Errors(err, req)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	resp, err := h.service.AddRevenues(ctx, req)
 	if err != nil {
 		code, errs := errmsg.Errors[error](err)
 		return c.Status(code).JSON(response.Error(errs))

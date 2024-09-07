@@ -29,6 +29,8 @@ type GetWACResponse struct {
 
 type VCondition struct {
 	Id           string        `json:"id"`
+	InvoiceNum   *string       `json:"invoice_number"`
+	Revenue      float64       `json:"revenue"`
 	Potency      Common        `json:"potency"`
 	Area         Area          `json:"area"`
 	Assginee     AssigneedUser `json:"assigneed_user"`

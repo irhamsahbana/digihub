@@ -118,3 +118,32 @@ func (s *wacService) AddRevenue(ctx context.Context, req *entity.AddWACRevenueRe
 
 	return resp, s.repo.AddRevenue(ctx, req)
 }
+
+func (s *wacService) AddRevenues(ctx context.Context, req *entity.AddWACRevenuesRequest) (entity.AddWACRevenueResponse, error) {
+	var (
+		resp entity.AddWACRevenueResponse
+	)
+	resp.Id = req.Id
+
+	isCreator, err := s.repo.IsWACCreator(ctx, req.UserId, req.Id)
+	if err != nil {
+		return resp, err
+	}
+
+	if !isCreator {
+		log.Warn().Any("payload", req).Msg("service::AddRevenues - You are not the creator of this walk around check")
+		return resp, errmsg.NewCustomErrors(403, errmsg.WithMessage("Anda bukan pembuat walk around check ini"))
+	}
+
+	isStatusWIP, err := s.repo.IsWACStatus(ctx, req.Id, "wip")
+	if err != nil {
+		return resp, err
+	}
+
+	if !isStatusWIP {
+		log.Warn().Any("payload", req).Msg("service::AddRevenues - Walk around check is not marked as WIP / already finished")
+		return resp, errmsg.NewCustomErrors(403, errmsg.WithMessage("Walk around check belum ditandai sebagai WIP / sudah selesai"))
+	}
+
+	return resp, s.repo.AddRevenues(ctx, req)
+}

@@ -28,6 +28,8 @@ func (r *wacRepository) GetWAC(ctx context.Context, req *entity.GetWACRequest) (
 
 	type daoVCondition struct {
 		Id              string  `db:"id"`
+		InvoiceNum      *string `db:"invoice_number"`
+		Revenue         float64 `db:"revenue"`
 		PotencyId       string  `db:"potency_id"`
 		PotencyName     string  `db:"potency_name"`
 		AreaId          string  `db:"area_id"`
@@ -89,6 +91,8 @@ func (r *wacRepository) GetWAC(ctx context.Context, req *entity.GetWACRequest) (
 	query.WriteString(`
 		SELECT
 			wacc.id,
+			wacc.revenue,
+			wacc.invoice_number,
 			p.id AS potency_id,
 			p.name AS potency_name,
 			a.id AS area_id,
@@ -144,7 +148,9 @@ func (r *wacRepository) GetWAC(ctx context.Context, req *entity.GetWACRequest) (
 		}
 
 		res.VehicleConditions = append(res.VehicleConditions, entity.VCondition{
-			Id: vc.Id,
+			Id:         vc.Id,
+			InvoiceNum: vc.InvoiceNum,
+			Revenue:    vc.Revenue,
 			Potency: entity.Common{
 				Id:   vc.PotencyId,
 				Name: vc.PotencyName,

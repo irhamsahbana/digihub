@@ -17,7 +17,8 @@ type VehicleCondition struct {
 	Image            string  `json:"image" validate:"base64"`
 	Notes            *string `json:"notes"`
 
-	Path string
+	Path  string
+	Price float64
 }
 
 func (r *CreateWACRequest) RemoveBase64() {
