@@ -51,6 +51,8 @@ func (r *wacRepository) OfferWAC(ctx context.Context, req *entity.OfferWACReques
 		if err != nil {
 			return res, err
 		}
+
+		return res, nil
 	}
 
 	query := `
