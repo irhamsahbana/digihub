@@ -34,6 +34,7 @@ type WacItem struct {
 	ClientName          string    `json:"client_name" db:"client_name"`
 	TotalPotentialLeads int       `json:"total_potential_leads" db:"total_potential_leads"`
 	TotalLeads          int       `json:"total_leads" db:"total_leads"`
+	TotalLeadsCompleted int       `json:"total_leads_completed" db:"total_leads_completed"`
 	TotalFollowUps      int       `json:"total_follow_ups" db:"total_follow_ups"`
 	Status              string    `json:"status" db:"status"`
 	CreatedAt           time.Time `json:"created_at" db:"created_at"`

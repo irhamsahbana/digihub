@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS walk_around_checks (
 
     total_potential_leads INT DEFAULT 0 NOT NULL,
     total_leads INT DEFAULT 0 NOT NULL,
+    total_leads_completed INT DEFAULT 0 NOT NULL,
     total_follow_ups INT DEFAULT 0 NOT NULL,
 
     is_used_car BOOLEAN DEFAULT FALSE NOT NULL,

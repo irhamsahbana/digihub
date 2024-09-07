@@ -183,6 +183,35 @@ func (r *wacRepository) AddRevenues(ctx context.Context, req *entity.AddWACReven
 		return err
 	}
 
+	// count total leads completed
+	queryCountingLeadsCompleted := `
+		UPDATE
+			walk_around_checks
+		SET
+			total_leads_completed = COALESCE(
+				(
+					SELECT
+						SUM(1)
+					FROM
+						walk_around_check_conditions
+					WHERE
+						walk_around_check_id = ?
+						AND is_interested = TRUE
+						AND invoice_number IS NOT NULL
+				),
+				0
+			),
+			updated_at = NOW()
+		WHERE
+			id = ?
+	`
+
+	_, err = tx.ExecContext(ctx, r.db.Rebind(queryCountingLeadsCompleted), req.Id, req.Id)
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenues - failed to count total leads completed")
+		return err
+	}
+
 	if !IsStillNeedRevenue { // if all revenue added, update status to completed and follow up if needed
 		query = `
 			UPDATE
@@ -226,7 +255,18 @@ func (r *wacRepository) AddRevenues(ctx context.Context, req *entity.AddWACReven
 					walk_around_checks
 				SET
 					is_needs_follow_up = TRUE,
-					total_follow_ups = COALESCE((SELECT SUM(1) FROM walk_around_check_conditions WHERE walk_around_check_id = ? AND is_interested = FALSE), 0),
+					total_follow_ups = COALESCE(
+						(
+							SELECT
+								SUM(1)
+							FROM
+								walk_around_check_conditions
+							WHERE
+								walk_around_check_id = ?
+								AND is_interested = FALSE
+						),
+						0
+					),
 					updated_at = NOW(),
 					follow_up_at = ?
 				WHERE
