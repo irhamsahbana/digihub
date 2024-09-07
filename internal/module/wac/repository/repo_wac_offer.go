@@ -3,12 +3,17 @@ package repository
 import (
 	"codebase-app/internal/module/wac/entity"
 	"context"
+	"time"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog/log"
 )
 
 func (r *wacRepository) OfferWAC(ctx context.Context, req *entity.OfferWACRequest) (entity.OfferWACResponse, error) {
-	var res entity.OfferWACResponse
+	var (
+		res           entity.OfferWACResponse
+		isAnyInterest bool
+	)
 
 	if req.IsUsedCar {
 		return r.OfferWACUsedCard(ctx, req)
@@ -33,6 +38,20 @@ func (r *wacRepository) OfferWAC(ctx context.Context, req *entity.OfferWACReques
 			}
 		}
 	}()
+
+	for _, c := range req.VConditions {
+		if c.IsInterested {
+			isAnyInterest = true
+			break
+		}
+	}
+
+	if !isAnyInterest {
+		err = r.toCompletedWAC(ctx, tx, req)
+		if err != nil {
+			return res, err
+		}
+	}
 
 	query := `
 		UPDATE
@@ -140,4 +159,28 @@ func (r *wacRepository) OfferWACUsedCard(ctx context.Context, req *entity.OfferW
 	res.Id = req.Id
 
 	return res, nil
+}
+
+func (r *wacRepository) toCompletedWAC(ctx context.Context, tx *sqlx.Tx, req *entity.OfferWACRequest) error {
+	followUpAt := time.Now().UTC().AddDate(0, 0, 7).Format("2006-01-02 15:04:05")
+	query := `
+		UPDATE
+			walk_around_checks
+		SET
+			status = 'completed',
+			total_follow_ups = total_potential_leads,
+			is_need_follow_up = TRUE,
+			follow_up_at = ?,
+			updated_at = NOW()
+		WHERE
+			id = ?
+	`
+
+	_, err := tx.ExecContext(ctx, r.db.Rebind(query), followUpAt, req.Id)
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::toCompletedWAC - Failed to update walk around check record")
+		return err
+	}
+
+	return nil
 }
