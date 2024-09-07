@@ -132,6 +132,7 @@ func (r *wacRepository) GetWAC(ctx context.Context, req *entity.GetWACRequest) (
 	res.ClientName = data.ClientName
 	res.VehicleLicenseNumber = data.VLicenseNum
 	res.WhatsappNumber = data.ClientWANum
+	res.IsUsedCar = data.IsUsedCar
 	res.IsOffered = data.IsOffered
 	res.InvoiceNumber = data.InvoiceNum
 	res.Revenue = data.Revenue
