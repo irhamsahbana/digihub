@@ -5,7 +5,6 @@ import (
 	"codebase-app/internal/module/dashboard/entity"
 	"codebase-app/internal/module/dashboard/ports"
 	"context"
-	"fmt"
 	"strings"
 	"unicode"
 
@@ -177,8 +176,6 @@ func (r *dashboardRepository) GetWACSummary(ctx context.Context, req *entity.WAC
 			wac.user_id = ?
 			AND TO_CHAR(wac.created_at AT TIME ZONE 'Asia/Makassar', 'YYYY-MM') = ?
 	`
-
-	fmt.Println(queryArea)
 
 	TrendArea := make(map[string]any)
 
