@@ -28,6 +28,9 @@ func (r *wacRepository) GetWACs(ctx context.Context, req *entity.GetWACsRequest)
 			wac.id,
 			c.name AS client_name,
 			wac.status,
+			wac.total_potential_leads,
+			wac.total_leads,
+			wac.total_follow_ups,
 			wac.created_at
 		FROM
 			walk_around_checks wac
