@@ -226,13 +226,14 @@ func (r *wacRepository) AddRevenues(ctx context.Context, req *entity.AddWACReven
 					walk_around_checks
 				SET
 					is_needs_follow_up = TRUE,
+					total_follow_ups = COALESCE((SELECT SUM(1) FROM walk_around_check_conditions WHERE walk_around_check_id = ? AND is_interested = FALSE), 0),
 					updated_at = NOW(),
 					follow_up_at = ?
 				WHERE
 					id = ?
 			`
 
-			_, err = tx.ExecContext(ctx, r.db.Rebind(query), followUpAt, req.Id)
+			_, err = tx.ExecContext(ctx, r.db.Rebind(query), req.Id, followUpAt, req.Id)
 			if err != nil {
 				log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenues - failed to follow up")
 				return err

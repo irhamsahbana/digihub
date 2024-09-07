@@ -151,5 +151,17 @@ func (r *wacRepository) createWACConditions(ctx context.Context, tx *sqlx.Tx, wa
 			return err
 		}
 	}
+
+	potentialLeads := len(conditions)
+	if potentialLeads > 0 {
+		query := `UPDATE walk_around_checks SET total_potential_leads = ? WHERE id = ?`
+		_, err := tx.ExecContext(ctx, r.db.Rebind(query), potentialLeads, wacId)
+		if err != nil {
+			log.Error().Err(err).Any("wac_id", wacId).Any("potential_leads", potentialLeads).
+				Msg("repo::CreateWAC - Failed to update total potential leads")
+			return err
+		}
+	}
+
 	return nil
 }

@@ -15,9 +15,15 @@ CREATE TABLE IF NOT EXISTS walk_around_checks (
     invoice_number VARCHAR(255),
     revenue DECIMAL(19, 4) DEFAULT 0.0000 NOT NULL,
     status wac_status DEFAULT 'offered' NOT NULL,
+
+    total_potential_leads INT DEFAULT 0 NOT NULL,
+    total_leads INT DEFAULT 0 NOT NULL,
+    total_follow_ups INT DEFAULT 0 NOT NULL,
+
     is_used_car BOOLEAN DEFAULT FALSE NOT NULL,
     is_needs_follow_up BOOLEAN DEFAULT FALSE NOT NULL,
     is_followed_up BOOLEAN,
+
     follow_up_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,

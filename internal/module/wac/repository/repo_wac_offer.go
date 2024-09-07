@@ -45,12 +45,16 @@ func (r *wacRepository) OfferWAC(ctx context.Context, req *entity.OfferWACReques
 			id = ?
 			AND walk_around_check_id = ?
 	`
-
+	var totalLeads int
 	for _, c := range req.VConditions {
 		_, err = tx.ExecContext(ctx, r.db.Rebind(query), c.IsInterested, c.Notes, c.Id, req.Id)
 		if err != nil {
 			log.Error().Err(err).Any("payload", req).Msg("repo::OfferWAC - Failed to update walk around check conditions")
 			return res, err
+		}
+
+		if c.IsInterested {
+			totalLeads = totalLeads + 1
 		}
 	}
 
@@ -59,12 +63,13 @@ func (r *wacRepository) OfferWAC(ctx context.Context, req *entity.OfferWACReques
 			walk_around_checks
 		SET
 			status = 'wip',
+			total_leads = ?,
 			updated_at = NOW()
 		WHERE
 			id = ?
 	`
 
-	_, err = tx.ExecContext(ctx, r.db.Rebind(query), req.Id)
+	_, err = tx.ExecContext(ctx, r.db.Rebind(query), totalLeads, req.Id)
 	if err != nil {
 		log.Error().Err(err).Any("payload", req).Msg("repo::OfferWAC - Failed to update walk around check record")
 		return res, err
@@ -103,6 +108,7 @@ func (r *wacRepository) OfferWACUsedCard(ctx context.Context, req *entity.OfferW
 			walk_around_checks
 		SET
 			is_used_car = TRUE,
+			total_leads = COALESCE((SELECT SUM(1) FROM walk_around_check_conditions WHERE walk_around_check_id = ?), 0),
 			status = 'offered',
 			updated_at = NOW()
 		WHERE
