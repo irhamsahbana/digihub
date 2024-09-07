@@ -159,7 +159,7 @@ func (r *dashboardRepository) GetWACSummary(ctx context.Context, req *entity.WAC
 		areas[idx].Key = key
 
 		queryArea += `
-			COALESCE(SUM(CASE WHEN wacc.area_id = '` + area.Id + `' THEN 1 ELSE 0 END), 0) AS ` + key + `
+			COALESCE(SUM(CASE WHEN wacc.area_id = '` + area.Id + `' WHERE wacc.is_interested = TRUE THEN 1 ELSE 0 END), 0) AS ` + key + `
 		`
 		if idx != lastIndex {
 			queryArea += ", "
