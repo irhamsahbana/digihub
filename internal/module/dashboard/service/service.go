@@ -26,6 +26,6 @@ func (s *DashbaordService) GetWACSummary(ctx context.Context, request *entity.WA
 	return s.repo.GetWACSummary(ctx, request)
 }
 
-func (s *DashbaordService) GetWACSummaryTechnician(ctx context.Context, request *entity.WACSummaryRequest) (entity.WACSummaryResponse, error) {
+func (s *DashbaordService) GetWACSummaryTechnician(ctx context.Context, request *entity.WACSummaryRequest) (entity.TechWACSummaryResponse, error) {
 	return s.repo.GetWACSummaryTechnician(ctx, request)
 }

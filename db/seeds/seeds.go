@@ -510,10 +510,12 @@ func (s *Seed) usersSeed(total int) {
 		// }
 	}
 
+	branchId := branches[gofakeit.Number(0, len(branches)-1)].Id
+
 	advisorUser := map[string]any{
 		"id":              ulid.Make().String(),
 		"role_id":         serviceAdvisorId,
-		"branch_id":       branches[gofakeit.Number(0, len(branches)-1)].Id,
+		"branch_id":       branchId,
 		"section_id":      secGeneralRepairId,
 		"name":            "Fhikar SA",
 		"email":           "sa@fake.com",
@@ -524,7 +526,7 @@ func (s *Seed) usersSeed(total int) {
 	techUser := map[string]any{
 		"id":              ulid.Make().String(),
 		"role_id":         technicianId,
-		"branch_id":       branches[gofakeit.Number(0, len(branches)-1)].Id,
+		"branch_id":       branchId,
 		"section_id":      secGeneralRepairId,
 		"name":            "Fhikar Tech",
 		"email":           "tech@fake.com",
