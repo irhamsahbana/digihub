@@ -70,6 +70,8 @@ func (r *dashboardRepository) GetWACSummary(ctx context.Context, req *entity.WAC
 			name
 		FROM
 			potencies
+		WHERE
+			name != 'Used-car'
 	`
 	err = r.db.SelectContext(ctx, &potencies, r.db.Rebind(query))
 	if err != nil {
@@ -109,6 +111,51 @@ func (r *dashboardRepository) GetWACSummary(ctx context.Context, req *entity.WAC
 		res.TotalLeadDistributions += summary.TotalLeads
 		res.Summaries = append(res.Summaries, summary)
 	}
+
+	// for used-car, the wo/do is based on wac that status is completed (invoice_number column is not null)
+	query = `
+		WITH total_wo_do_alt AS (
+			SELECT
+				COUNT(wac.id) AS total_wo_do
+			FROM
+				walk_around_checks wac
+			WHERE
+				wac.status = 'completed'
+				AND Wac.is_used_car = TRUE
+				AND wac.user_id = ?
+				AND TO_CHAR(wac.created_at AT TIME ZONE 'Asia/Makassar', 'YYYY-MM') = ?
+		),
+		total_leads_alt AS (
+			SELECT
+				COUNT(wacc.id) AS total_leads
+			FROM
+				walk_around_check_conditions wacc
+			LEFT JOIN
+				walk_around_checks wac
+				ON wac.id = wacc.walk_around_check_id
+			WHERE
+				wac.is_used_car = TRUE
+				AND wac.user_id = ?
+				AND TO_CHAR(wac.created_at AT TIME ZONE 'Asia/Makassar', 'YYYY-MM') = ?
+		)
+		SELECT
+			'Used-car' AS title,
+			(SELECT total_leads FROM total_leads_alt) AS total_potencial_leads,
+			(SELECT total_leads FROM total_leads_alt) AS total_leads,
+			(SELECT total_wo_do FROM total_wo_do_alt) AS total_wo_do
+	`
+
+	var summary entity.Summary
+	err = r.db.QueryRowxContext(ctx, r.db.Rebind(query),
+		req.UserId, req.Month,
+		req.UserId, req.Month,
+	).StructScan(&summary)
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::GetWACSummary - failed to get wac summary")
+		return res, err
+	}
+
+	res.Summaries = append(res.Summaries, summary)
 
 	// make percentage from total leads
 	for _, summary := range res.Summaries {
