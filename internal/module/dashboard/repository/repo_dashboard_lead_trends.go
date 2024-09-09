@@ -76,9 +76,9 @@ func (r *dashboardRepository) GetLeadsTrends(ctx context.Context, req *entity.Le
 	}
 
 	// reverse the data
-	for i, j := 0, len(res)-1; i < j; i, j = i+1, j-1 {
-		res[i], res[j] = res[j], res[i]
-	}
+	// for i, j := 0, len(res)-1; i < j; i, j = i+1, j-1 {
+	// 	res[i], res[j] = res[j], res[i]
+	// }
 
 	return res, nil
 }
