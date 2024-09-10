@@ -132,7 +132,7 @@ func (r *userRepository) GetProfile(ctx context.Context, req *entity.GetProfileR
 		LEFT JOIN
 			branches b ON u.branch_id = b.id
 		LEFT JOIN
-			sections s ON u.section_id = s.id
+			potencies s ON u.section_id = s.id
 		LEFT JOIN
 			roles r ON u.role_id = r.id
 		WHERE u.id = ?

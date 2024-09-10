@@ -118,7 +118,7 @@ func (r *commonRepository) GetPotencies(ctx context.Context, req *entity.GetPote
 		LEFT JOIN
 			branches br ON usr.branch_id = br.id
 		LEFT JOIN
-			sections sc ON usr.section_id = sc.id
+			potencies sc ON usr.section_id = sc.id
 		WHERE
 			usr.id = ?
 	`
@@ -208,7 +208,7 @@ func (r *commonRepository) GetEmployees(ctx context.Context, req *entity.GetEmpl
 		LEFT JOIN
 			branches br ON usr.branch_id = br.id
 		LEFT JOIN
-			sections sc ON usr.section_id = sc.id
+			potencies sc ON usr.section_id = sc.id
 		LEFT JOIN
 			roles rl ON usr.role_id = rl.id
 		WHERE
@@ -233,6 +233,11 @@ func (r *commonRepository) GetEmployees(ctx context.Context, req *entity.GetEmpl
 	if req.BranchId != "" {
 		query.WriteString(" AND usr.branch_id = ?")
 		args = append(args, req.BranchId)
+	}
+
+	if req.SectionId != "" {
+		query.WriteString(" AND usr.section_id = ?")
+		args = append(args, req.SectionId)
 	}
 
 	query.WriteString(` LIMIT ? OFFSET ?`)

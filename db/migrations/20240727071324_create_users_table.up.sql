@@ -15,5 +15,5 @@ CREATE TABLE IF NOT EXISTS users (
 
     FOREIGN KEY (role_id) REFERENCES roles (id),
     FOREIGN KEY (branch_id) REFERENCES branches (id),
-    FOREIGN KEY (section_id) REFERENCES sections (id)
+    FOREIGN KEY (section_id) REFERENCES potencies (id)
 );

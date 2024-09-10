@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS walk_around_checks (
 
     FOREIGN KEY (follow_up_wac_id) REFERENCES walk_around_checks(id),
     FOREIGN KEY (branch_id) REFERENCES branches(id),
-    FOREIGN KEY (section_id) REFERENCES sections(id),
+    FOREIGN KEY (section_id) REFERENCES potencies(id),
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (client_id) REFERENCES clients (id),
     UNIQUE (invoice_number)

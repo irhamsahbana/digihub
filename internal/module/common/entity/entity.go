@@ -7,6 +7,7 @@ type GetEmployeesRequest struct {
 	Paginate  int    `query:"paginate" validate:"required"`
 	Role      string `query:"role" validate:"omitempty,oneof=service_advisor technician"`
 	BranchId  string `query:"branch_id" validate:"omitempty,exist=branches.id"`
+	SectionId string `query:"section_id" validate:"omitempty,exist=potencies.id"`
 	IncludeMe bool   `query:"include_me"`
 }
 

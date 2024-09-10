@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS walk_around_check_conditions (
     FOREIGN KEY (area_id) REFERENCES areas (id),
     FOREIGN KEY (potency_id) REFERENCES potencies (id),
     FOREIGN KEY (assigned_branch_id) REFERENCES branches (id),
-    FOREIGN KEY (assigned_section_id) REFERENCES sections (id),
+    FOREIGN KEY (assigned_section_id) REFERENCES potencies (id),
     FOREIGN KEY (assigned_user_id) REFERENCES users (id),
     UNIQUE (invoice_number)
 );

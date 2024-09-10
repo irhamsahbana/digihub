@@ -42,16 +42,13 @@ func (s *Seed) run(table string, total int) {
 		s.vehicleTypesSeed()
 	case "branches":
 		s.branchesSeed(total)
-	case "sections":
-		s.sectionSeed()
 	case "users":
 		s.usersSeed(total)
 	case "all":
 		s.rolesSeed()
-		s.sectionSeed()
-		s.vehicleTypesSeed()
-		s.potenciesSeed()
 		s.areasSeed()
+		s.potenciesSeed()
+		s.vehicleTypesSeed()
 		s.branchesSeed(total)
 		s.usersSeed(total)
 	case "delete-all":
@@ -366,44 +363,6 @@ func (s *Seed) branchesSeed(total int) {
 	log.Info().Msg("branches table seeded successfully")
 }
 
-func (s *Seed) sectionSeed() {
-	sectionMaps := []map[string]any{
-		{"id": ulid.Make().String(), "name": "General Repair"},
-		{"id": ulid.Make().String(), "name": "Body Paint"},
-		{"id": ulid.Make().String(), "name": "OtoXpert"},
-		{"id": ulid.Make().String(), "name": "Used-car"},
-	}
-
-	tx, err := s.db.BeginTxx(context.Background(), nil)
-	if err != nil {
-		log.Error().Err(err).Msg("Error starting transaction")
-		return
-	}
-	defer func() {
-		if err != nil {
-			err = tx.Rollback()
-			log.Error().Err(err).Msg("Error rolling back transaction")
-			return
-		} else {
-			err = tx.Commit()
-			if err != nil {
-				log.Error().Err(err).Msg("Error committing transaction")
-			}
-		}
-	}()
-
-	_, err = tx.NamedExec(`
-		INSERT INTO sections (id, name)
-		VALUES (:id, :name)
-	`, sectionMaps)
-	if err != nil {
-		log.Error().Err(err).Msg("Error creating sections")
-		return
-	}
-
-	log.Info().Msg("sections table seeded successfully")
-}
-
 // users
 func (s *Seed) usersSeed(total int) {
 	tx, err := s.db.BeginTxx(context.Background(), nil)
@@ -448,9 +407,9 @@ func (s *Seed) usersSeed(total int) {
 		return
 	}
 
-	err = s.db.Select(&sections, `SELECT id, name FROM sections`)
+	err = s.db.Select(&sections, `SELECT id, name FROM potencies`)
 	if err != nil {
-		log.Error().Err(err).Msg("Error selecting sections")
+		log.Error().Err(err).Msg("Error selecting potencies")
 		return
 	}
 
