@@ -310,7 +310,7 @@ func (r *dashboardRepository) GetWACSummaryTechnician(ctx context.Context, req *
 	res.Month = req.Month
 
 	query := `
-		WITH total_leads AS (
+		WITH total_leads_wac_need_follow_up AS (
 			SELECT
 				COALESCE(SUM(1), 0) AS total_leads
 			FROM
@@ -319,13 +319,15 @@ func (r *dashboardRepository) GetWACSummaryTechnician(ctx context.Context, req *
 				walk_around_checks wac
 				ON wac.id = wacc.walk_around_check_id
 			WHERE
-				wac.branch_id = (SELECT branch_id FROM users WHERE id = ?)
+				wac.status = 'completed'
+				AND wac.is_needs_follow_up = TRUE
+				AND wac.branch_id = (SELECT branch_id FROM users WHERE id = ?)
 				AND TO_CHAR(wac.created_at AT TIME ZONE 'Asia/Makassar', 'YYYY-MM') = ?
 		)
 		SELECT
 			COALESCE(SUM(CASE WHEN wac.is_needs_follow_up = TRUE THEN 1 ELSE 0 END), 0) AS total_wac_need_follow_up,
 			COALESCE(SUM(CASE WHEN wac.is_followed_up = TRUE THEN 1 ELSE 0 END), 0) AS total_wac_followed_up,
-			(SELECT total_leads FROM total_leads) AS total_leads
+			(SELECT total_leads FROM total_leads_wac_need_follow_up) AS total_leads
 		FROM
 			walk_around_checks wac
 		WHERE
