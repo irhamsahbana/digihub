@@ -175,39 +175,50 @@ func (r *dashboardRepository) GetWACSummary(ctx context.Context, req *entity.WAC
 		}
 	*/
 
-	var totalPercentage float64
-	var maxIndex int
+	if res.TotalLeadDistributions == 0 {
+		// Set all percentages to 0% since there are no leads
+		for _, summary := range res.Summaries {
+			res.DistributionOfLeads = append(res.DistributionOfLeads, entity.Distribution{
+				Title:      summary.Title,
+				Percentage: 0.0,
+			})
+		}
+	} else {
 
-	// Calculate the distribution percentages and find the index of the maximum percentage
-	for i, summary := range res.Summaries {
-		// Initialize the percentage to zero
-		var percentage float64
+		var totalPercentage float64
+		var maxIndex int
 
-		// Calculate the percentage if the total distribution is not zero
-		if res.TotalLeadDistributions != 0 {
-			percentage = float64(summary.TotalLeads) / float64(res.TotalLeadDistributions) * 100
-			percentage = float64(int(percentage*100)) / 100 // Round to two decimal places
+		// Calculate the distribution percentages and find the index of the maximum percentage
+		for i, summary := range res.Summaries {
+			// Initialize the percentage to zero
+			var percentage float64
+
+			// Calculate the percentage if the total distribution is not zero
+			if res.TotalLeadDistributions != 0 {
+				percentage = float64(summary.TotalLeads) / float64(res.TotalLeadDistributions) * 100
+				percentage = float64(int(percentage*100)) / 100 // Round to two decimal places
+			}
+
+			// Append the percentage to the result
+			res.DistributionOfLeads = append(res.DistributionOfLeads, entity.Distribution{
+				Title:      summary.Title,
+				Percentage: percentage,
+			})
+
+			// Track the total percentage sum
+			totalPercentage += percentage
+
+			// Track the index of the maximum percentage
+			if res.DistributionOfLeads[maxIndex].Percentage < percentage {
+				maxIndex = i
+			}
 		}
 
-		// Append the percentage to the result
-		res.DistributionOfLeads = append(res.DistributionOfLeads, entity.Distribution{
-			Title:      summary.Title,
-			Percentage: percentage,
-		})
-
-		// Track the total percentage sum
-		totalPercentage += percentage
-
-		// Track the index of the maximum percentage
-		if res.DistributionOfLeads[maxIndex].Percentage < percentage {
-			maxIndex = i
+		// Adjust the total to ensure it sums to 100%
+		difference := 100 - totalPercentage
+		if len(res.DistributionOfLeads) > 0 {
+			res.DistributionOfLeads[maxIndex].Percentage += difference
 		}
-	}
-
-	// Adjust the total to ensure it sums to 100%
-	difference := 100 - totalPercentage
-	if len(res.DistributionOfLeads) > 0 {
-		res.DistributionOfLeads[maxIndex].Percentage += difference
 	}
 
 	query = `
@@ -376,38 +387,47 @@ func (r *dashboardRepository) GetWACSummaryTechnician(ctx context.Context, req *
 			})
 		}
 	*/
+	if res.TotalLeads == 0 {
+		// Set all percentages to 0% since there are no leads
+		for _, potency := range potencies {
+			res.DistributionOfLeads = append(res.DistributionOfLeads, entity.Distribution{
+				Title:      potency.Name,
+				Percentage: 0.0,
+			})
+		}
+	} else {
+		var totalPercentage float64
+		var maxIndex int
 
-	var totalPercentage float64
-	var maxIndex int
+		// Calculate the distribution percentages and find the index of the maximum percentage
+		for i, potency := range potencies {
+			var percentage float64
 
-	// Calculate the distribution percentages and find the index of the maximum percentage
-	for i, potency := range potencies {
-		var percentage float64
+			if res.TotalLeads != 0 {
+				percentage = float64(potency.Total) / float64(res.TotalLeads) * 100
+				percentage = float64(int(percentage*100)) / 100 // Round to two decimal places
+			}
 
-		if res.TotalLeads != 0 {
-			percentage = float64(potency.Total) / float64(res.TotalLeads) * 100
-			percentage = float64(int(percentage*100)) / 100 // Round to two decimal places
+			// Add to the result
+			res.DistributionOfLeads = append(res.DistributionOfLeads, entity.Distribution{
+				Title:      potency.Name,
+				Percentage: percentage,
+			})
+
+			// Keep track of the total percentage
+			totalPercentage += percentage
+
+			// Track the index of the maximum percentage
+			if res.DistributionOfLeads[maxIndex].Percentage < percentage {
+				maxIndex = i
+			}
 		}
 
-		// Add to the result
-		res.DistributionOfLeads = append(res.DistributionOfLeads, entity.Distribution{
-			Title:      potency.Name,
-			Percentage: percentage,
-		})
-
-		// Keep track of the total percentage
-		totalPercentage += percentage
-
-		// Track the index of the maximum percentage
-		if res.DistributionOfLeads[maxIndex].Percentage < percentage {
-			maxIndex = i
+		// Adjust the total to ensure it sums to 100%
+		difference := 100 - totalPercentage
+		if len(res.DistributionOfLeads) > 0 {
+			res.DistributionOfLeads[maxIndex].Percentage += difference
 		}
-	}
-
-	// Adjust the total to ensure it sums to 100%
-	difference := 100 - totalPercentage
-	if len(res.DistributionOfLeads) > 0 {
-		res.DistributionOfLeads[maxIndex].Percentage += difference
 	}
 
 	return res, nil
