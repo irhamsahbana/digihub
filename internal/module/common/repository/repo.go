@@ -106,7 +106,7 @@ func (r *commonRepository) GetPotencies(ctx context.Context, req *entity.GetPote
 
 	err := r.db.SelectContext(ctx, &potencies, query)
 	if err != nil {
-		log.Error().Err(err).Msg("repo::GetPotencies - Failed to get potencies")
+		log.Error().Err(err).Any("payload", req).Msg("repo::GetPotencies - Failed to get potencies")
 		return nil, err
 	}
 
@@ -125,7 +125,7 @@ func (r *commonRepository) GetPotencies(ctx context.Context, req *entity.GetPote
 
 	err = r.db.GetContext(ctx, &user, r.db.Rebind(query), req.UserId)
 	if err != nil {
-		log.Error().Err(err).Msg("repo::GetPotencies - Failed to get potencies")
+		log.Error().Err(err).Any("payload", req).Msg("repo::GetPotencies - Failed to get potencies")
 		return nil, err
 	}
 
