@@ -8,6 +8,7 @@ import (
 	"codebase-app/internal/module/mrs/repository"
 	"codebase-app/internal/module/mrs/service"
 	"codebase-app/pkg/errmsg"
+	"codebase-app/pkg/response"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
@@ -63,5 +64,5 @@ func (h *mrsHandler) GetMRSs(c *fiber.Ctx) error {
 		return c.Status(code).JSON(errs)
 	}
 
-	return c.JSON(resp)
+	return c.JSON(response.Success(resp, ""))
 }
