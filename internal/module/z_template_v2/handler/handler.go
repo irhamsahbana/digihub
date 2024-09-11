@@ -6,7 +6,9 @@ type xxxHandler struct {
 }
 
 func NewXXXHandler() *xxxHandler {
-	return &xxxHandler{}
+	var handler = new(xxxHandler)
+
+	return handler
 }
 
 func (h *xxxHandler) Register(router fiber.Router) {
