@@ -278,6 +278,21 @@ func (r *wacRepository) AddRevenues(ctx context.Context, req *entity.AddWACReven
 				log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenues - failed to follow up")
 				return err
 			}
+
+			query = `
+				INSERT INTO
+					wac_follow_up_logs (id, walk_around_check_id, notes)
+				VALUES (?, ?, ?)
+			`
+			_, err = tx.ExecContext(ctx, r.db.Rebind(query),
+				ulid.Make().String(),
+				req.Id,
+				"perlu follow up",
+			)
+			if err != nil {
+				log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenues - failed to create log")
+				return err
+			}
 		}
 	}
 

@@ -32,3 +32,9 @@ type MRSItem struct {
 	ServiceAdvisor string     `json:"service_advisor" db:"service_advisor"`
 	FollowUpAt     *time.Time `json:"follow_up_at" db:"follow_up_at"`
 }
+
+type RenewWACRequest struct {
+	UserId              string
+	WacId               string   `params:"id" validate:"ulid"`
+	VehicleConditionIds []string `json:"vehicle_condition_ids" validate:"required,dive,ulid"`
+}

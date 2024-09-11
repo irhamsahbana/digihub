@@ -29,6 +29,11 @@ func (e *CustomError) SetCode(code int) *CustomError {
 	return e
 }
 
+func (e *CustomError) SetMessage(msg string) *CustomError {
+	e.Msg = msg
+	return e
+}
+
 func (e *CustomError) Add(field, msg string) *CustomError {
 	e.Errors[field] = append(e.Errors[field], msg)
 	return e

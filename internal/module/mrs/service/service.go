@@ -21,3 +21,7 @@ func NewMRSService(repo ports.MRSRepository) *mrsService {
 func (s *mrsService) GetMRSs(ctx context.Context, req *entity.GetMRSsRequest) (entity.GetMRSsResponse, error) {
 	return s.repo.GetMRSs(ctx, req)
 }
+
+func (s *mrsService) RenewWAC(ctx context.Context, req *entity.RenewWACRequest) error {
+	return s.repo.RenewWAC(ctx, req)
+}
