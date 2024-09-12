@@ -224,7 +224,7 @@ func (r *mrsRepository) updateFollowUpDeadline(
 				walk_around_checks
 			SET
 				is_needs_follow_up = TRUE,
-				follow_up_at = NOW() + INTERVAL '7 day',
+				follow_up_at = follow_up_at + INTERVAL '7 day',
 				updated_at = NOW()
 			WHERE
 				id = ?
