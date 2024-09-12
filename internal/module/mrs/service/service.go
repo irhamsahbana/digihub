@@ -25,3 +25,7 @@ func (s *mrsService) GetMRSs(ctx context.Context, req *entity.GetMRSsRequest) (e
 func (s *mrsService) RenewWAC(ctx context.Context, req *entity.RenewWACRequest) error {
 	return s.repo.RenewWAC(ctx, req)
 }
+
+func (s *mrsService) DeleteFollowUp(ctx context.Context, req *entity.DeleteFollowUpRequest) error {
+	return s.repo.DeleteFollowUp(ctx, req)
+}

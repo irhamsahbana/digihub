@@ -33,11 +33,12 @@ func NewMRSHandler() *mrsHandler {
 func (h *mrsHandler) Register(router fiber.Router) {
 	mrs := router.Group("/mrs", m.AuthBearer, m.AuthRole([]string{"technician"}))
 
-	mrs.Get("/processes", h.GetMRSs)
-	mrs.Patch("/processes/:id", h.RenewWAC)
+	mrs.Get("/processes", h.getMRSs)
+	mrs.Patch("/processes/:id", h.renewOffer)
+	mrs.Delete("/processes/:id", h.deleteFollowUp)
 }
 
-func (h *mrsHandler) GetMRSs(c *fiber.Ctx) error {
+func (h *mrsHandler) getMRSs(c *fiber.Ctx) error {
 	var (
 		req = new(entity.GetMRSsRequest)
 		ctx = c.Context()
@@ -68,7 +69,7 @@ func (h *mrsHandler) GetMRSs(c *fiber.Ctx) error {
 	return c.JSON(response.Success(resp, ""))
 }
 
-func (h *mrsHandler) RenewWAC(c *fiber.Ctx) error {
+func (h *mrsHandler) renewOffer(c *fiber.Ctx) error {
 	var (
 		req = new(entity.RenewWACRequest)
 		ctx = c.Context()
@@ -96,4 +97,29 @@ func (h *mrsHandler) RenewWAC(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(response.Success(nil, "Berhasil memperbarui Penawaran"))
+}
+
+func (h *mrsHandler) deleteFollowUp(c *fiber.Ctx) error {
+	var (
+		req = new(entity.DeleteFollowUpRequest)
+		ctx = c.Context()
+		v   = adapter.Adapters.Validator
+		l   = m.GetLocals(c)
+	)
+
+	req.UserId = l.GetUserId()
+	req.WacId = c.Params("id")
+
+	if err := v.Validate(req); err != nil {
+		log.Warn().Err(err).Any("payload", req).Msg("handler::DeleteFollowUp - Invalid request payload")
+		code, errs := errmsg.Errors(err, req)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	if err := h.service.DeleteFollowUp(ctx, req); err != nil {
+		code, errs := errmsg.Errors[error](err)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	return c.JSON(response.Success(nil, "Berhasil menghapus Follow Up"))
 }

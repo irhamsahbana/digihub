@@ -38,3 +38,8 @@ type RenewWACRequest struct {
 	WacId               string   `params:"id" validate:"ulid"`
 	VehicleConditionIds []string `json:"vehicle_condition_ids" validate:"required,dive,ulid"`
 }
+
+type DeleteFollowUpRequest struct {
+	UserId string
+	WacId  string `params:"id" validate:"ulid"`
+}
