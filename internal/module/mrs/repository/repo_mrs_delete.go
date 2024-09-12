@@ -48,6 +48,7 @@ func (r *mrsRepository) DeleteFollowUp(ctx context.Context, req *entity.DeleteFo
 			walk_around_checks
 		SET
 			is_needs_follow_up = FALSE,
+			is_followed_up = TRUE,
 			total_follow_ups = 0,
 			updated_at = NOW()
 		WHERE

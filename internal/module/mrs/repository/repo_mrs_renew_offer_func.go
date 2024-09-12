@@ -243,15 +243,16 @@ func (r *mrsRepository) removeWACFromFollowUpList(
 	WACId string,
 ) error {
 	query := `
-				UPDATE
-					walk_around_checks
-				SET
-					is_needs_follow_up = FALSE,
-					follow_up_at = NULL,
-					updated_at = NOW()
-				WHERE
-					id = ?
-			`
+		UPDATE
+			walk_around_checks
+		SET
+			is_needs_follow_up = FALSE,
+			is_followed_up = TRUE,
+			follow_up_at = NULL,
+			updated_at = NOW()
+		WHERE
+			id = ?
+	`
 
 	_, err := tx.ExecContext(ctx, tx.Rebind(query), WACId)
 	if err != nil {
