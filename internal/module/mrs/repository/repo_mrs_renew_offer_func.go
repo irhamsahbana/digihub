@@ -195,7 +195,7 @@ func (r *mrsRepository) ExtendFollowUpAndRecountingTotalFollowUps(
 		updated_at = NOW(),
 		total_follow_ups = (
 			SELECT
-				COUNT(wacc.id)
+				COUNT(*)
 			FROM
 				walk_around_check_conditions wacc
 			WHERE
