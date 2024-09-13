@@ -10,10 +10,24 @@ type WACSummaryRequest struct {
 type WACSummaryResponse struct {
 	Month                  string         `json:"month"`
 	WACCounts              int            `json:"wac_counts" db:"wac_counts"`
+	TotalWACOnOffered      int            `json:"total_wac_on_offered" db:"total_wac_on_offered"`
 	TotalLeadDistributions int            `json:"total_lead_distributions" db:"total_lead_distributions"`
 	Summaries              []Summary      `json:"summaries"`
 	DistributionOfLeads    []Distribution `json:"distribution_of_leads"`
 	ServiceTrends          []Trend        `json:"service_trends"`
+	Tiers                  Tier           `json:"tiers"`
+	Promotions             []Promotion    `json:"promotions"`
+}
+
+type Tier struct {
+	Current string  `json:"current_tier"`
+	Next    *string `json:"next_tier"`
+	Revenue float64 `json:"revenue"`
+}
+
+type Promotion struct {
+	Id    string `json:"id"`
+	Image string `json:"image"`
 }
 
 type Summary struct {

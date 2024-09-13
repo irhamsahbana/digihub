@@ -3,9 +3,11 @@ package repository
 import (
 	"codebase-app/internal/module/dashboard/entity"
 	"context"
+	"net/url"
 	"strings"
 	"unicode"
 
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/rs/zerolog/log"
 )
 
@@ -29,6 +31,16 @@ func (r *dashboardRepository) GetWACSummary(ctx context.Context, req *entity.WAC
 		return res, err
 	}
 
+	err = r.summaryTiers(ctx, req, &res)
+	if err != nil {
+		return res, err
+	}
+
+	err = r.summaryPromotions(ctx, req, &res)
+	if err != nil {
+		return res, err
+	}
+
 	// get walk around check summary per area in percentage
 	r.summaryLeadsDistribution(&res)
 
@@ -44,7 +56,9 @@ func (r *dashboardRepository) GetWACSummary(ctx context.Context, req *entity.WAC
 func (r *dashboardRepository) summaryWACCount(ctx context.Context, req *entity.WACSummaryRequest, res *entity.WACSummaryResponse) error {
 	query := `
 		SELECT
-			COUNT(wac.id) AS wac_counts
+			COUNT(wac.id) AS wac_counts,
+			COALESCE(SUM(CASE WHEN wac.status = 'offered' THEN 1 ELSE 0 END), 0)
+				AS total_wac_on_offered
 		FROM
 			walk_around_checks wac
 		WHERE
@@ -52,7 +66,7 @@ func (r *dashboardRepository) summaryWACCount(ctx context.Context, req *entity.W
 			AND TO_CHAR(wac.created_at AT TIME ZONE 'Asia/Makassar', 'YYYY-MM') = ?
 	`
 
-	err := r.db.QueryRowxContext(ctx, r.db.Rebind(query), req.UserId, req.Month).Scan(&res.WACCounts)
+	err := r.db.QueryRowxContext(ctx, r.db.Rebind(query), req.UserId, req.Month).Scan(&res.WACCounts, &res.TotalWACOnOffered)
 	if err != nil {
 		log.Error().Err(err).Any("payload", req).Msg("repo::GetWACSummary - failed to get wac summary")
 		return err
@@ -295,4 +309,96 @@ func (r *dashboardRepository) summaryWACArea(ctx context.Context, req *entity.WA
 	}
 
 	return nil
+}
+
+func (r *dashboardRepository) summaryTiers(ctx context.Context, req *entity.WACSummaryRequest, res *entity.WACSummaryResponse) error {
+	var (
+		currentYear            = res.Month[:4]
+		totalRevenueNotUsedCar float64
+		totalRevenueUsedCar    float64
+		currentTier            string
+		nextTier               *string
+	)
+
+	query := `
+		SELECT
+			COALESCE(SUM(CASE WHEN wac.status = 'completed' THEN wacc.revenue ELSE 0 END), 0) AS revenue
+		FROM
+			walk_around_check_conditions wacc
+		LEFT JOIN
+			walk_around_checks wac
+			ON wac.id = wacc.walk_around_check_id
+		WHERE
+			wac.user_id = ?
+			AND TO_CHAR(wac.created_at AT TIME ZONE 'Asia/Makassar', 'YYYY') = ?
+	`
+
+	err := r.db.QueryRowxContext(ctx, r.db.Rebind(query), req.UserId, currentYear).Scan(&totalRevenueNotUsedCar)
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::GetWACSummary - failed to get wac summary")
+		return err
+	}
+
+	query = `
+		SELECT
+			COALESCE(
+				SUM(
+					CASE
+						WHEN
+							wac.status = 'completed'
+							AND is_used_car = TRUE
+						THEN wac.revenue
+						ELSE 0
+					END),
+			0) AS revenue
+		FROM
+			walk_around_checks wac
+		WHERE
+			wac.user_id = ?
+			AND TO_CHAR(wac.created_at AT TIME ZONE 'Asia/Makassar', 'YYYY') = ?
+	`
+
+	err = r.db.QueryRowxContext(ctx, r.db.Rebind(query), req.UserId, currentYear).Scan(&totalRevenueUsedCar)
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::GetWACSummary - failed to get wac summary")
+		return err
+	}
+
+	totalRevenue := totalRevenueNotUsedCar + totalRevenueUsedCar
+	if totalRevenue >= 20000000 {
+		currentTier = "platinum"
+	} else if totalRevenue >= 10000000 {
+		currentTier = "gold"
+		nextTier = stringPointer("platinum")
+	} else {
+		currentTier = "silver"
+		nextTier = stringPointer("gold")
+	}
+
+	res.Tiers = entity.Tier{
+		Current: currentTier,
+		Next:    nextTier,
+		Revenue: totalRevenue,
+	}
+
+	return nil
+}
+
+func (r *dashboardRepository) summaryPromotions(ctx context.Context, req *entity.WACSummaryRequest, res *entity.WACSummaryResponse) error {
+	promotions := make([]entity.Promotion, 4, 5)
+
+	for i := 0; i < len(promotions); i++ {
+		promotions[i] = entity.Promotion{
+			Id:    gofakeit.UUID(),
+			Image: "https://fakeimg.pl/440x320/?text=" + url.QueryEscape(gofakeit.Sentence(2)),
+		}
+	}
+
+	res.Promotions = promotions
+
+	return nil
+}
+
+func stringPointer(s string) *string {
+	return &s
 }
