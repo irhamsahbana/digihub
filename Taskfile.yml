@@ -44,6 +44,16 @@ tasks:
       # - immortal -c ../binaries/digihub-dev/digihub-dev.yaml
       - immortalctl start digihub-dev
       - immortalctl status
+  build-staging:
+    cmds:
+      - git pull
+      - go build -o ./digihub-app ./cmd/bin/main.go
+      - immortalctl stop digihub-staging
+      # - immortalctl halt digihub-staging
+      - mv ./digihub-app ../binaries/digihub-staging
+      # - immortal -c ../binaries/digihub-staging/digihub-staging.yaml
+      - immortalctl start digihub-staging
+      - immortalctl status
   lint-fix:
     cmds:
       - gofmt -w .
