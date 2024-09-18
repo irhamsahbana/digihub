@@ -37,6 +37,12 @@ func (h *commonHandler) Register(router fiber.Router) {
 	master.Get("/vehicle-types", h.GetVehicleTypes)
 	master.Get("/employees", h.GetEmployees)
 	master.Get("/branches", h.GetBranches)
+
+	master.Get("/hi-trade-in/brands", h.GetHTIBrands)
+	master.Get("/hi-trade-in/models", h.GetHTIModels)
+	master.Get("/hi-trade-in/types", h.GetHTITypes)
+	master.Get("/hi-trade-in/years", h.GetHTIYears)
+	master.Get("/hi-trade-in/purchases", h.GetHTIPurchases)
 }
 
 func (h *commonHandler) GetAreas(c *fiber.Ctx) error {
@@ -128,6 +134,124 @@ func (h *commonHandler) GetBranches(c *fiber.Ctx) error {
 	}
 
 	result, err := h.service.GetBranches(ctx, req)
+	if err != nil {
+		code, errs := errmsg.Errors[error](err)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	return c.JSON(response.Success(result, ""))
+}
+
+func (h *commonHandler) GetHTIBrands(c *fiber.Ctx) error {
+	result, err := h.service.GetHTIBrands(c.Context())
+	if err != nil {
+		code, errs := errmsg.Errors[error](err)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	return c.JSON(response.Success(result, ""))
+}
+
+func (h *commonHandler) GetHTIModels(c *fiber.Ctx) error {
+	var (
+		req = new(entity.GetHTIModelsRequest)
+		ctx = c.Context()
+		v   = adapter.Adapters.Validator
+	)
+
+	if err := c.QueryParser(req); err != nil {
+		log.Error().Err(err).Msg("handler::GetHTIModels - Failed to parse request")
+		return c.Status(fiber.StatusBadRequest).JSON(response.Error(err))
+	}
+
+	if err := v.Validate(req); err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("handler::GetHTIModels - Invalid request")
+		code, errs := errmsg.Errors(err, req)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	result, err := h.service.GetHTIModels(ctx, req)
+	if err != nil {
+		code, errs := errmsg.Errors[error](err)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	return c.JSON(response.Success(result, ""))
+}
+
+func (h *commonHandler) GetHTITypes(c *fiber.Ctx) error {
+	var (
+		req = new(entity.GetHTITypesRequest)
+		ctx = c.Context()
+		v   = adapter.Adapters.Validator
+	)
+
+	if err := c.QueryParser(req); err != nil {
+		log.Error().Err(err).Msg("handler::GetHTITypes - Failed to parse request")
+		return c.Status(fiber.StatusBadRequest).JSON(response.Error(err))
+	}
+
+	if err := v.Validate(req); err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("handler::GetHTITypes - Invalid request")
+		code, errs := errmsg.Errors(err, req)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	result, err := h.service.GetHTITypes(ctx, req)
+	if err != nil {
+		code, errs := errmsg.Errors[error](err)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	return c.JSON(response.Success(result, ""))
+}
+
+func (h *commonHandler) GetHTIYears(c *fiber.Ctx) error {
+	var (
+		req = new(entity.GetHTIYearsRequest)
+		ctx = c.Context()
+		v   = adapter.Adapters.Validator
+	)
+
+	if err := c.QueryParser(req); err != nil {
+		log.Error().Err(err).Msg("handler::GetHTIYears - Failed to parse request")
+		return c.Status(fiber.StatusBadRequest).JSON(response.Error(err))
+	}
+
+	if err := v.Validate(req); err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("handler::GetHTIYears - Invalid request")
+		code, errs := errmsg.Errors(err, req)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	result, err := h.service.GetHTIYears(ctx, req)
+	if err != nil {
+		code, errs := errmsg.Errors[error](err)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	return c.JSON(response.Success(result, ""))
+}
+
+func (h *commonHandler) GetHTIPurchases(c *fiber.Ctx) error {
+	var (
+		req = new(entity.GetHTIPurchaseRequest)
+		ctx = c.Context()
+		v   = adapter.Adapters.Validator
+	)
+
+	if err := c.QueryParser(req); err != nil {
+		log.Error().Err(err).Msg("handler::GetHTIPurchases - Failed to parse request")
+		return c.Status(fiber.StatusBadRequest).JSON(response.Error(err))
+	}
+
+	if err := v.Validate(req); err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("handler::GetHTIPurchases - Invalid request")
+		code, errs := errmsg.Errors(err, req)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	result, err := h.service.GetHTIPurchase(ctx, req)
 	if err != nil {
 		code, errs := errmsg.Errors[error](err)
 		return c.Status(code).JSON(response.Error(errs))

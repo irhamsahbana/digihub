@@ -70,3 +70,23 @@ func (s *commonService) GetEmployees(ctx context.Context, req *entity.GetEmploye
 
 	return resp, nil
 }
+
+func (s *commonService) GetHTIBrands(ctx context.Context) ([]entity.CommonResponse, error) {
+	return s.repo.GetHTIBrands(ctx)
+}
+
+func (s *commonService) GetHTIModels(ctx context.Context, req *entity.GetHTIModelsRequest) ([]entity.CommonResponse, error) {
+	return s.repo.GetHTIModels(ctx, req)
+}
+
+func (s *commonService) GetHTITypes(ctx context.Context, req *entity.GetHTITypesRequest) ([]entity.CommonResponse, error) {
+	return s.repo.GetHTITypes(ctx, req)
+}
+
+func (s *commonService) GetHTIYears(ctx context.Context, req *entity.GetHTIYearsRequest) ([]entity.CommonResponse, error) {
+	return s.repo.GetHTIYears(ctx, req)
+}
+
+func (s *commonService) GetHTIPurchase(ctx context.Context, req *entity.GetHTIPurchaseRequest) (entity.GetHTIPurchaseResponse, error) {
+	return s.repo.GetHTIPurchase(ctx, req)
+}

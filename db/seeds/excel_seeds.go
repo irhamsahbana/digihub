@@ -67,6 +67,11 @@ func SeedExcel(db *sqlx.DB, sheetName string) error {
 		if errSeed != nil {
 			return errSeed
 		}
+	case "trade_in_trends":
+		errSeed = excelSeeder.SeedTradeInTrends(tx)
+		if errSeed != nil {
+			return errSeed
+		}
 	case "users":
 		errSeed = excelSeeder.SeedUsers(tx)
 		if errSeed != nil {
@@ -643,6 +648,65 @@ func (s *excelSeed) SeedUsers(tx *sqlx.Tx) error {
 	}
 
 	log.Info().Msg("users seeded successfully!")
+
+	return nil
+}
+
+func (s *excelSeed) SeedTradeInTrends(tx *sqlx.Tx) error {
+	rows, err := s.file.GetRows("hi_trade_in")
+	if err != nil {
+		log.Error().Err(err).Msg("failed to get rows from excel")
+		return err
+	}
+
+	for i, row := range rows {
+		if i == 0 { // skip header
+			continue
+		}
+
+		var (
+			brand = strings.ToUpper(strings.Trim(row[1], " "))
+			model = strings.ToUpper(strings.Trim(row[2], " "))
+			type_ = strings.ToUpper(strings.Trim(row[3], " "))
+		)
+
+		// try to convert string to int
+		year, err := strconv.Atoi(row[4])
+		if err != nil {
+			log.Error().Err(err).Msg("failed to convert year to int")
+			return err
+		}
+
+		minPurchase, err := strconv.Atoi(row[5])
+		if err != nil {
+			log.Error().Err(err).Msg("failed to convert min purchase to int")
+			return err
+		}
+
+		maxPurchase, err := strconv.Atoi(row[6])
+		if err != nil {
+			log.Error().Err(err).Msg("failed to convert max purchase to int")
+			return err
+		}
+
+		// on conflict do update min_purchase and max_purchase
+		query := `
+			INSERT INTO trade_in_trends (brand, model, type, year, min_purchase, max_purchase)
+			VALUES (?, ?, ?, ?, ?, ?)
+			ON CONFLICT (brand, model, type, year)
+			DO UPDATE SET min_purchase = ?, max_purchase = ?, created_at = NOW()
+			`
+		_, err = tx.Exec(s.db.Rebind(query),
+			brand, model, type_, year, minPurchase, maxPurchase,
+			minPurchase, maxPurchase,
+		)
+		if err != nil {
+			log.Error().Err(err).Msg("failed to insert hi tread in trend")
+			return err
+		}
+	}
+
+	log.Info().Msg("hi tread in trends seeded successfully!")
 
 	return nil
 }

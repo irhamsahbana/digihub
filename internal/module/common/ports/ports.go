@@ -12,6 +12,12 @@ type CommonRepository interface {
 
 	GetEmployees(ctx context.Context, req *entity.GetEmployeesRequest) (entity.GetEmployeesResult, error)
 	GetBranches(ctx context.Context, req *entity.GetBranchesRequest) (entity.GetBranchesResponse, error)
+
+	GetHTIBrands(ctx context.Context) ([]entity.CommonResponse, error)
+	GetHTIModels(ctx context.Context, req *entity.GetHTIModelsRequest) ([]entity.CommonResponse, error)
+	GetHTITypes(ctx context.Context, req *entity.GetHTITypesRequest) ([]entity.CommonResponse, error)
+	GetHTIYears(ctx context.Context, req *entity.GetHTIYearsRequest) ([]entity.CommonResponse, error)
+	GetHTIPurchase(ctx context.Context, req *entity.GetHTIPurchaseRequest) (entity.GetHTIPurchaseResponse, error)
 }
 
 type CommonService interface {
@@ -21,4 +27,10 @@ type CommonService interface {
 
 	GetEmployees(ctx context.Context, req *entity.GetEmployeesRequest) (entity.GetEmployeesResponse, error)
 	GetBranches(ctx context.Context, req *entity.GetBranchesRequest) (entity.GetBranchesResponse, error)
+
+	GetHTIBrands(ctx context.Context) ([]entity.CommonResponse, error)
+	GetHTIModels(ctx context.Context, req *entity.GetHTIModelsRequest) ([]entity.CommonResponse, error)
+	GetHTITypes(ctx context.Context, req *entity.GetHTITypesRequest) ([]entity.CommonResponse, error)
+	GetHTIYears(ctx context.Context, req *entity.GetHTIYearsRequest) ([]entity.CommonResponse, error)
+	GetHTIPurchase(ctx context.Context, req *entity.GetHTIPurchaseRequest) (entity.GetHTIPurchaseResponse, error)
 }
