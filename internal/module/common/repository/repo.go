@@ -166,6 +166,8 @@ func (r *commonRepository) GetVehicleTypes(ctx context.Context) ([]entity.Common
 			id, name
 		FROM
 			vehicle_types
+		ORDER BY
+			name ASC
 	`
 
 	err := r.db.SelectContext(ctx, &result, query)

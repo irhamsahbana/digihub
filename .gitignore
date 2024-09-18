@@ -1,5 +1,6 @@
 # files to ignore
 .env
+~$seeds.xlsx
 digihub-app
 
 # directories to ignore
