@@ -40,6 +40,8 @@ func (r *commonRepository) GetBranches(ctx context.Context, req *entity.GetBranc
 			id, name
 		FROM
 			branches
+		ORDER BY
+			name ASC
 		LIMIT ? OFFSET ?
 	`
 
