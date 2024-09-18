@@ -20,7 +20,8 @@ tasks:
       - migrate create -ext sql -dir db/migrations/ {{.name}} -tz UTC
   seed:
     cmds:
-      - go run ./cmd/bin/main.go seed -total={{.total}} -table={{.table}}
+      # - go run ./cmd/bin/main.go seed -total={{.total}} -table={{.table}}
+      - go run ./cmd/bin/main.go seed -table={{.table}}
   dev:
     cmds:
       - go run ./cmd/bin/main.go

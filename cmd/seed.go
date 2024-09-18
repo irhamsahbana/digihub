@@ -11,7 +11,7 @@ import (
 func RunSeed(cmd *flag.FlagSet, args []string) {
 	var (
 		table = cmd.String("table", "", "seed to run")
-		total = cmd.Int("total", 1, "total of records to seed")
+		// total = cmd.Int("total", 1, "total of records to seed")
 	)
 
 	if err := cmd.Parse(args); err != nil {
@@ -27,5 +27,7 @@ func RunSeed(cmd *flag.FlagSet, args []string) {
 		}
 	}()
 
-	seeds.Execute(adapter.Adapters.DigihubPostgres, *table, *total)
+	// seeds.Execute(adapter.Adapters.DigihubPostgres, *table, *total)
+
+	seeds.SeedExcel(adapter.Adapters.DigihubPostgres, *table)
 }
