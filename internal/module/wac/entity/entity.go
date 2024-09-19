@@ -44,3 +44,13 @@ type AssigneedUser struct {
 	Branch Common `json:"branch"`
 	User   Common `json:"user"`
 }
+
+type GetWACPDFLinkRequest struct {
+	Id string `params:"id" validate:"required,ulid"`
+}
+
+type GetWACPDFLinkResponse struct {
+	Link      string `json:"link"`
+	Expires   int64  `json:"expires"`
+	Signature string `json:"signature"`
+}

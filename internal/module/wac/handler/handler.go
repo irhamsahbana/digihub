@@ -2,6 +2,7 @@ package handler
 
 import (
 	"codebase-app/internal/adapter"
+	"codebase-app/internal/infrastructure/config"
 	integstorage "codebase-app/internal/integration/localstorage"
 	m "codebase-app/internal/middleware"
 	"codebase-app/internal/module/wac/entity"
@@ -10,6 +11,8 @@ import (
 	"codebase-app/internal/module/wac/service"
 	"codebase-app/pkg/errmsg"
 	"codebase-app/pkg/response"
+	"codebase-app/pkg/security"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
@@ -54,6 +57,9 @@ func (h *wachHandler) Register(router fiber.Router) {
 
 	wac.Get("/documents", h.getWACs)
 	wac.Get("/documents/:id", h.getWAC)
+	wac.Get("/documents/:id/generate-pdf-signature", h.getWACPDFSignature)
+	router.Get("/wac/documents/:id/pdf", m.ValidateSignedURL, h.getWAC)
+
 }
 
 func (h *wachHandler) createWAC(c *fiber.Ctx) error {
@@ -233,6 +239,30 @@ func (h *wachHandler) AddRevenues(c *fiber.Ctx) error {
 	if err != nil {
 		code, errs := errmsg.Errors[error](err)
 		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(response.Success(resp, ""))
+}
+
+func (h *wachHandler) getWACPDFSignature(c *fiber.Ctx) error {
+	var (
+		req           = new(entity.GetWACPDFLinkRequest)
+		v             = adapter.Adapters.Validator
+		baseUrl       = config.Envs.App.BaseURL
+		sharedLinkExp = time.Duration(config.Envs.Guard.SharedLinkExp)
+	)
+
+	req.Id = c.Params("id")
+
+	if err := v.Validate(req); err != nil {
+		log.Warn().Err(err).Any("payload", req).Msg("handler::getWACPDFLink - Invalid input")
+		code, errs := errmsg.Errors(err, req)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	resp, err := security.GenerateSignedURL(baseUrl+"/api/wac/documents/"+req.Id+"/pdf", sharedLinkExp*time.Minute)
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("handler::getWACPDFLink - Failed to generate signed URL")
 	}
 
 	return c.Status(fiber.StatusOK).JSON(response.Success(resp, ""))
