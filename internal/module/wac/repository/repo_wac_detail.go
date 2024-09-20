@@ -16,6 +16,8 @@ func (r *wacRepository) GetWAC(ctx context.Context, req *entity.GetWACRequest) (
 	type dao struct {
 		Id          string  `db:"id"`
 		ClientName  string  `db:"client_name"`
+		SAName      string  `db:"service_advisor_name"`
+		BranchName  string  `db:"branch_name"`
 		VLicenseNum string  `db:"vehicle_license_number"`
 		VTypeId     string  `db:"vehicle_type_id"`
 		VTypeName   string  `db:"vehicle_type_name"`
@@ -56,6 +58,8 @@ func (r *wacRepository) GetWAC(ctx context.Context, req *entity.GetWACRequest) (
 		SELECT
 			wac.id,
 			c.name AS client_name,
+			u.name AS service_advisor_name,
+			b.name AS branch_name,
 			c.vehicle_license_number,
 			vt.id AS vehicle_type_id,
 			vt.name AS vehicle_type_name,
@@ -70,6 +74,10 @@ func (r *wacRepository) GetWAC(ctx context.Context, req *entity.GetWACRequest) (
 			wac.status
 		FROM
 			walk_around_checks wac
+		LEFT JOIN
+			users u ON u.id = wac.user_id
+		LEFT JOIN
+			branches b ON b.id = u.branch_id
 		LEFT JOIN
 			clients c ON c.id = wac.client_id
 		LEFT JOIN
@@ -130,6 +138,8 @@ func (r *wacRepository) GetWAC(ctx context.Context, req *entity.GetWACRequest) (
 
 	res.Id = data.Id
 	res.ClientName = data.ClientName
+	res.SAName = data.SAName
+	res.BranchName = data.BranchName
 	res.VehicleLicenseNumber = data.VLicenseNum
 	res.WhatsappNumber = data.ClientWANum
 	res.IsUsedCar = data.IsUsedCar

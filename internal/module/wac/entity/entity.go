@@ -17,6 +17,8 @@ type GetWACRequest struct {
 type GetWACResponse struct {
 	Id                   string       `json:"id"`
 	ClientName           string       `json:"client_name"`
+	SAName               string       `json:"service_advisor_name"`
+	BranchName           string       `json:"branch_name"`
 	VehicleLicenseNumber string       `json:"vehicle_license_number"`
 	WhatsappNumber       string       `json:"whatsapp_number"`
 	IsUsedCar            bool         `json:"is_used_car"`
