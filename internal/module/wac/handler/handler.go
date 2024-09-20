@@ -32,6 +32,8 @@ func NewWacHandler(storage integstorage.LocalStorageContract) *wachHandler {
 }
 
 func (h *wachHandler) Register(router fiber.Router) {
+	router.Get("/wac/documents/:id/pdf", m.ValidateSignedURL, h.getWAC)
+
 	wac := router.Group("/wac", m.AuthBearer)
 
 	wac.Post("/documents",
@@ -58,7 +60,6 @@ func (h *wachHandler) Register(router fiber.Router) {
 	wac.Get("/documents", h.getWACs)
 	wac.Get("/documents/:id", h.getWAC)
 	wac.Get("/documents/:id/generate-pdf-signature", h.getWACPDFSignature)
-	router.Get("/wac/documents/:id/pdf", m.ValidateSignedURL, h.getWAC)
 
 }
 
