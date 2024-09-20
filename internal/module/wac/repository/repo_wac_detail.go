@@ -14,19 +14,20 @@ import (
 
 func (r *wacRepository) GetWAC(ctx context.Context, req *entity.GetWACRequest) (entity.GetWACResponse, error) {
 	type dao struct {
-		Id          string  `db:"id"`
-		ClientName  string  `db:"client_name"`
-		SAName      string  `db:"service_advisor_name"`
-		BranchName  string  `db:"branch_name"`
-		VLicenseNum string  `db:"vehicle_license_number"`
-		VTypeId     string  `db:"vehicle_type_id"`
-		VTypeName   string  `db:"vehicle_type_name"`
-		ClientWANum string  `db:"whatsapp_number"`
-		IsUsedCar   bool    `db:"is_used_car"`
-		IsOffered   bool    `db:"is_offered"`
-		InvoiceNum  *string `db:"invoice_number"`
-		Revenue     float64 `db:"revenue"`
-		Status      string  `db:"status"`
+		Id          string    `db:"id"`
+		ClientName  string    `db:"client_name"`
+		SAName      string    `db:"service_advisor_name"`
+		BranchName  string    `db:"branch_name"`
+		VLicenseNum string    `db:"vehicle_license_number"`
+		VTypeId     string    `db:"vehicle_type_id"`
+		VTypeName   string    `db:"vehicle_type_name"`
+		ClientWANum string    `db:"whatsapp_number"`
+		IsUsedCar   bool      `db:"is_used_car"`
+		IsOffered   bool      `db:"is_offered"`
+		InvoiceNum  *string   `db:"invoice_number"`
+		Revenue     float64   `db:"revenue"`
+		Status      string    `db:"status"`
+		CreatedAt   time.Time `db:"created_at"`
 	}
 
 	type daoVCondition struct {
@@ -71,7 +72,8 @@ func (r *wacRepository) GetWAC(ctx context.Context, req *entity.GetWACRequest) (
 			END AS is_offered,
 			wac.invoice_number,
 			wac.revenue,
-			wac.status
+			wac.status,
+			wac.created_at
 		FROM
 			walk_around_checks wac
 		LEFT JOIN
@@ -149,6 +151,7 @@ func (r *wacRepository) GetWAC(ctx context.Context, req *entity.GetWACRequest) (
 	res.Status = data.Status
 	res.VehicleType.Id = data.VTypeId
 	res.VehicleType.Name = data.VTypeName
+	res.CreatedAt = data.CreatedAt
 
 	for _, vc := range datavc {
 		var (

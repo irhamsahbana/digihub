@@ -1,5 +1,7 @@
 package entity
 
+import "time"
+
 type Common struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
@@ -26,6 +28,7 @@ type GetWACResponse struct {
 	InvoiceNumber        *string      `json:"invoice_number"`
 	Revenue              float64      `json:"revenue"`
 	Status               string       `json:"status"`
+	CreatedAt            time.Time    `json:"created_at"`
 	VehicleType          Common       `json:"vehicle_type"`
 	VehicleConditions    []VCondition `json:"vehicle_conditions"`
 }
