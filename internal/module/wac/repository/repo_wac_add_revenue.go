@@ -217,13 +217,26 @@ func (r *wacRepository) AddRevenues(ctx context.Context, req *entity.AddWACReven
 			UPDATE
 				walk_around_checks
 			SET
+				revenue = COALESCE(
+					(
+						SELECT
+							SUM(revenue)
+						FROM
+							walk_around_check_conditions
+						WHERE
+							walk_around_check_id = ?
+							AND is_interested = TRUE
+							AND invoice_number IS NOT NULL
+					),
+					0
+				),
 				status = 'completed',
 				updated_at = NOW()
 			WHERE
 				id = ?
 		`
 
-		_, err = tx.ExecContext(ctx, r.db.Rebind(query), req.Id)
+		_, err = tx.ExecContext(ctx, r.db.Rebind(query), req.Id, req.Id)
 		if err != nil {
 			log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenues - failed to update status")
 			return err
@@ -293,6 +306,32 @@ func (r *wacRepository) AddRevenues(ctx context.Context, req *entity.AddWACReven
 				log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenues - failed to create log")
 				return err
 			}
+		}
+
+		// create activity
+		query = `
+			SELECT
+				user_id,
+				total_potential_leads,
+				total_leads,
+				total_leads AS total_leads_completed,
+				revenue AS total_revenue
+			FROM
+				walk_around_checks
+			WHERE
+				id = ?
+		`
+
+		var a activity
+		err = tx.GetContext(ctx, &a, r.db.Rebind(query), req.Id)
+		if err != nil {
+			log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenues - failed to get walk around check record")
+			return err
+		}
+
+		err = r.addActivity(ctx, tx, a)
+		if err != nil {
+			return err
 		}
 	}
 
