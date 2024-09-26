@@ -15,7 +15,7 @@ type activity struct {
 	TotalPotentialLeads int     `db:"total_potential_leads"`
 	TotalLeads          int     `db:"total_leads"`
 	TotalCompletedLeads int     `db:"total_completed_leads"`
-	TotalRevenue        []uint8 `db:"total_revenue"`
+	TotalRevenue        float64 `db:"total_revenue"`
 }
 
 func (r *wacRepository) addActivity(ctx context.Context, tx *sqlx.Tx, a activity) error {

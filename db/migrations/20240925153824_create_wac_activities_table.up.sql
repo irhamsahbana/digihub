@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS wac_activities (
     total_potential_leads INT NOT NULL DEFAULT 0,
     total_leads INT NOT NULL DEFAULT 0,
     total_completed_leads INT NOT NULL DEFAULT 0,
-    total_revenue INT NOT NULL DEFAULT 0,
+    total_revenue DECIMAL(19, 4) NOT NULL DEFAULT 0.0000,
 
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
