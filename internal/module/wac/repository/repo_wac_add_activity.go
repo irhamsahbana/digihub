@@ -9,7 +9,7 @@ import (
 )
 
 type activity struct {
-	WacId               string  `db:"id"`
+	WacId               string  `db:"wac_id"`
 	UserId              string  `db:"user_id"`
 	Status              string  `db:"status"`
 	TotalPotentialLeads int     `db:"total_potential_leads"`
