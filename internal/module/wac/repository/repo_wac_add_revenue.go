@@ -311,6 +311,7 @@ func (r *wacRepository) AddRevenues(ctx context.Context, req *entity.AddWACReven
 		// create activity
 		query = `
 			SELECT
+				id AS wac_id,
 				user_id,
 				total_potential_leads,
 				total_leads,
