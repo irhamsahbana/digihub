@@ -9,5 +9,5 @@ CREATE TABLE IF NOT EXISTS clients (
     deleted_at TIMESTAMP WITH TIME ZONE,
 
     FOREIGN KEY (vehicle_type_id) REFERENCES vehicle_types (id),
-    UNIQUE (vehicle_license_number)
+    UNIQUE (vehicle_license_number, name)
 );

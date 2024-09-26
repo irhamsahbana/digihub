@@ -599,6 +599,8 @@ func (s *excelSeed) SeedUsers(tx *sqlx.Tx) error {
 			RoleName = "service_advisor"
 		case "MRA":
 			RoleName = "technician"
+		case "ADMIN":
+			RoleName = "admin"
 		}
 
 		// bcrypt password
@@ -626,7 +628,35 @@ func (s *excelSeed) SeedUsers(tx *sqlx.Tx) error {
 			return err
 		}
 
-		query := `
+		switch strings.ToUpper(RoleName) {
+		case "ADMIN":
+			query := `
+			INSERT INTO users (
+				id, role_id, name, email, password
+			) VALUES (
+				?,
+				(SELECT id FROM roles WHERE name = ?),
+				?,
+				?,
+				?
+			) ON CONFLICT (id) DO UPDATE SET
+				role_id = (SELECT id FROM roles WHERE name = ?),
+				name = ?,
+				email = ?,
+				password = ?
+		`
+
+			_, err = tx.Exec(s.db.Rebind(query),
+				id, RoleName, name, email, string(passwordHashed),
+				RoleName, name, email, string(passwordHashed),
+			)
+			if err != nil {
+				log.Error().Err(err).Msg("failed to insert user")
+				return err
+			}
+		default:
+			//  on conflict update
+			query := `
 			INSERT INTO users (
 				id, name, branch_id, section_id, role_id, email, password
 			) VALUES (
@@ -637,13 +667,23 @@ func (s *excelSeed) SeedUsers(tx *sqlx.Tx) error {
 				(SELECT id FROM roles WHERE name = ?),
 				?,
 				?
-			) ON CONFLICT DO NOTHING
+			) ON CONFLICT (id) DO UPDATE SET
+				name = ?,
+				branch_id = (SELECT id FROM branches WHERE UPPER(name) = UPPER(?)),
+				section_id = (SELECT id FROM potencies WHERE UPPER(name) = UPPER(?)),
+				role_id = (SELECT id FROM roles WHERE name = ?),
+				email = ?,
+				password = ?
 		`
 
-		_, err = tx.Exec(s.db.Rebind(query), id, name, branchName, sectionName, RoleName, email, string(passwordHashed))
-		if err != nil {
-			log.Error().Err(err).Msg("failed to insert user")
-			return err
+			_, err = tx.Exec(s.db.Rebind(query),
+				id, name, branchName, sectionName, RoleName, email, string(passwordHashed),
+				name, branchName, sectionName, RoleName, email, string(passwordHashed),
+			)
+			if err != nil {
+				log.Error().Err(err).Msg("failed to insert user")
+				return err
+			}
 		}
 	}
 

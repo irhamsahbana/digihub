@@ -76,26 +76,30 @@ func (r *wacRepository) CreateWAC(ctx context.Context, req *entity.CreateWACRequ
 		return result, err
 	}
 
+	// create walk around check activity
+	err = r.addActivity(ctx, tx, activity{
+		Id:                  wacId,
+		UserId:              req.UserId,
+		Status:              "offered",
+		TotalPotentialLeads: len(req.VehicleConditions),
+	})
+	if err != nil {
+		req.RemoveBase64()
+		log.Error().Err(err).Any("payload", req).Msg("repo::CreateWAC - Failed to create walk around check activity")
+		return result, err
+	}
+
 	result.Id = wacId
 	return result, nil
 }
 
 func (r *wacRepository) getClientId(ctx context.Context, tx *sqlx.Tx, req *entity.CreateWACRequest) (string, error) {
 	var clientId string
-	query := `SELECT id FROM clients WHERE vehicle_license_number = ?`
-	err := tx.GetContext(ctx, &clientId, r.db.Rebind(query), req.VehicleRegistrationNumber)
+	query := `SELECT id FROM clients WHERE vehicle_license_number = ? AND name = ?`
+	err := tx.GetContext(ctx, &clientId, r.db.Rebind(query), req.VehicleRegistrationNumber, req.Name)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			clientId = ulid.Make().String()
-			query = `
-			INSERT INTO clients (id, name, vehicle_type_id, vehicle_license_number, phone)
-			VALUES (?, ?, ?, ?, ?)`
-			_, err = tx.ExecContext(ctx, r.db.Rebind(query), clientId, req.Name, req.VehicleTypeId, req.VehicleRegistrationNumber, req.WhatsAppNumber)
-			if err != nil {
-				req.RemoveBase64()
-				log.Error().Err(err).Any("payload", req).Msg("repo::CreateWAC - Failed to create new client")
-				return "", err
-			}
+			return r.createClient(ctx, tx, req)
 		} else {
 			req.RemoveBase64()
 			log.Error().Err(err).Any("payload", req).Msg("repo::CreateWAC - Failed to get client id")
@@ -103,6 +107,21 @@ func (r *wacRepository) getClientId(ctx context.Context, tx *sqlx.Tx, req *entit
 		}
 	}
 	return clientId, nil
+}
+
+func (r *wacRepository) createClient(ctx context.Context, tx *sqlx.Tx, req *entity.CreateWACRequest) (string, error) {
+	clientId := ulid.Make().String()
+	query := `
+	INSERT INTO clients (id, name, vehicle_type_id, vehicle_license_number, phone)
+	VALUES (?, ?, ?, ?, ?)`
+	_, err := tx.ExecContext(ctx, r.db.Rebind(query), clientId, req.Name, req.VehicleTypeId, req.VehicleRegistrationNumber, req.WhatsAppNumber)
+	if err != nil {
+		req.RemoveBase64()
+		log.Error().Err(err).Any("payload", req).Msg("repo::CreateWAC - Failed to create new client")
+		return "", err
+	}
+	return clientId, nil
+
 }
 
 func (r *wacRepository) getUserData(ctx context.Context, tx *sqlx.Tx, userId string) (user, error) {
