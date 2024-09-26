@@ -324,6 +324,7 @@ func (r *wacRepository) AddRevenues(ctx context.Context, req *entity.AddWACReven
 		`
 
 		var a activity
+		a.Status = "completed"
 		err = tx.GetContext(ctx, &a, r.db.Rebind(query), req.Id)
 		if err != nil {
 			log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenues - failed to get walk around check record")
