@@ -9,13 +9,13 @@ import (
 )
 
 type activity struct {
-	WacId               string `db:"id"`
-	UserId              string `db:"user_id"`
-	Status              string `db:"status"`
-	TotalPotentialLeads int    `db:"total_potential_leads"`
-	TotalLeads          int    `db:"total_leads"`
-	TotalCompletedLeads int    `db:"total_completed_leads"`
-	TotalRevenue        int    `db:"total_revenue"`
+	WacId               string  `db:"id"`
+	UserId              string  `db:"user_id"`
+	Status              string  `db:"status"`
+	TotalPotentialLeads int     `db:"total_potential_leads"`
+	TotalLeads          int     `db:"total_leads"`
+	TotalCompletedLeads int     `db:"total_completed_leads"`
+	TotalRevenue        []uint8 `db:"total_revenue"`
 }
 
 func (r *wacRepository) addActivity(ctx context.Context, tx *sqlx.Tx, a activity) error {
