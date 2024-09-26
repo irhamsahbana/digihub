@@ -19,7 +19,7 @@ type activity struct {
 
 func (r *wacRepository) addActivity(ctx context.Context, tx *sqlx.Tx, a activity) error {
 	query := `
-		INSERT INTO activities (
+		INSERT INTO wac_activities (
 			id,
 			user_id,
 			status,
