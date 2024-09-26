@@ -98,6 +98,32 @@ func (r *wacRepository) OfferWAC(ctx context.Context, req *entity.OfferWACReques
 
 	res.Id = req.Id
 
+	// create activity
+	query = `
+		SELECT
+			user_id,
+			total_potential_leads,
+			total_leads
+		FROM
+			walk_around_checks
+		WHERE
+			id = ?
+	`
+
+	var a activity
+	a.WacId = req.Id
+	a.Status = "wip"
+	err = tx.GetContext(ctx, &a, r.db.Rebind(query), req.Id)
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::OfferWAC - Failed to get walk around check record")
+		return res, err
+	}
+
+	err = r.addActivity(ctx, tx, a)
+	if err != nil {
+		return res, err
+	}
+
 	return res, nil
 }
 

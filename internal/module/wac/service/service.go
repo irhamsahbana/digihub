@@ -77,6 +77,7 @@ func (s *wacService) OfferWAC(ctx context.Context, req *entity.OfferWACRequest) 
 	}
 
 	if !isCreator {
+		log.Warn().Any("payload", req).Msg("service::OfferWAC - You are not the creator of this walk around check")
 		return resp, errmsg.NewCustomErrors(403, errmsg.WithMessage("Anda bukan pembuat walk around check ini"))
 	}
 
@@ -86,6 +87,7 @@ func (s *wacService) OfferWAC(ctx context.Context, req *entity.OfferWACRequest) 
 	}
 
 	if !isDefaultStatus {
+		log.Warn().Any("payload", req).Msg("service::OfferWAC - Walk around check has been offered")
 		return resp, errmsg.NewCustomErrors(403, errmsg.WithMessage("Walk around check sudah ditawarkan"))
 	}
 
@@ -104,6 +106,7 @@ func (s *wacService) AddRevenue(ctx context.Context, req *entity.AddWACRevenueRe
 	}
 
 	if !isCreator {
+		log.Warn().Any("payload", req).Msg("service::AddRevenue - You are not the creator of this walk around check")
 		return resp, errmsg.NewCustomErrors(403, errmsg.WithMessage("Anda bukan pembuat walk around check ini"))
 	}
 
@@ -113,6 +116,7 @@ func (s *wacService) AddRevenue(ctx context.Context, req *entity.AddWACRevenueRe
 	}
 
 	if !isStatusWIP {
+		log.Warn().Any("payload", req).Msg("service::AddRevenue - Walk around check is not marked as WIP")
 		return resp, errmsg.NewCustomErrors(403, errmsg.WithMessage("Walk around check belum ditandai sebagai WIP"))
 	}
 
