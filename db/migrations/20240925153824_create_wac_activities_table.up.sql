@@ -9,5 +9,8 @@ CREATE TABLE IF NOT EXISTS wac_activities (
     total_revenue INT NOT NULL DEFAULT 0,
 
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+
+    FOREIGN KEY (wac_id) REFERENCES walk_around_checks(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
