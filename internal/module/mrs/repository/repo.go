@@ -9,6 +9,11 @@ import (
 
 var _ ports.MRSRepository = &mrsRepository{}
 
+type daoWACC struct {
+	Id           string `db:"id"`
+	IsInterested bool   `db:"is_interested"`
+}
+
 type mrsRepository struct {
 	db *sqlx.DB
 }

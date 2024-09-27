@@ -45,20 +45,20 @@ func (r *mrsRepository) RenewWAC(ctx context.Context, req *entity.RenewWACReques
 	}
 
 	totalNewLeads := len(req.VehicleConditionIds)
-	if totalNewLeads > 0 {
-		err = r.createWACCopy(ctx, req, tx, req.WacId, newWACId, totalNewLeads)
+	if totalNewLeads > 0 { //  if [array] not empty condition ids
+		err = r.createWACCopy(ctx, tx, req, req.WacId, newWACId, totalNewLeads)
 		if err != nil {
 			log.Error().Err(err).Any("payload", req).Msg("repository::RenewWAC - Failed to create WAC copy")
 			return err
 		}
 
-		err = r.moveVehicleConditionsToNewWAC(ctx, req, tx, newWACId, totalNewLeads)
+		err = r.moveVehicleConditionsToNewWAC(ctx, tx, req, newWACId, totalNewLeads)
 		if err != nil {
 			log.Error().Err(err).Any("payload", req).Msg("repository::RenewWAC - Failed to move WAC conditions")
 			return err
 		}
 
-		err = r.updateTotalFollowUps(ctx, req.WacId, tx, totalNewLeads, WaccNotInterestedLeft)
+		err = r.updateTotalFollowUps(ctx, tx, req.WacId, totalNewLeads, WaccNotInterestedLeft)
 		if err != nil {
 			log.Error().Err(err).Any("payload", req).Msg("repository::RenewWAC - Failed to update total follow ups")
 			return err

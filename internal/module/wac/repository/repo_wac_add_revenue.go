@@ -103,23 +103,6 @@ func (r *wacRepository) AddRevenue(ctx context.Context, req *entity.AddWACRevenu
 }
 
 func (r *wacRepository) AddRevenues(ctx context.Context, req *entity.AddWACRevenuesRequest) error {
-	var (
-		// this query is to check if all revenue added where invoice_number is null and is_interested is true
-		queryCheckIsStillNeedRevenue = `
-			SELECT EXISTS (
-				SELECT
-					1
-				FROM
-					walk_around_check_conditions
-				WHERE
-					walk_around_check_id = ?
-					AND invoice_number IS NULL
-					AND is_interested = TRUE
-			)
-		`
-		IsStillNeedRevenue bool
-	)
-
 	tx, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {
 		log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenues - failed to begin transaction")
@@ -139,9 +122,8 @@ func (r *wacRepository) AddRevenues(ctx context.Context, req *entity.AddWACReven
 		}
 	}()
 
-	err = tx.GetContext(ctx, &IsStillNeedRevenue, r.db.Rebind(queryCheckIsStillNeedRevenue), req.Id)
+	IsStillNeedRevenue, err := r.IsStillNeedAddRevenue(ctx, tx, req.Id)
 	if err != nil {
-		log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenues - failed to check all revenue added")
 		return err
 	}
 
@@ -150,191 +132,49 @@ func (r *wacRepository) AddRevenues(ctx context.Context, req *entity.AddWACReven
 		return errmsg.NewCustomErrors(400, errmsg.WithMessage("Semua revenue sudah diinput, tidak dapat mengubah revenue lagi"))
 	}
 
-	query := `
-		UPDATE
-			walk_around_check_conditions
-		SET
-			revenue = ?,
-			invoice_number = ?,
-			updated_at = NOW()
-		WHERE
-			id = ?
-			AND walk_around_check_id = ?
-			AND is_interested = TRUE
-	`
-	query = r.db.Rebind(query)
-
-	for idx, revenue := range req.Revenues {
-		_, err = tx.ExecContext(ctx, query,
-			revenue.Revenue,
-			revenue.InvoiceNumber,
-			revenue.VehicleConditionId,
-			req.Id,
-		)
-		if err != nil {
-			log.Error().Err(err).Any("payload", req).Any("item", req.Revenues[idx]).Msg("repo::AddRevenues - failed to add revenue")
-			return err
-		}
-	}
-
-	err = tx.GetContext(ctx, &IsStillNeedRevenue, r.db.Rebind(queryCheckIsStillNeedRevenue), req.Id)
+	err = r.updateConditions(ctx, tx, req)
 	if err != nil {
-		log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenues - failed to check all revenue added")
 		return err
 	}
 
-	// count total leads completed
-	queryCountingLeadsCompleted := `
-		UPDATE
-			walk_around_checks
-		SET
-			total_leads_completed = COALESCE(
-				(
-					SELECT
-						SUM(1)
-					FROM
-						walk_around_check_conditions
-					WHERE
-						walk_around_check_id = ?
-						AND is_interested = TRUE
-						AND invoice_number IS NOT NULL
-				),
-				0
-			),
-			updated_at = NOW()
-		WHERE
-			id = ?
-	`
-
-	_, err = tx.ExecContext(ctx, r.db.Rebind(queryCountingLeadsCompleted), req.Id, req.Id)
+	IsStillNeedRevenue, err = r.IsStillNeedAddRevenue(ctx, tx, req.Id)
 	if err != nil {
-		log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenues - failed to count total leads completed")
+		return err
+	}
+
+	err = r.countTotalLeadsCompleted(ctx, tx, req.Id)
+	if err != nil {
 		return err
 	}
 
 	if !IsStillNeedRevenue { // if all revenue added, update status to completed and follow up if needed
-		query = `
-			UPDATE
-				walk_around_checks
-			SET
-				revenue = COALESCE(
-					(
-						SELECT
-							SUM(revenue)
-						FROM
-							walk_around_check_conditions
-						WHERE
-							walk_around_check_id = ?
-							AND is_interested = TRUE
-							AND invoice_number IS NOT NULL
-					),
-					0
-				),
-				status = 'completed',
-				updated_at = NOW()
-			WHERE
-				id = ?
-		`
-
-		_, err = tx.ExecContext(ctx, r.db.Rebind(query), req.Id, req.Id)
+		err = r.completingWAC(ctx, tx, req)
 		if err != nil {
-			log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenues - failed to update status")
 			return err
 		}
 
-		var isNeedFollowUp bool
-		query = `
-			SELECT EXISTS (
-				SELECT
-					1
-				FROM
-					walk_around_check_conditions
-				WHERE
-					walk_around_check_id = ?
-					AND is_interested = FALSE
-			)
-		`
-
-		err = tx.GetContext(ctx, &isNeedFollowUp, r.db.Rebind(query), req.Id)
+		isNeedFollowUp, err := r.isNeedFollowUp(ctx, tx, req.Id)
 		if err != nil {
-			log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenues - failed to check need follow up")
 			return err
 		}
 
 		if isNeedFollowUp { // add 7 days from now in utc
-			followUpAt := time.Now().UTC().AddDate(0, 0, 7).Format("2006-01-02 15:04:05")
-			query = `
-				UPDATE
-					walk_around_checks
-				SET
-					is_needs_follow_up = TRUE,
-					total_follow_ups = COALESCE(
-						(
-							SELECT
-								SUM(1)
-							FROM
-								walk_around_check_conditions
-							WHERE
-								walk_around_check_id = ?
-								AND is_interested = FALSE
-						),
-						0
-					),
-					updated_at = NOW(),
-					follow_up_at = ?
-				WHERE
-					id = ?
-			`
-
-			_, err = tx.ExecContext(ctx, r.db.Rebind(query), req.Id, followUpAt, req.Id)
+			err := r.updateNextFollowUpAt(ctx, tx, req)
 			if err != nil {
-				log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenues - failed to follow up")
 				return err
 			}
 
-			query = `
-				INSERT INTO
-					wac_follow_up_logs (id, walk_around_check_id, notes)
-				VALUES (?, ?, ?)
-			`
-			_, err = tx.ExecContext(ctx, r.db.Rebind(query),
-				ulid.Make().String(),
-				req.Id,
-				"perlu follow up",
-			)
+			err = r.createFollowUpLogs(ctx, tx, req)
 			if err != nil {
-				log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenues - failed to create log")
 				return err
 			}
 		}
+	}
 
-		// create activity
-		query = `
-			SELECT
-				id AS wac_id,
-				user_id,
-				total_potential_leads,
-				total_leads,
-				total_leads AS total_completed_leads,
-				revenue AS total_revenue
-			FROM
-				walk_around_checks
-			WHERE
-				id = ?
-		`
-
-		var a activity
-		a.Status = "completed"
-		err = tx.GetContext(ctx, &a, r.db.Rebind(query), req.Id)
-		if err != nil {
-			log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenues - failed to get walk around check record")
-			return err
-		}
-
-		err = r.addActivity(ctx, tx, a)
-		if err != nil {
-			return err
-		}
+	// create activity
+	err = r.addCompletedActivity(ctx, tx, req)
+	if err != nil {
+		return err
 	}
 
 	return nil

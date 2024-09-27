@@ -10,11 +10,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type daoWACC struct {
-	Id           string `db:"id"`
-	IsInterested bool   `db:"is_interested"`
-}
-
 func (r *mrsRepository) getVehicleConditions(ctx context.Context, req *entity.RenewWACRequest, tx *sqlx.Tx, waccs *[]daoWACC) error {
 	query := `
 		SELECT
@@ -68,7 +63,7 @@ func (r *mrsRepository) validateVehicleConditions(req *entity.RenewWACRequest, w
 	return isWACStillNeedFollowUp, WaccNotInterestedLeft, nil
 }
 
-func (r *mrsRepository) createWACCopy(ctx context.Context, req *entity.RenewWACRequest, tx *sqlx.Tx, oldWACId, newWACId string, totalLeads int) error {
+func (r *mrsRepository) createWACCopy(ctx context.Context, tx *sqlx.Tx, req *entity.RenewWACRequest, oldWACId, newWACId string, totalLeads int) error {
 	queryCopy := `
 			WITH wac_copy AS (
 				SELECT
@@ -118,8 +113,8 @@ func (r *mrsRepository) createWACCopy(ctx context.Context, req *entity.RenewWACR
 
 func (r *mrsRepository) moveVehicleConditionsToNewWAC(
 	ctx context.Context,
-	req *entity.RenewWACRequest,
 	tx *sqlx.Tx,
+	req *entity.RenewWACRequest,
 	newWACId string,
 	totalNewLeads int,
 ) error {
@@ -158,8 +153,8 @@ func (r *mrsRepository) moveVehicleConditionsToNewWAC(
 
 func (r *mrsRepository) updateTotalFollowUps(
 	ctx context.Context,
-	oldWACId string,
 	tx *sqlx.Tx,
+	oldWACId string,
 	totalNewLeads,
 	WaccNotInterestedLeft int,
 ) error {
