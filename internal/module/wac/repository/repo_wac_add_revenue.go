@@ -169,12 +169,12 @@ func (r *wacRepository) AddRevenues(ctx context.Context, req *entity.AddWACReven
 				return err
 			}
 		}
-	}
 
-	// create activity
-	err = r.addCompletedActivity(ctx, tx, req)
-	if err != nil {
-		return err
+		// create activity
+		err = r.addCompletedActivity(ctx, tx, req)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

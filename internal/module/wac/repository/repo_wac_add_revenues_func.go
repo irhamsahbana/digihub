@@ -217,7 +217,17 @@ func (r *wacRepository) addCompletedActivity(ctx context.Context, tx *sqlx.Tx, r
 		id AS wac_id,
 		user_id,
 		total_potential_leads,
-		total_leads
+		total_leads,
+		(
+			SELECT
+				COALESCE(SUM(1), 0)
+			FROM
+				walk_around_check_conditions
+			WHERE
+				walk_around_check_id = ?
+				AND is_interested = TRUE
+				AND invoice_number IS NOT NULL
+		) AS total_completed_leads
 	FROM
 		walk_around_checks
 	WHERE
@@ -226,7 +236,7 @@ func (r *wacRepository) addCompletedActivity(ctx context.Context, tx *sqlx.Tx, r
 
 	var a activity
 	a.Status = "completed"
-	err := tx.GetContext(ctx, &a, r.db.Rebind(query), req.Id)
+	err := tx.GetContext(ctx, &a, r.db.Rebind(query), req.Id, req.Id)
 	if err != nil {
 		log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenues - failed to get walk around check record")
 		return err
