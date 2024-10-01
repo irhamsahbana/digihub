@@ -32,10 +32,10 @@ func NewClientHandler() *clientHandler {
 func (h *clientHandler) Register(router fiber.Router) {
 	client := router.Group("/clients", middleware.AuthBearer, middleware.AuthRole([]string{"admin"}))
 
-	client.Get("/", h.GetClients)
+	client.Get("/", h.getClients)
 }
 
-func (h *clientHandler) GetClients(c *fiber.Ctx) error {
+func (h *clientHandler) getClients(c *fiber.Ctx) error {
 	var (
 		req = new(entity.GetClientsRequest)
 		ctx = c.Context()

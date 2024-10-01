@@ -94,7 +94,7 @@ func isEmailBlacklist(fl validator.FieldLevel) bool {
 
 func isStrongPassword(fl validator.FieldLevel) bool {
 	password := fl.Field().String()
-	if len(password) < 12 {
+	if len(password) < 8 {
 		return false
 	}
 

@@ -65,7 +65,7 @@ func errorValidationHandler[T any](err error, payload *T) (int, map[string][]str
 			message = fmt.Sprintf("email %v tidak diizinkan.", value)
 		case "strong_password":
 			// message = fmt.Sprintf("%s must be at least 12 characters and contain at least one uppercase letter, one lowercase letter, and one number.", fieldInMsg)
-			message = fmt.Sprintf("%s minimal 12 karakter dan harus mengandung setidaknya satu huruf besar, satu huruf kecil, dan satu angka.", fieldInMsg)
+			message = fmt.Sprintf("%s minimal 8 karakter dan harus mengandung setidaknya satu huruf besar, satu huruf kecil, dan satu angka.", fieldInMsg)
 		case "exist":
 			// message = "resource is not exist."
 			message = "sumber data tidak ditemukan."
