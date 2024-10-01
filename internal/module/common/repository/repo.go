@@ -244,6 +244,11 @@ func (r *commonRepository) GetEmployees(ctx context.Context, req *entity.GetEmpl
 		args = append(args, req.SectionId)
 	}
 
+	if req.Search != "" {
+		query.WriteString(" AND (usr.name ILIKE ? OR usr.email ILIKE ? OR usr.whatsapp_number ILIKE ?)")
+		args = append(args, "%"+req.Search+"%", "%"+req.Search+"%", "%"+req.Search+"%")
+	}
+
 	query.WriteString(` LIMIT ? OFFSET ?`)
 	args = append(args, req.Paginate, (req.Page-1)*req.Paginate)
 

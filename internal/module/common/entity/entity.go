@@ -9,6 +9,7 @@ type GetEmployeesRequest struct {
 	BranchId  string `query:"branch_id" validate:"omitempty,exist=branches.id"`
 	SectionId string `query:"section_id" validate:"omitempty,exist=potencies.id"`
 	IncludeMe bool   `query:"include_me"`
+	Search    string `query:"search" validate:"omitempty,min=3"`
 }
 
 func (r *GetEmployeesRequest) SetDefault() {
