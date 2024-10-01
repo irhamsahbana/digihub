@@ -174,6 +174,9 @@ func errorValidationHandler[T any](err error, payload *T) (int, map[string][]str
 		case "unique_in_slice":
 			// message = fmt.Sprintf("%s elements must be unique.", fieldInMsg)
 			message = fmt.Sprintf("elemen %s harus unik.", fieldInMsg)
+		case "url":
+			// message = fmt.Sprintf("%s is not a valid URL.", fieldInMsg)
+			message = fmt.Sprintf("%s bukan URL yang valid.", fieldInMsg)
 		}
 
 		errorMessages[field] = append(errorMessages[field], message)

@@ -7,6 +7,7 @@ import (
 	commonHandler "codebase-app/internal/module/common/handler"
 	dashboardHandler "codebase-app/internal/module/dashboard/handler"
 	mrsHandler "codebase-app/internal/module/mrs/handler"
+	promotionHandler "codebase-app/internal/module/promotion/handler"
 	userHandler "codebase-app/internal/module/user/handler"
 	wacHandler "codebase-app/internal/module/wac/handler"
 
@@ -31,6 +32,7 @@ func SetupRoutes(app *fiber.App) {
 	dashboardHandler.NewDashboardHandler().Register(api)
 	mrsHandler.NewMRSHandler().Register(api)
 	appLogHandler.NewAppLogHandler().Register(api)
+	promotionHandler.NewPromotionHandler(storage).Register(api)
 
 	// fallback route
 	app.Use(func(c *fiber.Ctx) error {

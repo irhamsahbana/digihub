@@ -15,6 +15,7 @@ import (
 
 type LocalStorageContract interface {
 	Save(base64String, path string) (fullpath string, err error)
+	Delete(fullpath string) error
 }
 
 var (
@@ -115,4 +116,13 @@ func (l *localstorage) isAcceptableMimeType(mimeType string) bool {
 	default:
 		return false
 	}
+}
+
+func (l *localstorage) Delete(fullpath string) error {
+	err := os.Remove(fullpath)
+	if err != nil {
+		log.Error().Err(err).Msg("localstorage: failed to delete file")
+	}
+
+	return nil
 }
