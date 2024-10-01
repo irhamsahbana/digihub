@@ -86,5 +86,5 @@ func (h *employeeHandler) updateEmployee(c *fiber.Ctx) error {
 		return c.Status(code).JSON(response.Error(errs))
 	}
 
-	return c.JSON(response.Success(nil, "Employee updated successfully"))
+	return c.JSON(response.Success(nil, ""))
 }
