@@ -4,6 +4,7 @@ import (
 	integlocalstorage "codebase-app/internal/integration/localstorage"
 	m "codebase-app/internal/middleware"
 	appLogHandler "codebase-app/internal/module/app_log/handler"
+	clientHandler "codebase-app/internal/module/client/handler"
 	commonHandler "codebase-app/internal/module/common/handler"
 	dashboardHandler "codebase-app/internal/module/dashboard/handler"
 	mrsHandler "codebase-app/internal/module/mrs/handler"
@@ -33,6 +34,7 @@ func SetupRoutes(app *fiber.App) {
 	mrsHandler.NewMRSHandler().Register(api)
 	appLogHandler.NewAppLogHandler().Register(api)
 	promotionHandler.NewPromotionHandler(storage).Register(api)
+	clientHandler.NewClientHandler().Register(api)
 
 	// fallback route
 	app.Use(func(c *fiber.Ctx) error {
