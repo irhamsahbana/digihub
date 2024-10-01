@@ -1,13 +1,12 @@
 package repository
 
 import (
+	"codebase-app/internal/infrastructure/config"
 	"codebase-app/internal/module/dashboard/entity"
 	"context"
-	"net/url"
 	"strings"
 	"unicode"
 
-	"github.com/brianvoe/gofakeit/v7"
 	"github.com/rs/zerolog/log"
 )
 
@@ -385,15 +384,34 @@ func (r *dashboardRepository) summaryTiers(ctx context.Context, req *entity.WACS
 }
 
 func (r *dashboardRepository) summaryPromotions(ctx context.Context, req *entity.WACSummaryRequest, res *entity.WACSummaryResponse) error {
-	promotions := make([]entity.Promotion, 4, 5)
-
-	for i := 0; i < len(promotions); i++ {
-		promotions[i] = entity.Promotion{
-			Id:    gofakeit.UUID(),
-			Image: "https://fakeimg.pl/440x320/?text=" + url.QueryEscape(gofakeit.Sentence(2)),
-		}
+	type dao struct {
+		Id   string `db:"id"`
+		Path string `db:"path"`
 	}
 
+	promotions := make([]entity.Promotion, 0, 5)
+	data := make([]dao, 0, 5)
+
+	query := `
+		SELECT
+			p.id,
+			p.path
+		FROM
+			promotions p
+	`
+
+	err := r.db.SelectContext(ctx, &data, r.db.Rebind(query))
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::GetWACSummary - failed to get wac summary")
+		return err
+	}
+
+	for _, d := range data {
+		promotions = append(promotions, entity.Promotion{
+			Id:    d.Id,
+			Image: config.Envs.App.BaseURL + "/" + strings.ReplaceAll(d.Path, "storage/", "api/storage/"),
+		})
+	}
 	res.Promotions = promotions
 
 	return nil
