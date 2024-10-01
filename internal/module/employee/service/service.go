@@ -35,3 +35,21 @@ func (s *employeeService) UpdateEmployee(ctx context.Context, req *entity.Update
 
 	return nil
 }
+
+func (s *employeeService) CreateEmployee(ctx context.Context, req *entity.CreateEmployeeRequest) error {
+	err := s.repo.CreateEmployee(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *employeeService) DeleteEmployee(ctx context.Context, req *entity.DeleteEmployeeRequest) error {
+	err := s.repo.DeleteEmployee(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -10,6 +10,7 @@ import (
 	"database/sql"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 )
 
@@ -124,6 +125,72 @@ func (r *employeeRepository) UpdateEmployee(ctx context.Context, req *entity.Upd
 
 	if err := tx.Commit(); err != nil {
 		log.Error().Err(err).Any("payload", req).Msg("repo::UpdateEmployee - Failed to commit transaction")
+		return err
+	}
+
+	return nil
+}
+
+func (r *employeeRepository) CreateEmployee(ctx context.Context, req *entity.CreateEmployeeRequest) error {
+	tx, err := r.db.BeginTxx(ctx, nil)
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::CreateEmployee - Failed to begin transaction")
+		return err
+	}
+	defer tx.Rollback()
+
+	query := `
+		INSERT INTO
+			users (id, branch_id, section_id, role_id, name, email, whatsapp_number, password)
+		VALUES
+			(?, ?, ?, ?, ?, ?, ?, ?)
+		`
+
+	hashed, err := pkg.HashPassword(req.Password)
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::CreateEmployee - Failed to hash password")
+		return err
+	}
+
+	_, err = tx.ExecContext(ctx, r.db.Rebind(query), ulid.Make().String(), req.BranchId, req.SectionId, req.RoleId, req.Name, req.Email, req.WANumber, hashed)
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::CreateEmployee - Failed to create employee")
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::CreateEmployee - Failed to commit transaction")
+		return err
+	}
+
+	return nil
+}
+
+func (r *employeeRepository) DeleteEmployee(ctx context.Context, req *entity.DeleteEmployeeRequest) error {
+	tx, err := r.db.BeginTxx(ctx, nil)
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::DeleteEmployee - Failed to begin transaction")
+		return err
+	}
+	defer tx.Rollback()
+
+	query := `
+		UPDATE
+			users
+		SET
+			deleted_at = NOW()
+		WHERE
+			id = ? AND deleted_at IS NULL
+		`
+
+	_, err = tx.ExecContext(ctx, r.db.Rebind(query), req.Id)
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::DeleteEmployee - Failed to delete employee")
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::DeleteEmployee - Failed to commit transaction")
 		return err
 	}
 

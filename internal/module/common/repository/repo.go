@@ -216,7 +216,7 @@ func (r *commonRepository) GetEmployees(ctx context.Context, req *entity.GetEmpl
 		LEFT JOIN
 			roles rl ON usr.role_id = rl.id
 		WHERE
-			1 = 1
+			usr.deleted_at IS NULL
 	`)
 
 	if !req.IncludeMe {

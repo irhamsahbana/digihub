@@ -26,17 +26,6 @@ type Common struct {
 	Name string `json:"name" db:"name"`
 }
 
-// {
-//     "name": "sapa",
-//     "branch_id": "",
-//     "section_id": "",
-//     "whatsapp_number": "",
-//     "role_id": "",
-//     "email": "",
-//     "password": "",
-//     "password_confirmation": ""
-// }
-
 type UpdateEmployeeRequest struct {
 	Id        string `params:"id" validate:"ulid"`
 	BranchId  string `json:"branch_id" validate:"ulid,exist=branches.id"`
@@ -47,4 +36,19 @@ type UpdateEmployeeRequest struct {
 	WANumber  string `json:"whatsapp_number"`
 	Password  string `json:"password" validate:"omitempty,strong_password"`
 	PassConf  string `json:"password_confirmation" validate:"eqfield=Password"`
+}
+
+type CreateEmployeeRequest struct {
+	BranchId  string `json:"branch_id" validate:"ulid,exist=branches.id"`
+	SectionId string `json:"section_id" validate:"ulid,exist=potencies.id"`
+	RoleId    string `json:"role_id" validate:"ulid,exist=roles.id"`
+	Name      string `json:"name" validate:"required"`
+	Email     string `json:"email" validate:"email"`
+	WANumber  string `json:"whatsapp_number"`
+	Password  string `json:"password" validate:"required,strong_password"`
+	PassConf  string `json:"password_confirmation" validate:"eqfield=Password"`
+}
+
+type DeleteEmployeeRequest struct {
+	Id string `json:"id" validate:"ulid"`
 }
