@@ -3,6 +3,7 @@ module codebase-app
 go 1.22.0
 
 require (
+	github.com/LukaGiorgadze/gonull v1.2.0
 	github.com/brianvoe/gofakeit/v7 v7.0.2
 	github.com/go-playground/validator/v10 v10.19.0
 	github.com/gofiber/fiber/v2 v2.52.2

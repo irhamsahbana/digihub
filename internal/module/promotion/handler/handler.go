@@ -2,6 +2,7 @@ package handler
 
 import (
 	integstorage "codebase-app/internal/integration/localstorage"
+	"encoding/json"
 
 	"codebase-app/internal/adapter"
 	"codebase-app/internal/middleware"
@@ -44,6 +45,12 @@ func (h *promotionHandler) Register(router fiber.Router) {
 		middleware.AuthBearer,
 		middleware.AuthRole([]string{"admin"}),
 		h.DeletePromotion,
+	)
+
+	router.Patch("/promotions/:id",
+		middleware.AuthBearer,
+		middleware.AuthRole([]string{"admin"}),
+		h.updatePromotion,
 	)
 }
 
@@ -104,6 +111,37 @@ func (h *promotionHandler) DeletePromotion(c *fiber.Ctx) error {
 	}
 
 	if err := h.service.DeletePromotion(ctx, req); err != nil {
+		code, errs := errmsg.Errors[error](err)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(response.Success(nil, ""))
+}
+
+func (h *promotionHandler) updatePromotion(c *fiber.Ctx) error {
+	var (
+		ctx = c.Context()
+		req = new(entity.UpdatePromotionRequest)
+		v   = adapter.Adapters.Validator
+	)
+
+	req.Id = c.Params("id")
+
+	err := json.Unmarshal(c.Body(), req)
+	if err != nil {
+		log.Warn().Err(err).Msg("handler::updatePromotion - invalid payload")
+		return c.Status(fiber.StatusBadRequest).JSON(response.Error(err))
+	}
+	req.SetValues()
+
+	if err := v.Validate(req); err != nil {
+		req.RemoveImage()
+		log.Warn().Err(err).Any("payload", req).Msg("handler::updatePromotion - invalid payload")
+		code, errs := errmsg.Errors(err, req)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	if err := h.service.UpdatePromotion(ctx, req); err != nil {
 		code, errs := errmsg.Errors[error](err)
 		return c.Status(code).JSON(response.Error(errs))
 	}

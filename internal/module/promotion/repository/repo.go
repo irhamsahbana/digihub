@@ -87,3 +87,91 @@ func (r *promotionRepository) DeletePromotion(ctx context.Context, req *entity.D
 
 	return nil
 }
+
+func (r *promotionRepository) UpdatePromotion(ctx context.Context, req *entity.UpdatePromotionRequest) error {
+	var (
+		args       = make([]any, 0)
+		argsCount  = 0
+		argsFilled = 0
+	)
+
+	if req.Title.Present && req.Title.Valid {
+		argsCount++
+	}
+	if req.Link.Present && req.Link.Valid {
+		argsCount++
+	}
+	if req.Image.Present && req.Image.Valid {
+		argsCount++
+	}
+
+	query := `
+		UPDATE promotions
+		SET
+		`
+
+	if req.Title.Present && req.Title.Valid {
+		query += " title = ?"
+		args = append(args, req.Title.Val)
+		argsFilled++
+		if argsFilled < argsCount {
+			query += ","
+		}
+	}
+
+	if req.Link.Valid {
+		query += " link = ?"
+		args = append(args, req.Link.Val)
+		argsFilled++
+		if argsFilled < argsCount {
+			query += ","
+		}
+	}
+
+	if req.Image.Present && req.Image.Valid {
+		query += " path = ?"
+		args = append(args, req.Path)
+		argsFilled++
+		if argsFilled < argsCount {
+			query += ","
+		}
+	}
+
+	query += `
+		WHERE
+		id = ?
+	`
+	args = append(args, req.Id)
+
+	_, err := r.db.ExecContext(ctx, r.db.Rebind(query), args...)
+	if err != nil {
+		req.RemoveImage()
+		log.Error().Any("payload", req).Err(err).Msg("repo::UpdatePromotion - failed to update promotion")
+		return err
+	}
+
+	return nil
+}
+
+func (r *promotionRepository) GetPromotionById(ctx context.Context, id string) (entity.Promotion, error) {
+	data := entity.Promotion{}
+
+	query := `
+		SELECT id, title, path, link
+		FROM promotions
+		WHERE id = ?
+	`
+
+	err := r.db.GetContext(ctx, &data, r.db.Rebind(query), id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Warn().Err(err).Str("id", id).Msg("repo::GetPromotionByID - promotion not found")
+			return data, errmsg.NewCustomErrors(404).SetMessage("Promosi tidak ditemukan")
+		}
+		log.Error().Err(err).Str("id", id).Msg("repo::GetPromotionByID - failed to get promotion")
+		return data, err
+	}
+
+	data.Image = config.Envs.App.BaseURL + "/" + strings.ReplaceAll(data.Path, "storage/", "api/storage/")
+	return data, nil
+}
