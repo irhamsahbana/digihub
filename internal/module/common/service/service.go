@@ -90,3 +90,7 @@ func (s *commonService) GetHTIYears(ctx context.Context, req *entity.GetHTIYears
 func (s *commonService) GetHTIPurchase(ctx context.Context, req *entity.GetHTIPurchaseRequest) (entity.GetHTIPurchaseResponse, error) {
 	return s.repo.GetHTIPurchase(ctx, req)
 }
+
+func (s *commonService) GetHTIValuations(ctx context.Context, req *entity.GetHTIValuationsRequest) (entity.GetHTIValuationsResponse, error) {
+	return s.repo.GetHTIValuations(ctx, req)
+}

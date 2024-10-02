@@ -124,3 +124,50 @@ func (r *commonRepository) GetHTIPurchase(ctx context.Context, req *entity.GetHT
 
 	return data, nil
 }
+
+func (r *commonRepository) GetHTIValuations(ctx context.Context, req *entity.GetHTIValuationsRequest) (entity.GetHTIValuationsResponse, error) {
+	type dao struct {
+		TotalData int `db:"total_data"`
+		entity.HTIValuationItem
+	}
+
+	var (
+		res  entity.GetHTIValuationsResponse
+		data = make([]dao, 0)
+	)
+	res.Items = make([]entity.HTIValuationItem, 0, req.Paginate)
+
+	query := `
+		SELECT
+			COUNT(*) OVER() AS total_data,
+			type,
+			year,
+			min_purchase,
+			max_purchase
+		FROM
+			trade_in_trends
+		WHERE
+			brand = ? AND model = ?
+		ORDER BY
+			year DESC, type ASC
+		LIMIT ? OFFSET ?
+		`
+
+	err := r.db.SelectContext(ctx, &data, r.db.Rebind(query), req.Brand, req.Model, req.Paginate, (req.Page-1)*req.Paginate)
+	if err != nil {
+		log.Error().Err(err).Str("brand", req.Brand).Str("model", req.Model).Msg("repo::GetHTIValuations - Failed to get HTI valuations")
+		return res, err
+	}
+
+	if len(data) > 0 {
+		res.Meta.TotalData = data[0].TotalData
+	}
+
+	for _, item := range data {
+		res.Items = append(res.Items, item.HTIValuationItem)
+	}
+
+	res.Meta.CountTotalPage(req.Page, req.Paginate, res.Meta.TotalData)
+
+	return res, nil
+}

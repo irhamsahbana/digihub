@@ -43,6 +43,7 @@ func (h *commonHandler) Register(router fiber.Router) {
 	master.Get("/hi-trade-in/types", h.GetHTITypes)
 	master.Get("/hi-trade-in/years", h.GetHTIYears)
 	master.Get("/hi-trade-in/purchases", h.GetHTIPurchases)
+	master.Get("/hi-trade-in/valuations", h.GetHTIvaluations)
 }
 
 func (h *commonHandler) GetAreas(c *fiber.Ctx) error {
@@ -252,6 +253,35 @@ func (h *commonHandler) GetHTIPurchases(c *fiber.Ctx) error {
 	}
 
 	result, err := h.service.GetHTIPurchase(ctx, req)
+	if err != nil {
+		code, errs := errmsg.Errors[error](err)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	return c.JSON(response.Success(result, ""))
+}
+
+func (h *commonHandler) GetHTIvaluations(c *fiber.Ctx) error {
+	var (
+		req = new(entity.GetHTIValuationsRequest)
+		ctx = c.Context()
+		v   = adapter.Adapters.Validator
+	)
+
+	if err := c.QueryParser(req); err != nil {
+		log.Error().Err(err).Msg("handler::GetHTIvaluations - Failed to parse request")
+		return c.Status(fiber.StatusBadRequest).JSON(response.Error(err))
+	}
+
+	req.SetDefault()
+
+	if err := v.Validate(req); err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("handler::GetHTIvaluations - Invalid request")
+		code, errs := errmsg.Errors(err, req)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	result, err := h.service.GetHTIValuations(ctx, req)
 	if err != nil {
 		code, errs := errmsg.Errors[error](err)
 		return c.Status(code).JSON(response.Error(errs))

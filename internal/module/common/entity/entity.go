@@ -84,3 +84,32 @@ type GetPotencyResponse struct {
 	User   *CommonResponse `json:"user"`
 	Branch *CommonResponse `json:"branch"`
 }
+
+type GetHTIValuationsRequest struct {
+	Brand    string `query:"brand" validate:"required"`
+	Model    string `query:"model" validate:"required"`
+	Page     int    `query:"page" validate:"required"`
+	Paginate int    `query:"paginate" validate:"required"`
+}
+
+func (r *GetHTIValuationsRequest) SetDefault() {
+	if r.Page < 1 {
+		r.Page = 1
+	}
+
+	if r.Paginate < 1 {
+		r.Paginate = 10
+	}
+}
+
+type GetHTIValuationsResponse struct {
+	Items []HTIValuationItem `json:"items"`
+	Meta  Meta               `json:"meta"`
+}
+
+type HTIValuationItem struct {
+	Type        string  `json:"type" db:"type"`
+	Year        int     `json:"year" db:"year"`
+	MinPurchase float64 `json:"min_purchase" db:"min_purchase"`
+	MaxPurchase float64 `json:"max_purchase" db:"max_purchase"`
+}
