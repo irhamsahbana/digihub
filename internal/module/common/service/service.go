@@ -71,6 +71,10 @@ func (s *commonService) GetEmployees(ctx context.Context, req *entity.GetEmploye
 	return resp, nil
 }
 
+func (s *commonService) GetRoles(ctx context.Context) ([]entity.CommonResponse, error) {
+	return s.repo.GetRoles(ctx)
+}
+
 func (s *commonService) GetHTIBrands(ctx context.Context) ([]entity.CommonResponse, error) {
 	return s.repo.GetHTIBrands(ctx)
 }

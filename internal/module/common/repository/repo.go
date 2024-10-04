@@ -87,11 +87,11 @@ func (r *commonRepository) GetAreas(ctx context.Context) ([]entity.AreaResponse,
 
 func (r *commonRepository) GetPotencies(ctx context.Context, req *entity.GetPotenciesRequest) ([]entity.GetPotencyResponse, error) {
 	type userDao struct {
-		Id          string `db:"id"`
-		Name        string `db:"name"`
-		BranchId    string `db:"branch_id"`
-		BranchName  string `db:"branch_name"`
-		SectionName string `db:"section_name"`
+		Id          string  `db:"id"`
+		Name        string  `db:"name"`
+		BranchId    *string `db:"branch_id"`
+		BranchName  *string `db:"branch_name"`
+		SectionName *string `db:"section_name"`
 	}
 	var (
 		result    = make([]entity.GetPotencyResponse, 0)
@@ -137,19 +137,28 @@ func (r *commonRepository) GetPotencies(ctx context.Context, req *entity.GetPote
 			Name: p.Name,
 		}
 
-		if user.SectionName == p.Name {
+		if user.SectionName != nil && *user.SectionName == p.Name {
 			u := entity.CommonResponse{
 				Id:   user.Id,
 				Name: user.Name,
 			}
 
-			b := entity.CommonResponse{
-				Id:   user.BranchId,
-				Name: user.BranchName,
-			}
+			if user.BranchId != nil && user.BranchName != nil {
+				b := entity.CommonResponse{
+					Id:   *user.BranchId,
+					Name: *user.BranchName,
+				}
 
-			potency.User = &u
-			potency.Branch = &b
+				potency.User = &u
+				potency.Branch = &b
+			}
+			// b := entity.CommonResponse{
+			// 	Id:   *user.BranchId,
+			// 	Name: *user.BranchName,
+			// }
+
+			// potency.User = &u
+			// potency.Branch = &b
 		}
 
 		result = append(result, potency)
@@ -267,6 +276,29 @@ func (r *commonRepository) GetEmployees(ctx context.Context, req *entity.GetEmpl
 	}
 
 	result.Meta.CountTotalPage(req.Page, req.Paginate, result.Meta.TotalData)
+
+	return result, nil
+}
+
+func (r *commonRepository) GetRoles(ctx context.Context) ([]entity.CommonResponse, error) {
+	var (
+		result = make([]entity.CommonResponse, 0)
+	)
+
+	query := `
+		SELECT
+			id, name
+		FROM
+			roles
+		ORDER BY
+			name ASC
+	`
+
+	err := r.db.SelectContext(ctx, &result, query)
+	if err != nil {
+		log.Error().Err(err).Msg("repo::GetRoles - Failed to get roles")
+		return nil, err
+	}
 
 	return result, nil
 }

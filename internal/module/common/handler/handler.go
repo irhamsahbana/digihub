@@ -37,6 +37,7 @@ func (h *commonHandler) Register(router fiber.Router) {
 	master.Get("/vehicle-types", h.GetVehicleTypes)
 	master.Get("/employees", h.GetEmployees)
 	master.Get("/branches", h.GetBranches)
+	master.Get("/roles", h.GetRoles)
 
 	master.Get("/hi-trade-in/brands", h.GetHTIBrands)
 	master.Get("/hi-trade-in/models", h.GetHTIModels)
@@ -282,6 +283,16 @@ func (h *commonHandler) GetHTIvaluations(c *fiber.Ctx) error {
 	}
 
 	result, err := h.service.GetHTIValuations(ctx, req)
+	if err != nil {
+		code, errs := errmsg.Errors[error](err)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	return c.JSON(response.Success(result, ""))
+}
+
+func (h *commonHandler) GetRoles(c *fiber.Ctx) error {
+	result, err := h.service.GetRoles(c.Context())
 	if err != nil {
 		code, errs := errmsg.Errors[error](err)
 		return c.Status(code).JSON(response.Error(errs))
