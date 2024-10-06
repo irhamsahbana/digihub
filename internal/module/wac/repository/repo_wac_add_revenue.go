@@ -81,7 +81,7 @@ func (r *wacRepository) AddRevenue(ctx context.Context, req *entity.AddWACRevenu
 				user_id,
 				total_potential_leads,
 				total_leads,
-				total_leads_completed AS total_completed_leads
+				total_leads_completed AS total_completed_leads,
 				total_revenue
 			FROM
 				walk_around_checks
