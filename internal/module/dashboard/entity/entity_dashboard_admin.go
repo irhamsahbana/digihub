@@ -39,9 +39,10 @@ func (r *GetWACLineChartRequest) Validate() error {
 }
 
 type GetWACLineChartResponse struct {
-	PotentialLeads int `json:"potential_leads"`
-	Leads          int `json:"leads"`
-	Completed      int `json:"completed"`
+	Date           string `json:"date" db:"date"`
+	PotentialLeads int    `json:"total_potential_leads" db:"total_potential_leads"`
+	Leads          int    `json:"total_leads" db:"total_leads"`
+	Completed      int    `json:"total_completed" db:"total_completed_leads"`
 }
 
 /*

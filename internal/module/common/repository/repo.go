@@ -142,23 +142,16 @@ func (r *commonRepository) GetPotencies(ctx context.Context, req *entity.GetPote
 				Id:   user.Id,
 				Name: user.Name,
 			}
+			potency.User = &u
+		}
 
-			if user.BranchId != nil && user.BranchName != nil {
-				b := entity.CommonResponse{
-					Id:   *user.BranchId,
-					Name: *user.BranchName,
-				}
-
-				potency.User = &u
-				potency.Branch = &b
+		if user.BranchId != nil && user.BranchName != nil {
+			b := entity.CommonResponse{
+				Id:   *user.BranchId,
+				Name: *user.BranchName,
 			}
-			// b := entity.CommonResponse{
-			// 	Id:   *user.BranchId,
-			// 	Name: *user.BranchName,
-			// }
 
-			// potency.User = &u
-			// potency.Branch = &b
+			potency.Branch = &b
 		}
 
 		result = append(result, potency)

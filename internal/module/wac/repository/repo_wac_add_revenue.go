@@ -4,9 +4,7 @@ import (
 	"codebase-app/internal/module/wac/entity"
 	"codebase-app/pkg/errmsg"
 	"context"
-	"time"
 
-	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 )
 
@@ -30,73 +28,73 @@ func (r *wacRepository) AddRevenue(ctx context.Context, req *entity.AddWACRevenu
 		}
 	}()
 
+	isUsedCar := false
 	query := `
+		SELECT
+			is_used_car
+		FROM
+			walk_around_checks
+		WHERE
+			id = ?
+	`
+
+	err = tx.GetContext(ctx, &isUsedCar, r.db.Rebind(query), req.Id)
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenue - failed to get is_used_car")
+		return err
+	}
+
+	if !isUsedCar {
+		log.Warn().Any("payload", req).Msg("repo::AddRevenue - not used car")
+		return errmsg.NewCustomErrors(400, errmsg.WithMessage("Bukan mobil bekas"))
+	}
+
+	query = `
 		UPDATE
 			walk_around_checks
 		SET
 			invoice_number = ?,
 			revenue = ?,
+			total_leads_completed = (
+				SELECT
+					COALESCE(SUM(1), 0)
+				FROM
+					walk_around_check_conditions
+				WHERE
+					walk_around_check_id = ?
+			),
 			status = 'completed',
 			updated_at = NOW()
 		WHERE
 			id = ?
 	`
 
-	_, err = tx.ExecContext(ctx, r.db.Rebind(query), req.InvoiceNumber, req.TotalRevenue, req.Id)
+	_, err = tx.ExecContext(ctx, r.db.Rebind(query), req.InvoiceNumber, req.TotalRevenue, req.Id, req.Id)
 	if err != nil {
 		log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenue - failed to add revenue")
 		return err
 	}
 
-	var isNeedFollowUp bool
 	query = `
-		SELECT EXISTS (
 			SELECT
-				1
+				id AS wac_id,
+				user_id,
+				total_potential_leads,
+				total_leads,
+				total_leads_completed AS total_completed_leads
+				total_revenue
 			FROM
-				walk_around_check_conditions
-			WHERE
-				walk_around_check_id = ?
-				AND is_interested = FALSE
-		)
-	`
-
-	err = tx.GetContext(ctx, &isNeedFollowUp, r.db.Rebind(query), req.Id)
-	if err != nil {
-		log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenue - failed to check need follow up")
-		return err
-	}
-
-	if isNeedFollowUp { // add 7 days from now in utc
-		followUpAt := time.Now().UTC().AddDate(0, 0, 7).Format("2006-01-02 15:04:05")
-		query = `
-			UPDATE
 				walk_around_checks
-			SET
-				is_needs_follow_up = TRUE,
-				updated_at = NOW(),
-				follow_up_at = ?
 			WHERE
 				id = ?
-		`
+			`
 
-		_, err = tx.ExecContext(ctx, r.db.Rebind(query), followUpAt, req.Id)
-		if err != nil {
-			log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenue - failed to follow up")
-			return err
-		}
-
-		query = `
-			INSERT INTO
-				wac_follow_up_logs (id, walk_around_check_id, notes)
-			VALUES (?, ?, ?)
-		`
-
-		_, err = tx.ExecContext(ctx, r.db.Rebind(query),
-			ulid.Make().String(),
-			req.Id,
-			"perlu follow up",
-		)
+	var a activity
+	a.Status = "completed"
+	err = tx.GetContext(ctx, &a, r.db.Rebind(query), req.Id, req.Id)
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::AddRevenues - failed to get walk around check record")
+		return err
 	}
 
 	return nil

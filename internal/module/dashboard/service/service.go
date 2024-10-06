@@ -29,3 +29,7 @@ func (s *DashbaordService) GetWACSummary(ctx context.Context, request *entity.WA
 func (s *DashbaordService) GetWACSummaryTechnician(ctx context.Context, request *entity.WACSummaryRequest) (entity.TechWACSummaryResponse, error) {
 	return s.repo.GetWACSummaryTechnician(ctx, request)
 }
+
+func (s *DashbaordService) GetWACLineChart(ctx context.Context, request *entity.GetWACLineChartRequest) ([]entity.GetWACLineChartResponse, error) {
+	return s.repo.GetWACLineChart(ctx, request)
+}
