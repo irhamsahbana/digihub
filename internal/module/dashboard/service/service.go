@@ -37,3 +37,7 @@ func (s *DashbaordService) GetWACLineChart(ctx context.Context, request *entity.
 func (s *DashbaordService) GetActivities(ctx context.Context, request *entity.GetActivitiesRequest) (entity.GetActivitiesResponse, error) {
 	return s.repo.GetActivities(ctx, request)
 }
+
+func (s *DashbaordService) GetAdminSummary(ctx context.Context, request *entity.GetSummaryPerMonthRequest) (entity.GetSummaryPerMonthResponse, error) {
+	return s.repo.GetAdminSummary(ctx, request)
+}

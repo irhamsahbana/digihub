@@ -31,7 +31,7 @@ func (h *dashboardHandler) Register(router fiber.Router) {
 	dashboard := router.Group("/dashboard", middleware.AuthBearer)
 
 	dashboard.Get("/lead-trends", h.GetLeadsTrends)
-	dashboard.Get("/wac-summaries", h.GetWACSummaries)
+	dashboard.Get("/admin/summaries", h.GetAdminWACSummaries)
 	dashboard.Get("/admin/wac-line-chart", h.GetWACLineChart)
 	dashboard.Get("/admin/activities", h.GetActivities)
 }
@@ -152,6 +152,33 @@ func (h *dashboardHandler) GetActivities(c *fiber.Ctx) error {
 	}
 
 	res, err := h.service.GetActivities(ctx, req)
+	if err != nil {
+		code, errs := errmsg.Errors[error](err)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	return c.JSON(response.Success(res, ""))
+}
+
+func (h *dashboardHandler) GetAdminWACSummaries(c *fiber.Ctx) error {
+	var (
+		req = new(entity.GetSummaryPerMonthRequest)
+		ctx = c.Context()
+		v   = adapter.Adapters.Validator
+	)
+
+	if err := c.QueryParser(req); err != nil {
+		log.Warn().Err(err).Msg("handler::GetAdminWACSummaries - failed to parse query")
+		return c.Status(fiber.StatusBadRequest).JSON(response.Error(err.Error()))
+	}
+
+	if err := v.Validate(req); err != nil {
+		log.Warn().Err(err).Any("payload", req).Msg("handler::GetAdminWACSummaries - failed to validate request")
+		code, errs := errmsg.Errors(err, req)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	res, err := h.service.GetAdminSummary(ctx, req)
 	if err != nil {
 		code, errs := errmsg.Errors[error](err)
 		return c.Status(code).JSON(response.Error(errs))

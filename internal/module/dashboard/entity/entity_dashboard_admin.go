@@ -67,8 +67,9 @@ type GetSummaryPerMonthResponse struct {
 }
 
 type MRASummary struct {
-	TotalWACNeedFollowUp int `json:"total_wac_need_follow_up"`
-	TotalWACFollowedUp   int `json:"total_wac_followed_up"`
+	TotalWACNeedFollowUp int `json:"total_wac_need_follow_up" db:"total_wac_need_follow_up"`
+	TotalWACFollowedUp   int `json:"total_wac_followed_up" db:"total_wac_followed_up"`
+	TotalLeads           int `json:"total_leads" db:"total_leads"`
 }
 
 /*

@@ -12,6 +12,7 @@ type DashboardRepository interface {
 
 	GetWACLineChart(ctx context.Context, request *entity.GetWACLineChartRequest) ([]entity.GetWACLineChartResponse, error)
 	GetActivities(ctx context.Context, request *entity.GetActivitiesRequest) (entity.GetActivitiesResponse, error)
+	GetAdminSummary(ctx context.Context, request *entity.GetSummaryPerMonthRequest) (entity.GetSummaryPerMonthResponse, error)
 }
 
 type DashboardService interface {
@@ -21,4 +22,5 @@ type DashboardService interface {
 
 	GetWACLineChart(ctx context.Context, request *entity.GetWACLineChartRequest) ([]entity.GetWACLineChartResponse, error)
 	GetActivities(ctx context.Context, request *entity.GetActivitiesRequest) (entity.GetActivitiesResponse, error)
+	GetAdminSummary(ctx context.Context, request *entity.GetSummaryPerMonthRequest) (entity.GetSummaryPerMonthResponse, error)
 }
