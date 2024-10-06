@@ -76,18 +76,18 @@ func (r *wacRepository) AddRevenue(ctx context.Context, req *entity.AddWACRevenu
 	}
 
 	query = `
-			SELECT
-				id AS wac_id,
-				user_id,
-				total_potential_leads,
-				total_leads,
-				total_leads_completed AS total_completed_leads,
-				revenue AS total_revenue
-			FROM
-				walk_around_checks
-			WHERE
-				id = ?
-			`
+		SELECT
+			id AS wac_id,
+			user_id,
+			total_potential_leads,
+			total_leads,
+			total_leads_completed AS total_completed_leads,
+			revenue AS total_revenue
+		FROM
+			walk_around_checks
+		WHERE
+			id = ?
+	`
 
 	var a activity
 	a.Status = "completed"
