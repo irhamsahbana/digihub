@@ -77,7 +77,7 @@ func (r *wacRepository) CreateWAC(ctx context.Context, req *entity.CreateWACRequ
 	}
 
 	// create walk around check activity
-	err = r.addActivity(ctx, tx, activity{
+	err = r.addActivity(ctx, tx, &activity{
 		WacId:               wacId,
 		UserId:              req.UserId,
 		Status:              "offered",

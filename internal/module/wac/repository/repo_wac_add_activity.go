@@ -18,7 +18,7 @@ type activity struct {
 	TotalRevenue        float64 `db:"total_revenue"`
 }
 
-func (r *wacRepository) addActivity(ctx context.Context, tx *sqlx.Tx, a activity) error {
+func (r *wacRepository) addActivity(ctx context.Context, tx *sqlx.Tx, a *activity) error {
 	query := `
 		INSERT INTO wac_activities (
 			id,

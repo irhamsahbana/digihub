@@ -119,7 +119,7 @@ func (r *wacRepository) OfferWAC(ctx context.Context, req *entity.OfferWACReques
 		return res, err
 	}
 
-	err = r.addActivity(ctx, tx, a)
+	err = r.addActivity(ctx, tx, &a)
 	if err != nil {
 		return res, err
 	}
@@ -207,7 +207,7 @@ func (r *wacRepository) OfferWACUsedCard(ctx context.Context, req *entity.OfferW
 		return res, err
 	}
 
-	err = r.addActivity(ctx, tx, a)
+	err = r.addActivity(ctx, tx, &a)
 	if err != nil {
 		return res, err
 	}

@@ -248,7 +248,7 @@ func (r *wacRepository) addCompletedActivity(ctx context.Context, tx *sqlx.Tx, r
 	}
 	a.TotalRevenue, _ = totalRevenue.Float64()
 
-	err = r.addActivity(ctx, tx, a)
+	err = r.addActivity(ctx, tx, &a)
 	if err != nil {
 		return err
 	}

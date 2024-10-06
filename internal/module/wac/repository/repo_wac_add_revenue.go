@@ -97,6 +97,11 @@ func (r *wacRepository) AddRevenue(ctx context.Context, req *entity.AddWACRevenu
 		return err
 	}
 
+	err = r.addActivity(ctx, tx, &a)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
