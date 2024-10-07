@@ -30,6 +30,7 @@ func NewDashboardHandler() *dashboardHandler {
 func (h *dashboardHandler) Register(router fiber.Router) {
 	dashboard := router.Group("/dashboard", middleware.AuthBearer)
 
+	dashboard.Get("/wac-summaries", h.GetWACSummaries)
 	dashboard.Get("/lead-trends", h.GetLeadsTrends)
 	dashboard.Get("/admin/summaries", h.GetAdminWACSummaries)
 	dashboard.Get("/admin/wac-line-chart", h.GetWACLineChart)
