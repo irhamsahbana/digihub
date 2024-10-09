@@ -44,6 +44,13 @@ func (r *mrsRepository) RenewWAC(ctx context.Context, req *entity.RenewWACReques
 		return err
 	}
 
+	// get WAC owner id
+	userId, err := r.getWACOwnerId(ctx, tx, req.WacId)
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::RenewWAC - Failed to get WAC owner id")
+		return err
+	}
+
 	totalNewLeads := len(req.VehicleConditionIds)
 	if totalNewLeads > 0 { //  if [array] not empty condition ids
 		err = r.createWACCopy(ctx, tx, req, req.WacId, newWACId, totalNewLeads)
@@ -72,7 +79,7 @@ func (r *mrsRepository) RenewWAC(ctx context.Context, req *entity.RenewWACReques
 
 		err = r.addActivity(ctx, tx, &activity{
 			WacId:               newWACId,
-			UserId:              req.UserId,
+			UserId:              userId,
 			TotalPotentialLeads: totalNewLeads,
 			TotalLeads:          totalNewLeads,
 			Status:              "wip",

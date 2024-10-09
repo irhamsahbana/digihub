@@ -10,6 +10,24 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+func (r *mrsRepository) getWACOwnerId(ctx context.Context, tx *sqlx.Tx, wacId string) (string, error) {
+	var userId string
+
+	query := `
+		SELECT user_id
+		FROM Walk_around_checks
+		WHERE id = ?
+	`
+
+	err := tx.GetContext(ctx, &userId, tx.Rebind(query), wacId)
+	if err != nil {
+		log.Error().Err(err).Str("wac_id", wacId).Msg("repo::getWACOwnerId - An error occurred")
+		return "", err
+	}
+
+	return userId, nil
+}
+
 func (r *mrsRepository) getVehicleConditions(ctx context.Context, req *entity.RenewWACRequest, tx *sqlx.Tx, waccs *[]daoWACC) error {
 	query := `
 		SELECT
