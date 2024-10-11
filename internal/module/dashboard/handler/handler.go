@@ -2,7 +2,7 @@ package handler
 
 import (
 	"codebase-app/internal/adapter"
-	"codebase-app/internal/middleware"
+	m "codebase-app/internal/middleware"
 	"codebase-app/internal/module/dashboard/entity"
 	"codebase-app/internal/module/dashboard/ports"
 	"codebase-app/internal/module/dashboard/repository"
@@ -28,20 +28,20 @@ func NewDashboardHandler() *dashboardHandler {
 }
 
 func (h *dashboardHandler) Register(router fiber.Router) {
-	dashboard := router.Group("/dashboard", middleware.AuthBearer)
+	dashboard := router.Group("/dashboard", m.AuthBearer)
 
 	dashboard.Get("/wac-summaries", h.GetWACSummaries)
 	dashboard.Get("/lead-trends", h.GetLeadsTrends)
-	dashboard.Get("/admin/summaries", h.GetAdminWACSummaries)
-	dashboard.Get("/admin/wac-line-chart", h.GetWACLineChart)
-	dashboard.Get("/admin/activities", h.GetActivities)
+	dashboard.Get("/admin/summaries", m.AuthRole([]string{"admin"}), h.GetAdminWACSummaries)
+	dashboard.Get("/admin/wac-line-chart", m.AuthRole([]string{"admin"}), h.GetWACLineChart)
+	dashboard.Get("/admin/activities", m.AuthRole([]string{"admin"}), h.GetActivities)
 }
 
 func (h *dashboardHandler) GetLeadsTrends(c *fiber.Ctx) error {
 	var (
 		req = new(entity.LeadTrendsRequest)
 		ctx = c.Context()
-		l   = middleware.GetLocals(c)
+		l   = m.GetLocals(c)
 	)
 
 	req.UserId = l.GetUserId()
@@ -60,7 +60,7 @@ func (h *dashboardHandler) GetWACSummaries(c *fiber.Ctx) error {
 		req = new(entity.WACSummaryRequest)
 		ctx = c.Context()
 		v   = adapter.Adapters.Validator
-		l   = middleware.GetLocals(c)
+		l   = m.GetLocals(c)
 	)
 
 	if err := c.QueryParser(req); err != nil {

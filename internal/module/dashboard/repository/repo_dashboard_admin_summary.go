@@ -159,3 +159,58 @@ func (r *dashboardRepository) getMRASummary(ctx context.Context, req *entity.Get
 
 	return nil
 }
+
+// func (r *dashboardRepository) getSADistribution(ctx context.Context, req *entity.GetSummaryPerMonthRequest, res *entity.GetSummaryPerMonthResponse) error {
+// 	type daoPotency struct {
+// 		Id    string `db:"id"`
+// 		Title string `db:"title"`
+// 	}
+
+// 	var (
+// 		potencies = make([]daoPotency, 0, 4)
+// 	)
+
+// 	query := `
+// 		SELECT
+// 			id,
+// 			name AS title
+// 		FROM
+// 			potencies
+// 	`
+
+// 	err := r.db.SelectContext(ctx, &potencies, r.db.Rebind(query))
+// 	if err != nil {
+// 		log.Error().Err(err).Any("payload", req).Msg("repo::getSADistribution - failed to get wac summary")
+// 		return err
+// 	}
+
+// 	for _, potency := range potencies {
+// 		query = `
+// 			SELECT
+// 				COALESCE(SUM(1), 0) AS total
+// 			FROM
+// 				walk_around_check_conditions wacc
+// 			LEFT JOIN
+// 				walk_around_checks wac
+// 				ON wac.id = wacc.walk_around_check_id
+// 			WHERE
+// 				wacc.potency_id = ?
+// 				AND wacc.is_interested = TRUE
+// 				AND TO_CHAR(wac.created_at AT TIME ZONE 'Asia/Makassar', 'YYYY-MM') = ?
+// 		`
+
+// 		var total int
+// 		err = r.db.QueryRowxContext(ctx, r.db.Rebind(query), potency.Id, req.Month).Scan(&total)
+// 		if err != nil {
+// 			log.Error().Err(err).Any("payload", req).Msg("repo::getSADistribution - failed to get wac summary")
+// 			return err
+// 		}
+
+// 		res.TotalLeadDistributions += total
+// 		res.SADistribution = append(res.SADistribution, entity.Distribution{
+// 			Title: potency.Title,
+// 			Total: total,
+// 		})
+// 	}
+
+// }

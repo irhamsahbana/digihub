@@ -173,6 +173,7 @@ func (r *wacRepository) OfferWACUsedCard(ctx context.Context, req *entity.OfferW
 			walk_around_check_conditions
 		SET
 			is_interested = ?,
+			potency_id = (SELECT id FROM potencies WHERE name = 'Used-car'),
 			updated_at = NOW()
 		WHERE
 			walk_around_check_id = ?

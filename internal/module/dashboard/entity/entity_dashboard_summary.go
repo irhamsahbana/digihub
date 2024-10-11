@@ -40,6 +40,7 @@ type Summary struct {
 type Distribution struct {
 	Title      string  `json:"title"`
 	Percentage float64 `json:"percentage"`
+	Total      int     `json:"total"`
 }
 
 type Trend struct {
