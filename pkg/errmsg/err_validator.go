@@ -137,6 +137,9 @@ func errorValidationHandler[T any](err error, payload *T) (int, map[string][]str
 		case "numeric":
 			// message = fmt.Sprintf("%s must be a number.", fieldInMsg)
 			message = fmt.Sprintf("%s harus angka.", fieldInMsg)
+		case "timezone":
+			// message = fmt.Sprintf("%s must be a valid timezone (Ex: Asia/Jakarta).", fieldInMsg)
+			message = fmt.Sprintf("%s harus zona waktu yang valid (Contoh: Asia/Jakarta).", fieldInMsg)
 		case "eqfield":
 			eqField := err.Param()
 			eqFieldName := ""

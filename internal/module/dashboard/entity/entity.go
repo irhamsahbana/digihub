@@ -28,6 +28,7 @@ type GetActivitiesRequest struct {
 	Paginate int    `query:"paginate" validate:"required"`
 	Search   string `query:"search" validate:"omitempty,min=3"`
 	Date     string `query:"date" validate:"omitempty,datetime=2006-01-02"`
+	Timezone string `query:"timezone" validate:"omitempty,timezone"`
 }
 
 func (r *GetActivitiesRequest) SetDefault() {
@@ -37,6 +38,10 @@ func (r *GetActivitiesRequest) SetDefault() {
 
 	if r.Paginate < 1 {
 		r.Paginate = 10
+	}
+
+	if r.Timezone == "" {
+		r.Timezone = "Asia/Makassar"
 	}
 }
 

@@ -43,7 +43,7 @@ func (r *dashboardRepository) GetActivities(ctx context.Context, req *entity.Get
 	}
 
 	if req.Date != "" {
-		query += ` AND TO_CHAR(waca.created_at AT TIME ZONE 'Asia/Makassar', 'YYYY-MM-DD') = ?`
+		query += ` AND TO_CHAR(waca.created_at AT TIME ZONE '` + req.Timezone + `', 'YYYY-MM-DD') = ?`
 		args = append(args, req.Date)
 	}
 
