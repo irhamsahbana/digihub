@@ -48,3 +48,9 @@ type Trend struct {
 	Area  string `json:"area" db:"area"`
 	Leads any    `json:"leads" db:"leads"` // actual type is int
 }
+
+type AreaServiceTrends struct {
+	Area  string `json:"area" db:"area"`
+	Type  string `json:"type" db:"type"`
+	Leads int    `json:"leads" db:"leads"`
+}

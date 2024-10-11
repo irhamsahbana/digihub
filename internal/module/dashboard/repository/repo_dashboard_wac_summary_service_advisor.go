@@ -286,6 +286,7 @@ func (r *dashboardRepository) summaryWACArea(ctx context.Context, req *entity.WA
 			ON wac.id = wacc.walk_around_check_id
 		WHERE
 			wac.user_id = ?
+			AND wac.status != 'offered'
 			AND TO_CHAR(wac.created_at AT TIME ZONE 'Asia/Makassar', 'YYYY-MM') = ?
 	`
 

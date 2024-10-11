@@ -11,6 +11,7 @@ func (r *dashboardRepository) GetAdminSummary(ctx context.Context, req *entity.G
 	var res entity.GetSummaryPerMonthResponse
 	res.SADistribution = make([]entity.Distribution, 0, 4)
 	res.MRADistribution = make([]entity.Distribution, 0, 2)
+	res.AreaServiceTrends = make([]entity.AreaServiceTrends, 0, 4)
 
 	err := r.getSASummary(ctx, req, &res)
 	if err != nil {
@@ -28,6 +29,11 @@ func (r *dashboardRepository) GetAdminSummary(ctx context.Context, req *entity.G
 	}
 
 	err = r.getMRADistribution(ctx, req, &res)
+	if err != nil {
+		return res, err
+	}
+
+	err = r.getAreaServiceTrends(ctx, req, &res)
 	if err != nil {
 		return res, err
 	}
@@ -310,6 +316,40 @@ func (r *dashboardRepository) getMRADistribution(ctx context.Context, req *entit
 		diff := 100 - totalPercentage
 		res.MRADistribution[highestPercentageIndex].Percentage += diff
 	}
+
+	return nil
+}
+
+func (r *dashboardRepository) getAreaServiceTrends(ctx context.Context, req *entity.GetSummaryPerMonthRequest, res *entity.GetSummaryPerMonthResponse) error {
+	query := `
+	SELECT
+		a.name AS area,
+		a.type,
+		COALESCE(SUM(CASE WHEN wacc.is_interested = TRUE AND wac.status != 'offered' THEN 1 ELSE 0 END), 0) AS leads
+	FROM
+		areas a
+	LEFT JOIN
+		walk_around_check_conditions wacc
+		ON a.id = wacc.area_id
+	LEFT JOIN
+		walk_around_checks wac
+		ON wac.id = wacc.walk_around_check_id
+		AND TO_CHAR(wac.created_at AT TIME ZONE '` + req.Timezone + `', 'YYYY-MM') = ?
+	GROUP BY
+		a.name,
+		a.type
+	ORDER BY
+		a.type
+	`
+
+	var areaServiceTrends = make([]entity.AreaServiceTrends, 0, 15)
+	err := r.db.SelectContext(ctx, &areaServiceTrends, r.db.Rebind(query), req.Month)
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::getAreaServiceTrends - failed to get wac summary")
+		return err
+	}
+
+	res.AreaServiceTrends = areaServiceTrends
 
 	return nil
 }

@@ -71,10 +71,11 @@ func (r *GetSummaryPerMonthRequest) SetDefault() {
 }
 
 type GetSummaryPerMonthResponse struct {
-	SASummary       []Summary      `json:"sa_summary"`  // based on area
-	MRASummary      MRASummary     `json:"mra_summary"` //based on follow up
-	SADistribution  []Distribution `json:"sa_distribution"`
-	MRADistribution []Distribution `json:"mra_distribution"`
+	SASummary         []Summary           `json:"sa_summary"`  // based on area
+	MRASummary        MRASummary          `json:"mra_summary"` //based on follow up
+	SADistribution    []Distribution      `json:"sa_distribution"`
+	MRADistribution   []Distribution      `json:"mra_distribution"`
+	AreaServiceTrends []AreaServiceTrends `json:"area_service_trends"`
 }
 
 type MRASummary struct {
