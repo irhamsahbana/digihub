@@ -243,6 +243,73 @@ func (r *dashboardRepository) getSADistribution(ctx context.Context, req *entity
 }
 
 func (r *dashboardRepository) getMRADistribution(ctx context.Context, req *entity.GetSummaryPerMonthRequest, res *entity.GetSummaryPerMonthResponse) error {
+	query := `
+	SELECT
+		id,
+		name,
+		(
+			SELECT
+				COALESCE(SUM(1), 0)
+			FROM
+				walk_around_check_conditions wacc
+			LEFT JOIN
+				walk_around_checks wac
+				ON wac.id = wacc.walk_around_check_id
+			WHERE
+				wacc.potency_id = potencies.id
+				AND wac.status = 'completed'
+				AND wac.is_needs_follow_up = TRUE
+				AND wacc.is_interested = TRUE
+				AND TO_CHAR(wac.created_at AT TIME ZONE '` + req.Timezone + `', 'YYYY-MM') = ?
+		) AS total
+	FROM
+		potencies
+`
+
+	potencies := make([]daoTotalLeadsPerPotency, 0, 4)
+	err := r.db.SelectContext(ctx, &potencies, r.db.Rebind(query),
+		req.Month,
+	)
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::getMRADistribution - failed to get wac summary")
+		return err
+	}
+
+	var totalLeads int // total leads from all potencies
+	for _, potency := range potencies {
+		res.MRADistribution = append(res.MRADistribution, entity.Distribution{
+			Title: potency.Name,
+			Total: potency.Total,
+		})
+
+		totalLeads += potency.Total // sum total leads from all potencies
+	}
+
+	// calculate percentage
+	if totalLeads > 0 {
+		var totalPercentage float64    // total percentage from all potencies
+		var highestPercentageIndex int // index of potency with highest percentage
+
+		for i, potency := range potencies {
+			// calculate percentage
+			percentage := float64(potency.Total) / float64(totalLeads) * 100
+			// round to 2 decimal places
+			percentage = float64(int(percentage*100)) / 100
+
+			res.MRADistribution[i].Percentage = percentage
+
+			totalPercentage += percentage // sum total percentage from all potencies
+
+			// find potency with highest percentage
+			if percentage > res.MRADistribution[highestPercentageIndex].Percentage {
+				highestPercentageIndex = i
+			}
+		}
+
+		// if total percentage is not 100, add the difference to the potency with highest percentage
+		diff := 100 - totalPercentage
+		res.MRADistribution[highestPercentageIndex].Percentage += diff
+	}
 
 	return nil
 }
