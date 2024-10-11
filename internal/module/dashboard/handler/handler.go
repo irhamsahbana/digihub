@@ -173,6 +173,8 @@ func (h *dashboardHandler) GetAdminWACSummaries(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(response.Error(err.Error()))
 	}
 
+	req.SetDefault()
+
 	if err := v.Validate(req); err != nil {
 		log.Warn().Err(err).Any("payload", req).Msg("handler::GetAdminWACSummaries - failed to validate request")
 		code, errs := errmsg.Errors(err, req)

@@ -56,7 +56,18 @@ Admin Summary per month - Start
 - Distribution of leads based on area
 */
 type GetSummaryPerMonthRequest struct {
-	Month string `query:"month" validate:"datetime=2006-01"`
+	Month    string `query:"month" validate:"datetime=2006-01"`
+	Timezone string `query:"timezone" validate:"omitempty,timezone"`
+}
+
+func (r *GetSummaryPerMonthRequest) SetDefault() {
+	if r.Month == "" {
+		r.Month = time.Now().Format("2006-01")
+	}
+
+	if r.Timezone == "" {
+		r.Timezone = "Asia/Makassar"
+	}
 }
 
 type GetSummaryPerMonthResponse struct {

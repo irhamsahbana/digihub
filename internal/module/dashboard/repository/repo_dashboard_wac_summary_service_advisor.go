@@ -189,7 +189,7 @@ func (r *dashboardRepository) summaryLeadsDistribution(res *entity.WACSummaryRes
 		}
 	} else {
 		var totalPercentage float64
-		var maxIndex int
+		var maxIndex int // Index of the highest percentage
 
 		// Calculate the distribution percentages and find the index of the maximum percentage
 		for i, summary := range res.Summaries {
