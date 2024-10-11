@@ -150,6 +150,7 @@ func (r *dashboardRepository) summaryPerPotency(ctx context.Context, req *entity
 				ON wac.id = wacc.walk_around_check_id
 			WHERE
 				wac.is_used_car = TRUE
+				AND wac.status != 'offered'
 				AND wac.user_id = ?
 				AND TO_CHAR(wac.created_at AT TIME ZONE 'Asia/Makassar', 'YYYY-MM') = ?
 		)
@@ -171,6 +172,7 @@ func (r *dashboardRepository) summaryPerPotency(ctx context.Context, req *entity
 	}
 
 	res.Summaries = append(res.Summaries, summary)
+	res.TotalLeadDistributions += summary.TotalLeads
 
 	return nil
 }
@@ -182,6 +184,7 @@ func (r *dashboardRepository) summaryLeadsDistribution(res *entity.WACSummaryRes
 			res.DistributionOfLeads = append(res.DistributionOfLeads, entity.Distribution{
 				Title:      summary.Title,
 				Percentage: 0.0,
+				Total:      summary.TotalLeads,
 			})
 		}
 	} else {
@@ -203,6 +206,7 @@ func (r *dashboardRepository) summaryLeadsDistribution(res *entity.WACSummaryRes
 			res.DistributionOfLeads = append(res.DistributionOfLeads, entity.Distribution{
 				Title:      summary.Title,
 				Percentage: percentage,
+				Total:      summary.TotalLeads,
 			})
 
 			// Track the total percentage sum
