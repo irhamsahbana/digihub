@@ -24,7 +24,8 @@ func (r *dashboardRepository) GetActivities(ctx context.Context, req *entity.Get
 		SELECT
 			COUNT(*) OVER() AS total_data,
 			waca.id,
-			u.name AS service_advisor_name,
+			u.name AS employee_name,
+			c.name AS client_name,
 			waca.status,
 			waca.total_potential_leads,
 			waca.total_leads,
@@ -32,7 +33,15 @@ func (r *dashboardRepository) GetActivities(ctx context.Context, req *entity.Get
 			waca.created_at
 		FROM
 			wac_activities waca
-		LEFT JOIN users u ON waca.user_id = u.id
+		LEFT JOIN
+			users u
+			ON waca.user_id = u.id
+		LEFT JOIN
+			walk_around_checks wac
+			ON waca.wac_id = wac.id
+		LEFT JOIN
+			clients c
+			ON wac.client_id = c.id
 		WHERE
 			1 = 1
 	`

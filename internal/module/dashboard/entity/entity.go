@@ -52,7 +52,8 @@ type GetActivitiesResponse struct {
 
 type Activity struct {
 	Id                  string    `json:"id" db:"id"`
-	ServiceAdvisorName  string    `json:"service_advisor_name" db:"service_advisor_name"`
+	EmployeeName        string    `json:"employee_name" db:"employee_name"`
+	ClientName          string    `json:"client_name" db:"client_name"`
 	Status              string    `json:"status" db:"status"`
 	TotalPotentialLeads int       `json:"total_potential_leads" db:"total_potential_leads"`
 	TotalLeads          int       `json:"total_leads" db:"total_leads"`
