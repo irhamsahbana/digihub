@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"codebase-app/pkg/errmsg"
 	"codebase-app/pkg/types"
 	"time"
 )
@@ -27,7 +28,8 @@ type GetActivitiesRequest struct {
 	Page     int    `query:"page" validate:"required"`
 	Paginate int    `query:"paginate" validate:"required"`
 	Search   string `query:"search" validate:"omitempty,min=3"`
-	Date     string `query:"date" validate:"omitempty,datetime=2006-01-02"`
+	From     string `query:"from" validate:"omitempty,datetime=2006-01-02"`
+	To       string `query:"to" validate:"omitempty,datetime=2006-01-02"`
 	Timezone string `query:"timezone" validate:"omitempty,timezone"`
 }
 
@@ -42,6 +44,41 @@ func (r *GetActivitiesRequest) SetDefault() {
 
 	if r.Timezone == "" {
 		r.Timezone = "Asia/Makassar"
+	}
+}
+
+func (r *GetActivitiesRequest) Validate() error {
+	errs := errmsg.NewCustomErrors(400)
+
+	if (r.From == "" && r.To != "") || (r.From != "" && r.To == "") {
+		errs.Add("from", "from dan to harus diisi bersamaan")
+		errs.Add("to", "from dan to harus diisi bersamaan")
+	}
+
+	if r.From != "" && r.To != "" {
+		from, err := time.Parse("2006-01-02", r.From)
+		if err != nil {
+			errs.Add("from", "from merupakan tanggal yang tidak valid")
+		}
+
+		to, err := time.Parse("2006-01-02", r.To)
+		if err != nil {
+			errs.Add("to", "to merupakan tanggal yang tidak valid")
+		}
+
+		if from.After(to) {
+			errs.Add("from", "from seharusnya tidak lebih besar dari to")
+		}
+
+		if to.Before(from) {
+			errs.Add("to", "to seharusnya tidak lebih kecil dari from")
+		}
+	}
+
+	if errs.HasErrors() {
+		return errs
+	} else {
+		return nil
 	}
 }
 

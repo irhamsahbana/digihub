@@ -152,6 +152,13 @@ func (h *dashboardHandler) GetActivities(c *fiber.Ctx) error {
 		return c.Status(code).JSON(response.Error(errs))
 	}
 
+	err := req.Validate()
+	if err != nil {
+		log.Warn().Err(err).Any("payload", req).Msg("handler::GetActivities - failed to validate request")
+		code, errs := errmsg.Errors(err, req)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
 	res, err := h.service.GetActivities(ctx, req)
 	if err != nil {
 		code, errs := errmsg.Errors[error](err)

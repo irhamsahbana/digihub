@@ -51,9 +51,11 @@ func (r *dashboardRepository) GetActivities(ctx context.Context, req *entity.Get
 		args = append(args, "%"+req.Search+"%", "%"+req.Search+"%")
 	}
 
-	if req.Date != "" {
-		query += ` AND TO_CHAR(waca.created_at AT TIME ZONE '` + req.Timezone + `', 'YYYY-MM-DD') = ?`
-		args = append(args, req.Date)
+	if req.From != "" && req.To != "" {
+		query += ` AND waca.created_at AT TIME ZONE '` + req.Timezone + `'
+		BETWEEN (TO_TIMESTAMP(?, 'YYYY-MM-DD') AT TIME ZONE 'UTC')
+		AND (TO_TIMESTAMP(?, 'YYYY-MM-DD') AT TIME ZONE 'UTC' + time '23:59:59.999999')`
+		args = append(args, req.From, req.To)
 	}
 
 	query += ` ORDER BY waca.created_at DESC`
