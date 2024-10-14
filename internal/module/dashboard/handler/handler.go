@@ -28,13 +28,16 @@ func NewDashboardHandler() *dashboardHandler {
 }
 
 func (h *dashboardHandler) Register(router fiber.Router) {
-	dashboard := router.Group("/dashboard", m.AuthBearer)
+	dashboard := router.Group("/dashboard" /* , m.AuthBearer */)
 
 	dashboard.Get("/wac-summaries", h.GetWACSummaries)
 	dashboard.Get("/lead-trends", h.GetLeadsTrends)
 	dashboard.Get("/admin/summaries", m.AuthRole([]string{"admin"}), h.GetAdminWACSummaries)
 	dashboard.Get("/admin/wac-line-chart", m.AuthRole([]string{"admin"}), h.GetWACLineChart)
-	dashboard.Get("/admin/activities", m.AuthRole([]string{"admin"}), h.GetActivities)
+	dashboard.Get("/admin/activities",
+		// m.AuthRole([]string{"admin"}),
+		h.GetActivities,
+	)
 }
 
 func (h *dashboardHandler) GetLeadsTrends(c *fiber.Ctx) error {
@@ -159,13 +162,26 @@ func (h *dashboardHandler) GetActivities(c *fiber.Ctx) error {
 		return c.Status(code).JSON(response.Error(errs))
 	}
 
-	res, err := h.service.GetActivities(ctx, req)
-	if err != nil {
-		code, errs := errmsg.Errors[error](err)
-		return c.Status(code).JSON(response.Error(errs))
-	}
+	if req.Export == 1 {
+		resp, err := h.service.GetActivitiesExported(ctx, req)
+		if err != nil {
+			code, errs := errmsg.Errors[error](err)
+			return c.Status(code).JSON(response.Error(errs))
+		}
 
-	return c.JSON(response.Success(res, ""))
+		c.Set("Content-Disposition", "attachment; filename=\""+resp.Filename+"\"")
+		c.Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+		return c.SendStream(resp.Buf)
+	} else {
+		res, err := h.service.GetActivities(ctx, req)
+		if err != nil {
+			code, errs := errmsg.Errors[error](err)
+			return c.Status(code).JSON(response.Error(errs))
+		}
+
+		return c.JSON(response.Success(res, ""))
+	}
 }
 
 func (h *dashboardHandler) GetAdminWACSummaries(c *fiber.Ctx) error {

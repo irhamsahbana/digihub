@@ -26,6 +26,10 @@ func (r *dashboardRepository) GetActivities(ctx context.Context, req *entity.Get
 			waca.id,
 			u.name AS employee_name,
 			c.name AS client_name,
+			b.name AS branch_name,
+			c.vehicle_license_number,
+			vt.name AS vehicle_type_name,
+			c.phone,
 			waca.status,
 			waca.total_potential_leads,
 			waca.total_leads,
@@ -40,8 +44,14 @@ func (r *dashboardRepository) GetActivities(ctx context.Context, req *entity.Get
 			walk_around_checks wac
 			ON waca.wac_id = wac.id
 		LEFT JOIN
+			branches b
+			ON wac.branch_id = b.id
+		LEFT JOIN
 			clients c
 			ON wac.client_id = c.id
+		LEFT JOIN
+			vehicle_types vt
+			ON c.vehicle_type_id = vt.id
 		WHERE
 			1 = 1
 	`
@@ -58,9 +68,27 @@ func (r *dashboardRepository) GetActivities(ctx context.Context, req *entity.Get
 		args = append(args, req.From, req.To)
 	}
 
+	if req.BranchId != "" {
+		query += ` AND wac.branch_id = ?`
+		args = append(args, req.BranchId)
+
+		queryBranchName := `SELECT name FROM branches WHERE id = ?`
+		err := r.db.GetContext(ctx, &req.BranchName, r.db.Rebind(queryBranchName), req.BranchId)
+		if err != nil {
+			log.Error().Err(err).Any("payload", req).Msg("repo::GetActivities - failed to get branch name")
+			return res, err
+		}
+	}
+
 	query += ` ORDER BY waca.created_at DESC`
-	query += ` LIMIT ? OFFSET ?`
-	args = append(args, req.Paginate, (req.Page-1)*req.Paginate)
+
+	// convert int to bool
+	isExport := req.Export == 1
+
+	if !isExport {
+		query += ` LIMIT ? OFFSET ?`
+		args = append(args, req.Paginate, (req.Page-1)*req.Paginate)
+	}
 
 	err := r.db.SelectContext(ctx, &data, r.db.Rebind(query), args...)
 	if err != nil {

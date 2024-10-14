@@ -4,6 +4,7 @@ import (
 	"codebase-app/internal/adapter"
 	"codebase-app/internal/infrastructure"
 	"codebase-app/internal/infrastructure/config"
+	"codebase-app/internal/middleware"
 	"codebase-app/internal/route"
 	"codebase-app/pkg/validator"
 	"flag"
@@ -70,6 +71,9 @@ func RunServer(cmd *flag.FlagSet, args []string) {
 		AllowMethods: "GET,POST,PUT,DELETE,PATCH,OPTIONS,HEAD",
 		AllowHeaders: "Origin,Content-Type,Accept,Content-Length,Accept-Language,Accept-Encoding,Connection,Access-Control-Allow-Origin,Authorization",
 	}))
+
+	// Access log middleware
+	app.Use(middleware.AccessLog)
 	// End Application Middlewares
 
 	adapter.Adapters.Sync(
