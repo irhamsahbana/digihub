@@ -28,14 +28,14 @@ func NewDashboardHandler() *dashboardHandler {
 }
 
 func (h *dashboardHandler) Register(router fiber.Router) {
-	dashboard := router.Group("/dashboard" /* , m.AuthBearer */)
+	dashboard := router.Group("/dashboard", m.AuthBearer)
 
 	dashboard.Get("/wac-summaries", h.GetWACSummaries)
 	dashboard.Get("/lead-trends", h.GetLeadsTrends)
 	dashboard.Get("/admin/summaries", m.AuthRole([]string{"admin"}), h.GetAdminWACSummaries)
 	dashboard.Get("/admin/wac-line-chart", m.AuthRole([]string{"admin"}), h.GetWACLineChart)
 	dashboard.Get("/admin/activities",
-		// m.AuthRole([]string{"admin"}),
+		m.AuthRole([]string{"admin"}),
 		h.GetActivities,
 	)
 }
