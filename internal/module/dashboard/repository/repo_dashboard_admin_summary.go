@@ -339,7 +339,8 @@ func (r *dashboardRepository) getAreaServiceTrends(ctx context.Context, req *ent
 		a.name,
 		a.type
 	ORDER BY
-		a.type
+		leads DESC,
+		a.type, a.name ASC
 	`
 
 	var areaServiceTrends = make([]entity.AreaServiceTrends, 0, 15)
