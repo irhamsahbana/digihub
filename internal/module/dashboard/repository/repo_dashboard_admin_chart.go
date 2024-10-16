@@ -8,14 +8,16 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (r *dashboardRepository) GetWACLineChart(ctx context.Context, req *entity.GetWACLineChartRequest) ([]entity.GetWACLineChartResponse, error) {
+func (r *dashboardRepository) GetWACLineChart(ctx context.Context, req *entity.GetWACLineChartRequest) (entity.GetWACLineChartResponse, error) {
 	var (
-		res = make([]entity.GetWACLineChartResponse, 0)
+		res        entity.GetWACLineChartResponse
+		chartItems = make([]entity.ChartItem, 0)
 	)
+	res.ChartItems = chartItems
 
 	query := `
 		SELECT
-			TO_CHAR(waca.created_at AT TIME ZONE 'Asia/Makassar', 'YYYY-MM-DD') AS date,
+			TO_CHAR(waca.created_at AT TIME ZONE '` + req.Tz + `', 'YYYY-MM-DD') AS date,
 			COALESCE(SUM(
 				CASE
 					WHEN
@@ -37,17 +39,17 @@ func (r *dashboardRepository) GetWACLineChart(ctx context.Context, req *entity.G
 		FROM
 			wac_activities waca
 		WHERE
-			waca.created_at AT TIME ZONE 'Asia/Makassar'
+			waca.created_at AT TIME ZONE '` + req.Tz + `'
 			BETWEEN (TO_TIMESTAMP(?, 'YYYY-MM-DD') AT TIME ZONE 'UTC')
 			AND (TO_TIMESTAMP(?, 'YYYY-MM-DD') AT TIME ZONE 'UTC' + time '23:59:59.999999')
 		GROUP BY
-			TO_CHAR(waca.created_at AT TIME ZONE 'Asia/Makassar', 'YYYY-MM-DD')
+			TO_CHAR(waca.created_at AT TIME ZONE '` + req.Tz + `', 'YYYY-MM-DD')
 		`
 
-	err := r.db.SelectContext(ctx, &res, r.db.Rebind(query), req.From, req.To)
+	err := r.db.SelectContext(ctx, &chartItems, r.db.Rebind(query), req.From, req.To)
 	if err != nil {
 		log.Error().Err(err).Any("payload", req).Msg("repo::GetWACLineChart - failed to get wac line chart")
-		return nil, err
+		return res, err
 	}
 
 	// count expected days
@@ -55,13 +57,13 @@ func (r *dashboardRepository) GetWACLineChart(ctx context.Context, req *entity.G
 	fromDate, err := time.Parse("2006-01-02", req.From)
 	if err != nil {
 		log.Error().Err(err).Any("from", req.From).Msg("failed to parse from date")
-		return nil, err
+		return res, err
 	}
 
 	toDate, err := time.Parse("2006-01-02", req.To)
 	if err != nil {
 		log.Error().Err(err).Any("to", req.To).Msg("failed to parse to date")
-		return nil, err
+		return res, err
 	}
 
 	listOfDates := make(map[string]bool)
@@ -71,34 +73,55 @@ func (r *dashboardRepository) GetWACLineChart(ctx context.Context, req *entity.G
 		fromDate = fromDate.AddDate(0, 0, 1)
 	}
 
+	res.ChartItems = chartItems
+
 	// fill the data if blank for the expected days
-	length := len(res)
+	length := len(res.ChartItems)
 	if length < expectedDays {
-		newRes := make([]entity.GetWACLineChartResponse, 0)
+		newRes := make([]entity.ChartItem, 0)
 		loc, _ := time.LoadLocation("Asia/Makassar")
 
 		for i := 0; i < expectedDays; i++ {
 			date := toDate.In(loc).AddDate(0, 0, -i).Format("2006-01-02")
 			found := false
 			for j := 0; j < length; j++ {
-				if res[j].Date == date {
-					newRes = append(newRes, res[j])
+				if res.ChartItems[j].Date == date {
+					newRes = append(newRes, res.ChartItems[j])
 					listOfDates[date] = true
 					found = true
 					break
 				}
 			}
 			if !found {
-				newRes = append(newRes, entity.GetWACLineChartResponse{Date: date})
+				newRes = append(newRes, entity.ChartItem{Date: date})
 			}
 		}
 
-		res = newRes
+		res.ChartItems = newRes
 	}
 
 	// reverse the data
-	for i, j := 0, len(res)-1; i < j; i, j = i+1, j-1 {
-		res[i], res[j] = res[j], res[i]
+	for i, j := 0, len(res.ChartItems)-1; i < j; i, j = i+1, j-1 {
+		res.ChartItems[i], res.ChartItems[j] = res.ChartItems[j], res.ChartItems[i]
+	}
+
+	queryWACCount := `
+		SELECT
+			COUNT(*) AS total_wac
+		FROM
+			walk_around_checks wac
+		WHERE
+			wac.created_at AT TIME ZONE '` + req.Tz + `'
+			BETWEEN
+				(TO_TIMESTAMP(?, 'YYYY-MM-DD') AT TIME ZONE 'UTC')
+			AND
+				(TO_TIMESTAMP(?, 'YYYY-MM-DD') AT TIME ZONE 'UTC' + time '23:59:59.999999')
+	`
+
+	err = r.db.GetContext(ctx, &res.TotalWAC, r.db.Rebind(queryWACCount), req.From, req.To)
+	if err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("repo::GetWACLineChart - failed to get total wac")
+		return res, err
 	}
 
 	return res, nil

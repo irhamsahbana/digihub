@@ -10,7 +10,7 @@ type DashboardRepository interface {
 	GetWACSummary(ctx context.Context, request *entity.WACSummaryRequest) (entity.WACSummaryResponse, error)
 	GetWACSummaryTechnician(ctx context.Context, request *entity.WACSummaryRequest) (entity.TechWACSummaryResponse, error)
 
-	GetWACLineChart(ctx context.Context, request *entity.GetWACLineChartRequest) ([]entity.GetWACLineChartResponse, error)
+	GetWACLineChart(ctx context.Context, request *entity.GetWACLineChartRequest) (entity.GetWACLineChartResponse, error)
 	GetActivities(ctx context.Context, request *entity.GetActivitiesRequest) (entity.GetActivitiesResponse, error)
 	GetAdminSummary(ctx context.Context, request *entity.GetSummaryPerMonthRequest) (entity.GetSummaryPerMonthResponse, error)
 }
@@ -20,7 +20,7 @@ type DashboardService interface {
 	GetWACSummary(ctx context.Context, request *entity.WACSummaryRequest) (entity.WACSummaryResponse, error)
 	GetWACSummaryTechnician(ctx context.Context, request *entity.WACSummaryRequest) (entity.TechWACSummaryResponse, error)
 
-	GetWACLineChart(ctx context.Context, request *entity.GetWACLineChartRequest) ([]entity.GetWACLineChartResponse, error)
+	GetWACLineChart(ctx context.Context, request *entity.GetWACLineChartRequest) (entity.GetWACLineChartResponse, error)
 	GetActivities(ctx context.Context, request *entity.GetActivitiesRequest) (entity.GetActivitiesResponse, error)
 	GetAdminSummary(ctx context.Context, request *entity.GetSummaryPerMonthRequest) (entity.GetSummaryPerMonthResponse, error)
 

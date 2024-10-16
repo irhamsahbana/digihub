@@ -115,6 +115,8 @@ func (h *dashboardHandler) GetWACLineChart(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(response.Error(err.Error()))
 	}
 
+	req.SetDefault()
+
 	if err := v.Validate(req); err != nil {
 		log.Warn().Err(err).Any("payload", req).Msg("handler::GetWACLineChart - failed to validate request")
 		code, errs := errmsg.Errors(err, req)

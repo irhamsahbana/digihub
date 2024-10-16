@@ -13,6 +13,13 @@ Admin WAC Line Chart - Start
 type GetWACLineChartRequest struct {
 	From string `query:"from" validate:"datetime=2006-01-02"`
 	To   string `query:"to" validate:"datetime=2006-01-02"`
+	Tz   string `query:"timezone" validate:"timezone"`
+}
+
+func (r *GetWACLineChartRequest) SetDefault() {
+	if r.Tz == "" {
+		r.Tz = "Asia/Makassar"
+	}
 }
 
 func (r *GetWACLineChartRequest) Validate() error {
@@ -39,6 +46,10 @@ func (r *GetWACLineChartRequest) Validate() error {
 }
 
 type GetWACLineChartResponse struct {
+	TotalWAC   int         `json:"total_wac" db:"total_wac"`
+	ChartItems []ChartItem `json:"chart_items"`
+}
+type ChartItem struct {
 	Date           string `json:"date" db:"date"`
 	PotentialLeads int    `json:"total_potential_leads" db:"total_potential_leads"`
 	Leads          int    `json:"total_leads" db:"total_leads"`
