@@ -369,9 +369,9 @@ func (r *dashboardRepository) summaryTiers(ctx context.Context, req *entity.WACS
 	}
 
 	totalRevenue := totalRevenueNotUsedCar + totalRevenueUsedCar
-	if totalRevenue >= 20000000 {
+	if totalRevenue >= 1500000 {
 		currentTier = "platinum"
-	} else if totalRevenue >= 10000000 {
+	} else if totalRevenue >= 1000000 {
 		currentTier = "gold"
 		nextTier = stringPointer("platinum")
 	} else {
