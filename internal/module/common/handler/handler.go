@@ -32,12 +32,13 @@ func NewCommonHandler() *commonHandler {
 func (h *commonHandler) Register(router fiber.Router) {
 	master := router.Group("/masters", m.AuthBearer)
 
-	master.Get("/areas", h.GetAreas)
+	master.Get("/areas", h.getAreas)
 	master.Get("/potencies", h.GetPotencies)
 	master.Get("/vehicle-types", h.GetVehicleTypes)
 	master.Get("/employees", h.GetEmployees)
 	master.Get("/branches", h.GetBranches)
 	master.Get("/roles", h.GetRoles)
+	master.Get("/tiers", h.GetTiers)
 
 	master.Get("/hi-trade-in/brands", h.GetHTIBrands)
 	master.Get("/hi-trade-in/models", h.GetHTIModels)
@@ -47,7 +48,7 @@ func (h *commonHandler) Register(router fiber.Router) {
 	master.Get("/hi-trade-in/valuations", h.GetHTIvaluations)
 }
 
-func (h *commonHandler) GetAreas(c *fiber.Ctx) error {
+func (h *commonHandler) getAreas(c *fiber.Ctx) error {
 	result, err := h.service.GetAreas(c.Context())
 	if err != nil {
 		code, errs := errmsg.Errors[error](err)
@@ -297,6 +298,30 @@ func (h *commonHandler) GetRoles(c *fiber.Ctx) error {
 		code, errs := errmsg.Errors[error](err)
 		return c.Status(code).JSON(response.Error(errs))
 	}
+
+	return c.JSON(response.Success(result, ""))
+}
+
+func (h *commonHandler) GetTiers(c *fiber.Ctx) error {
+	var result []entity.Tier
+
+	result = append(result,
+		entity.Tier{
+			Key:       "platinum",
+			Name:      "Platinum",
+			Threshold: 1_500_000,
+		},
+		entity.Tier{
+			Key:       "gold",
+			Name:      "Gold",
+			Threshold: 1_000_000,
+		},
+		entity.Tier{
+			Key:       "silver",
+			Name:      "Silver",
+			Threshold: 500_000,
+		},
+	)
 
 	return c.JSON(response.Success(result, ""))
 }
