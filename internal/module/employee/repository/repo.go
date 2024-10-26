@@ -14,19 +14,19 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var _ ports.EmployeeRepository = &employeeRepository{}
+var _ ports.EmployeeRepository = &employeeRepo{}
 
-type employeeRepository struct {
+type employeeRepo struct {
 	db *sqlx.DB
 }
 
-func NewEmployeeRepository() *employeeRepository {
-	return &employeeRepository{
+func NewEmployeeRepository() *employeeRepo {
+	return &employeeRepo{
 		db: adapter.Adapters.DigihubPostgres,
 	}
 }
 
-func (r *employeeRepository) GetEmployee(ctx context.Context, req *entity.GetEmployeeRequest) (entity.GetEmployeeResponse, error) {
+func (r *employeeRepo) GetEmployee(ctx context.Context, req *entity.GetEmployeeRequest) (entity.GetEmployeeResponse, error) {
 	query := `
 		SELECT
 			u.id, u.name, u.email, u.whatsapp_number,
@@ -77,7 +77,7 @@ func (r *employeeRepository) GetEmployee(ctx context.Context, req *entity.GetEmp
 	return res, nil
 }
 
-func (r *employeeRepository) UpdateEmployee(ctx context.Context, req *entity.UpdateEmployeeRequest) error {
+func (r *employeeRepo) UpdateEmployee(ctx context.Context, req *entity.UpdateEmployeeRequest) error {
 	tx, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {
 		log.Error().Err(err).Any("payload", req).Msg("repo::UpdateEmployee - Failed to begin transaction")
@@ -131,7 +131,7 @@ func (r *employeeRepository) UpdateEmployee(ctx context.Context, req *entity.Upd
 	return nil
 }
 
-func (r *employeeRepository) CreateEmployee(ctx context.Context, req *entity.CreateEmployeeRequest) error {
+func (r *employeeRepo) CreateEmployee(ctx context.Context, req *entity.CreateEmployeeRequest) error {
 	tx, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {
 		log.Error().Err(err).Any("payload", req).Msg("repo::CreateEmployee - Failed to begin transaction")
@@ -166,7 +166,7 @@ func (r *employeeRepository) CreateEmployee(ctx context.Context, req *entity.Cre
 	return nil
 }
 
-func (r *employeeRepository) DeleteEmployee(ctx context.Context, req *entity.DeleteEmployeeRequest) error {
+func (r *employeeRepo) DeleteEmployee(ctx context.Context, req *entity.DeleteEmployeeRequest) error {
 	tx, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {
 		log.Error().Err(err).Any("payload", req).Msg("repo::DeleteEmployee - Failed to begin transaction")

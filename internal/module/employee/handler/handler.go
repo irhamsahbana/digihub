@@ -32,6 +32,7 @@ func NewEmployeeHandler() *employeeHandler {
 func (h *employeeHandler) Register(router fiber.Router) {
 	employee := router.Group("/employees", middleware.AuthBearer, middleware.AuthRole([]string{"admin"}))
 
+	employee.Post("/import", h.importEmployees)
 	employee.Post("/", h.createEmployee)
 	employee.Get("/:id", h.getEmployee)
 	employee.Patch("/:id", h.updateEmployee)
@@ -135,6 +136,34 @@ func (h *employeeHandler) deleteEmployee(c *fiber.Ctx) error {
 	}
 
 	err := h.service.DeleteEmployee(ctx, req)
+	if err != nil {
+		code, errs := errmsg.Errors[error](err)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	return c.JSON(response.Success(nil, ""))
+}
+
+func (h *employeeHandler) importEmployees(c *fiber.Ctx) error {
+	var (
+		req = new(entity.ImportEmployeesRequest)
+		ctx = c.Context()
+		v   = adapter.Adapters.Validator
+	)
+
+	if err := c.BodyParser(req); err != nil {
+		log.Warn().Err(err).Any("payload", req).Msg("handler::ImportEmployees - invalid request")
+		code, errs := errmsg.Errors(err, req)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	if err := v.Validate(req); err != nil {
+		log.Warn().Err(err).Any("payload", req).Msg("handler::ImportEmployees - invalid request")
+		code, errs := errmsg.Errors(err, req)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	err := h.service.ImportEmployees(ctx, req)
 	if err != nil {
 		code, errs := errmsg.Errors[error](err)
 		return c.Status(code).JSON(response.Error(errs))
