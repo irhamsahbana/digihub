@@ -20,6 +20,9 @@ type CommonRepository interface {
 	GetHTIYears(ctx context.Context, req *entity.GetHTIYearsRequest) ([]entity.CommonResponse, error)
 	GetHTIPurchase(ctx context.Context, req *entity.GetHTIPurchaseRequest) (entity.GetHTIPurchaseResponse, error)
 	GetHTIValuations(ctx context.Context, req *entity.GetHTIValuationsRequest) (entity.GetHTIValuationsResponse, error)
+
+	CreateBranch(ctx context.Context, req *entity.CreateBranchRequest) error
+	UpdateBranch(ctx context.Context, req *entity.UpdateBranchRequest) error
 }
 
 type CommonService interface {
@@ -37,4 +40,7 @@ type CommonService interface {
 	GetHTIYears(ctx context.Context, req *entity.GetHTIYearsRequest) ([]entity.CommonResponse, error)
 	GetHTIPurchase(ctx context.Context, req *entity.GetHTIPurchaseRequest) (entity.GetHTIPurchaseResponse, error)
 	GetHTIValuations(ctx context.Context, req *entity.GetHTIValuationsRequest) (entity.GetHTIValuationsResponse, error)
+
+	CreateBranch(ctx context.Context, req *entity.CreateBranchRequest) error
+	UpdateBranch(ctx context.Context, req *entity.UpdateBranchRequest) error
 }

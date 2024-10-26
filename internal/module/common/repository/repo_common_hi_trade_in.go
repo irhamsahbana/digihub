@@ -9,7 +9,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (r *commonRepository) GetHTIBrands(ctx context.Context) ([]entity.CommonResponse, error) {
+func (r *commonRepo) GetHTIBrands(ctx context.Context) ([]entity.CommonResponse, error) {
 	query := `
 		SELECT DISTINCT
 			brand as name
@@ -30,7 +30,7 @@ func (r *commonRepository) GetHTIBrands(ctx context.Context) ([]entity.CommonRes
 	return data, nil
 }
 
-func (r *commonRepository) GetHTIModels(ctx context.Context, req *entity.GetHTIModelsRequest) ([]entity.CommonResponse, error) {
+func (r *commonRepo) GetHTIModels(ctx context.Context, req *entity.GetHTIModelsRequest) ([]entity.CommonResponse, error) {
 	query := `
 		SELECT DISTINCT
 			model as name
@@ -53,7 +53,7 @@ func (r *commonRepository) GetHTIModels(ctx context.Context, req *entity.GetHTIM
 	return data, nil
 }
 
-func (r *commonRepository) GetHTITypes(ctx context.Context, req *entity.GetHTITypesRequest) ([]entity.CommonResponse, error) {
+func (r *commonRepo) GetHTITypes(ctx context.Context, req *entity.GetHTITypesRequest) ([]entity.CommonResponse, error) {
 	query := `
 		SELECT DISTINCT
 			type as name
@@ -76,7 +76,7 @@ func (r *commonRepository) GetHTITypes(ctx context.Context, req *entity.GetHTITy
 	return data, nil
 }
 
-func (r *commonRepository) GetHTIYears(ctx context.Context, req *entity.GetHTIYearsRequest) ([]entity.CommonResponse, error) {
+func (r *commonRepo) GetHTIYears(ctx context.Context, req *entity.GetHTIYearsRequest) ([]entity.CommonResponse, error) {
 	query := `
 		SELECT DISTINCT
 			CAST(year AS VARCHAR) as name
@@ -99,7 +99,7 @@ func (r *commonRepository) GetHTIYears(ctx context.Context, req *entity.GetHTIYe
 	return data, nil
 }
 
-func (r *commonRepository) GetHTIPurchase(ctx context.Context, req *entity.GetHTIPurchaseRequest) (entity.GetHTIPurchaseResponse, error) {
+func (r *commonRepo) GetHTIPurchase(ctx context.Context, req *entity.GetHTIPurchaseRequest) (entity.GetHTIPurchaseResponse, error) {
 	query := `
 		SELECT
 			min_purchase,
@@ -125,7 +125,7 @@ func (r *commonRepository) GetHTIPurchase(ctx context.Context, req *entity.GetHT
 	return data, nil
 }
 
-func (r *commonRepository) GetHTIValuations(ctx context.Context, req *entity.GetHTIValuationsRequest) (entity.GetHTIValuationsResponse, error) {
+func (r *commonRepo) GetHTIValuations(ctx context.Context, req *entity.GetHTIValuationsRequest) (entity.GetHTIValuationsResponse, error) {
 	type dao struct {
 		TotalData int `db:"total_data"`
 		entity.HTIValuationItem

@@ -98,3 +98,11 @@ func (s *commonService) GetHTIPurchase(ctx context.Context, req *entity.GetHTIPu
 func (s *commonService) GetHTIValuations(ctx context.Context, req *entity.GetHTIValuationsRequest) (entity.GetHTIValuationsResponse, error) {
 	return s.repo.GetHTIValuations(ctx, req)
 }
+
+func (s *commonService) CreateBranch(ctx context.Context, req *entity.CreateBranchRequest) error {
+	return s.repo.CreateBranch(ctx, req)
+}
+
+func (s *commonService) UpdateBranch(ctx context.Context, req *entity.UpdateBranchRequest) error {
+	return s.repo.UpdateBranch(ctx, req)
+}

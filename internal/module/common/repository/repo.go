@@ -11,19 +11,19 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var _ ports.CommonRepository = &commonRepository{}
+var _ ports.CommonRepository = &commonRepo{}
 
-type commonRepository struct {
+type commonRepo struct {
 	db *sqlx.DB
 }
 
-func NewCommonRepository() *commonRepository {
-	return &commonRepository{
+func NewCommonRepository() *commonRepo {
+	return &commonRepo{
 		db: adapter.Adapters.DigihubPostgres,
 	}
 }
 
-func (r *commonRepository) GetBranches(ctx context.Context, req *entity.GetBranchesRequest) (entity.GetBranchesResponse, error) {
+func (r *commonRepo) GetBranches(ctx context.Context, req *entity.GetBranchesRequest) (entity.GetBranchesResponse, error) {
 	type dao struct {
 		TotalData int `db:"total_data"`
 		entity.CommonResponse
@@ -64,7 +64,7 @@ func (r *commonRepository) GetBranches(ctx context.Context, req *entity.GetBranc
 	return result, nil
 }
 
-func (r *commonRepository) GetAreas(ctx context.Context) ([]entity.AreaResponse, error) {
+func (r *commonRepo) GetAreas(ctx context.Context) ([]entity.AreaResponse, error) {
 	var (
 		result = make([]entity.AreaResponse, 0)
 	)
@@ -85,7 +85,7 @@ func (r *commonRepository) GetAreas(ctx context.Context) ([]entity.AreaResponse,
 	return result, nil
 }
 
-func (r *commonRepository) GetPotencies(ctx context.Context, req *entity.GetPotenciesRequest) ([]entity.GetPotencyResponse, error) {
+func (r *commonRepo) GetPotencies(ctx context.Context, req *entity.GetPotenciesRequest) ([]entity.GetPotencyResponse, error) {
 	type userDao struct {
 		Id          string  `db:"id"`
 		Name        string  `db:"name"`
@@ -160,7 +160,7 @@ func (r *commonRepository) GetPotencies(ctx context.Context, req *entity.GetPote
 	return result, nil
 }
 
-func (r *commonRepository) GetVehicleTypes(ctx context.Context) ([]entity.CommonResponse, error) {
+func (r *commonRepo) GetVehicleTypes(ctx context.Context) ([]entity.CommonResponse, error) {
 	var (
 		result = make([]entity.CommonResponse, 0)
 	)
@@ -183,7 +183,7 @@ func (r *commonRepository) GetVehicleTypes(ctx context.Context) ([]entity.Common
 	return result, nil
 }
 
-func (r *commonRepository) GetEmployees(ctx context.Context, req *entity.GetEmployeesRequest) (entity.GetEmployeesResult, error) {
+func (r *commonRepo) GetEmployees(ctx context.Context, req *entity.GetEmployeesRequest) (entity.GetEmployeesResult, error) {
 	type dao struct {
 		TotalData int `db:"total_data"`
 		entity.EmployeeResult
@@ -273,7 +273,7 @@ func (r *commonRepository) GetEmployees(ctx context.Context, req *entity.GetEmpl
 	return result, nil
 }
 
-func (r *commonRepository) GetRoles(ctx context.Context) ([]entity.CommonResponse, error) {
+func (r *commonRepo) GetRoles(ctx context.Context) ([]entity.CommonResponse, error) {
 	var (
 		result = make([]entity.CommonResponse, 0)
 	)

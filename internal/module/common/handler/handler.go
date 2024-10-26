@@ -46,6 +46,9 @@ func (h *commonHandler) Register(router fiber.Router) {
 	master.Get("/hi-trade-in/years", h.GetHTIYears)
 	master.Get("/hi-trade-in/purchases", h.GetHTIPurchases)
 	master.Get("/hi-trade-in/valuations", h.GetHTIvaluations)
+
+	master.Post("/branches", m.AuthRole([]string{"admin"}), h.CreateBranch)
+	master.Put("/branches/:id", m.AuthRole([]string{"admin"}), h.UpdateBranch)
 }
 
 func (h *commonHandler) getAreas(c *fiber.Ctx) error {
@@ -324,4 +327,60 @@ func (h *commonHandler) GetTiers(c *fiber.Ctx) error {
 	)
 
 	return c.JSON(response.Success(result, ""))
+}
+
+func (h *commonHandler) CreateBranch(c *fiber.Ctx) error {
+	var (
+		req = new(entity.CreateBranchRequest)
+		ctx = c.Context()
+		v   = adapter.Adapters.Validator
+	)
+
+	if err := c.BodyParser(req); err != nil {
+		log.Error().Err(err).Msg("handler::CreateBranch - Failed to parse request")
+		return c.Status(fiber.StatusBadRequest).JSON(response.Error(err))
+	}
+
+	if err := v.Validate(req); err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("handler::CreateBranch - Invalid request")
+		code, errs := errmsg.Errors(err, req)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	err := h.service.CreateBranch(ctx, req)
+	if err != nil {
+		code, errs := errmsg.Errors[error](err)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	return c.JSON(response.Success(nil, "Cabang berhasil dibuat"))
+}
+
+func (h *commonHandler) UpdateBranch(c *fiber.Ctx) error {
+	var (
+		req = new(entity.UpdateBranchRequest)
+		ctx = c.Context()
+		v   = adapter.Adapters.Validator
+	)
+
+	if err := c.BodyParser(req); err != nil {
+		log.Error().Err(err).Msg("handler::UpdateBranch - Failed to parse request")
+		return c.Status(fiber.StatusBadRequest).JSON(response.Error(err))
+	}
+
+	req.Id = c.Params("id")
+
+	if err := v.Validate(req); err != nil {
+		log.Error().Err(err).Any("payload", req).Msg("handler::UpdateBranch - Invalid request")
+		code, errs := errmsg.Errors(err, req)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	err := h.service.UpdateBranch(ctx, req)
+	if err != nil {
+		code, errs := errmsg.Errors[error](err)
+		return c.Status(code).JSON(response.Error(errs))
+	}
+
+	return c.JSON(response.Success(nil, "Cabang berhasil diperbarui"))
 }

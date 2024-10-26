@@ -19,3 +19,14 @@ type GetBranchesResponse struct {
 	Items []CommonResponse `json:"items"`
 	Meta  Meta             `json:"meta"`
 }
+
+type CreateBranchRequest struct {
+	Name    string  `json:"name" validate:"required"`
+	Address *string `json:"address"`
+}
+
+type UpdateBranchRequest struct {
+	Id      string  `json:"id" validate:"required,ulid"`
+	Name    string  `json:"name" validate:"required"`
+	Address *string `json:"address"`
+}

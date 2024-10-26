@@ -44,13 +44,17 @@ func errorPqHandler(errPq *pq.Error) (int, map[string][]string) {
 			sliceOfColumns := strings.Split(column, ", ")
 			columns := strings.Join(sliceOfColumns, "_and_")
 			column = columns
-			columnMsg = "combination of " + strings.ReplaceAll(columns, "_", " ")
-			errors[column] = append(errors[column], fmt.Sprintf("%s already exists.", columnMsg))
+			// columnMsg = "combination of " + strings.ReplaceAll(columns, "_", " ")
+			columnMsg = "kombinasi " + strings.ReplaceAll(columns, "_", " ")
+			// errors[column] = append(errors[column], fmt.Sprintf("%s already exists.", columnMsg))
+			errors[column] = append(errors[column], fmt.Sprintf("%s sudah ada.", columnMsg))
 		} else { // unique_violation is not compound key
 			columnMsg = strings.ReplaceAll(column, "_", " ")
-			msg := fmt.Sprintf("%s already exists.", columnMsg)
+			// msg := fmt.Sprintf("%s already exists.", columnMsg)
+			msg := fmt.Sprintf("%s sudah ada.", columnMsg)
 			if column == "email" {
-				msg = "email already registered."
+				// msg = "email already registered."
+				msg = "email sudah terdaftar."
 			}
 			errors[column] = append(errors[column], msg)
 		}
