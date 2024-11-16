@@ -2,8 +2,8 @@ package repository
 
 import (
 	"codebase-app/internal/module/employee/entity"
-	"codebase-app/pkg/errmsg"
 	"context"
+	"errors"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
@@ -135,7 +135,7 @@ func (r *employeeRepo) GetRoles(ctx context.Context) ([]entity.Common, error) {
 	return res, nil
 }
 
-func (r *employeeRepo) IsEmailExist(ctx context.Context, email, rowname string, errCustom *errmsg.CustomError) error {
+func (r *employeeRepo) IsEmailExist(ctx context.Context, email string) error {
 	query := `
 		SELECT EXISTS(
 			SELECT
@@ -154,11 +154,11 @@ func (r *employeeRepo) IsEmailExist(ctx context.Context, email, rowname string, 
 	err := r.db.GetContext(ctx, &exist, r.db.Rebind(query), email)
 	if err != nil {
 		log.Error().Err(err).Str("email", email).Msg("repo::IsEmailExist - Failed to check email")
-		return errCustom.Add(rowname+".email", "Gagal memeriksa email")
+		return err
 	}
 
 	if exist {
-		return errCustom.Add(rowname+".email", "Email sudah terdaftar")
+		return errors.New("email sudah terdaftar")
 	}
 
 	return nil

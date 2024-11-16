@@ -148,7 +148,7 @@ func (s *employeeService) ImportEmployees(ctx context.Context, req *entity.Impor
 		}
 	}
 
-	errExcelValidation := errmsg.NewCustomErrors(400).SetMessage("Validasi data pegawai gagal")
+	errExcelValidation := errmsg.NewCustomErrors(400)
 
 	// Iterate over the rows
 	for i, row := range rows {
@@ -220,11 +220,15 @@ func (s *employeeService) ImportEmployees(ctx context.Context, req *entity.Impor
 				mapEmails[email] = true
 			}
 
-			err = s.repo.IsEmailExist(ctx, email, rowname, errExcelValidation)
+			err = s.repo.IsEmailExist(ctx, email)
 			if err != nil {
-				return err
+				if err.Error() == "email sudah terdaftar" {
+					errExcelValidation.Add(rowname+".email", "email sudah terdaftar")
+				} else {
+					log.Error().Err(err).Msg("service::ImportEmployees - Failed to check email exist")
+					return errExcelValidation.SetMessage("Gagal memeriksa email")
+				}
 			}
-			r.Email = email
 		}
 
 		if password == "" {
@@ -247,6 +251,8 @@ func (s *employeeService) ImportEmployees(ctx context.Context, req *entity.Impor
 	}
 
 	if errExcelValidation.HasErrors() {
+		msg := PopulateMsg(errExcelValidation.Errors)
+		errExcelValidation.SetMessage(msg)
 		return errExcelValidation
 	}
 
@@ -282,4 +288,21 @@ func isPasswordValid(password string) bool {
 	}
 
 	return true
+}
+
+func PopulateMsg(errors map[string][]string) string {
+	var allErrors []string
+	for field, errorList := range errors {
+		for _, errMsg := range errorList {
+			allErrors = append(allErrors, fmt.Sprintf("Baris %s: %s", extractRowAndField(field), errMsg))
+		}
+	}
+	return strings.Join(allErrors, "\n") // Menggabungkan pesan dengan newline
+}
+
+func extractRowAndField(field string) string {
+	var row int
+	var column string
+	fmt.Sscanf(field, "file[%d].%s", &row, &column)
+	return fmt.Sprintf("%d", row)
 }

@@ -2,7 +2,6 @@ package ports
 
 import (
 	"codebase-app/internal/module/employee/entity"
-	"codebase-app/pkg/errmsg"
 	"context"
 )
 
@@ -18,7 +17,7 @@ type EmployeeRepository interface {
 	GetPotencies(ctx context.Context) ([]entity.Common, error)
 	GetRoles(ctx context.Context) ([]entity.Common, error)
 
-	IsEmailExist(ctx context.Context, email, rowname string, errCustom *errmsg.CustomError) error
+	IsEmailExist(ctx context.Context, email string) error
 }
 
 type EmployeeService interface {
