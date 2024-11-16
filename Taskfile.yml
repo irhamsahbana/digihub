@@ -15,6 +15,12 @@ tasks:
   migrate:
     cmds:
       - migrate -path db/migrations -database "postgres://${DIGIHUB_POSTGRES_USER}:${DIGIHUB_POSTGRES_PASSWORD}@${DIGIHUB_POSTGRES_HOST}:${DIGIHUB_POSTGRES_PORT}/${DIGIHUB_POSTGRES_DB}?sslmode=${DIGIHUB_POSTGRES_SSL_MODE}" {{.cmd}}
+  restore:
+    desc: "Restore the PostgreSQL database from a .dump file with the --clean option"
+    cmds:
+      - export PGPASSWORD=${DIGIHUB_POSTGRES_PASSWORD}
+      - pg_restore --no-owner --clean -h ${DIGIHUB_POSTGRES_HOST} -p ${DIGIHUB_POSTGRES_PORT} -U ${DIGIHUB_POSTGRES_USER} -d ${DIGIHUB_POSTGRES_DB} ./backups/{{.file}}
+    silent: false
   create-migration:
     cmds:
       - migrate create -ext sql -dir db/migrations/ {{.name}} -tz UTC

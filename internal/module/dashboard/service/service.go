@@ -91,7 +91,7 @@ func (s *DashbaordService) GetActivitiesExported(ctx context.Context, request *e
 		f.SetCellValue("Sheet1", fmt.Sprintf("A%d", row), i+1)
 		c := a.CreatedAt.In(loc)
 		f.SetCellValue("Sheet1", fmt.Sprintf("B%d", row), c.Format("2006-01-02 15:04:05"))
-		f.SetCellValue("Sheet1", fmt.Sprintf("B%d", row), a.CreatedAt)
+		f.SetCellValue("Sheet1", fmt.Sprintf("B%d", row), a.CreatedAt.In(loc).Format("2006-01-02 15:04:05"))
 		f.SetCellValue("Sheet1", fmt.Sprintf("C%d", row), a.ClientName)
 		f.SetCellValue("Sheet1", fmt.Sprintf("D%d", row), a.BranchName)
 		f.SetCellValue("Sheet1", fmt.Sprintf("E%d", row), a.EmployeeName)
