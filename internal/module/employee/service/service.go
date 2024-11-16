@@ -148,7 +148,7 @@ func (s *employeeService) ImportEmployees(ctx context.Context, req *entity.Impor
 		}
 	}
 
-	errExcelValidation := errmsg.NewCustomErrors(400)
+	errExcelValidation := errmsg.NewCustomErrors(400).SetMessage("Beberapa data pegawai tidak valid")
 
 	// Iterate over the rows
 	for i, row := range rows {
@@ -251,8 +251,8 @@ func (s *employeeService) ImportEmployees(ctx context.Context, req *entity.Impor
 	}
 
 	if errExcelValidation.HasErrors() {
-		msg := PopulateMsg(errExcelValidation.Errors)
-		errExcelValidation.SetMessage(msg)
+		// msg := PopulateMsg(errExcelValidation.Errors)
+		// errExcelValidation.SetMessage(msg)
 		return errExcelValidation
 	}
 
