@@ -19,6 +19,7 @@ func main() {
 	seedCmd := flag.NewFlagSet("seed", flag.ExitOnError)
 	consumerCmd := flag.NewFlagSet("consumer", flag.ExitOnError)
 	wsCmd := flag.NewFlagSet("ws", flag.ExitOnError)
+	cronjobCmd := flag.NewFlagSet("cronjob", flag.ExitOnError)
 
 	if len(os.Args) < 2 {
 		log.Info().Msg("No command provided, defaulting to 'server'")
@@ -33,6 +34,8 @@ func main() {
 		cmd.RunConsumer(consumerCmd, os.Args[2:])
 	case "server":
 		cmd.RunServer(serverCmd, os.Args[2:])
+	case "cronjob":
+		cmd.RunCronjob(cronjobCmd, os.Args[2:])
 	case "ws":
 		cmd.RunWebsocket(wsCmd, os.Args[2:])
 	default:

@@ -25,6 +25,18 @@ func (r *wacRepository) IsWACCreator(ctx context.Context, userId, WACId string) 
 	return isCreator, nil
 }
 
+// IsWACStatus checks if a Walk Around Check (WAC) with the given ID has the specified status.
+// It returns true if the status matches, otherwise false. If an error occurs during the query,
+// it logs the error and returns false along with the error.
+//
+// Parameters:
+//   - ctx: The context for managing request deadlines and cancellations.
+//   - WACId: The ID of the Walk Around Check to be checked.
+//   - status: The status to be checked against the WAC.
+//
+// Returns:
+//   - bool: True if the WAC has the specified status, otherwise false.
+//   - error: An error if one occurs during the database query.
 func (r *wacRepository) IsWACStatus(ctx context.Context, WACId, status string) (bool, error) {
 	query := `
 		SELECT EXISTS(

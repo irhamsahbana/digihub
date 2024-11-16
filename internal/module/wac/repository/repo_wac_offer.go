@@ -231,6 +231,25 @@ func (r *wacRepository) toCompletedWAC(ctx context.Context, tx *sqlx.Tx, req *en
 			id = ?
 	`
 
+	queryConditionNotes := `
+		UPDATE
+			walk_around_check_conditions
+		SET
+			notes = ?,
+			updated_at = NOW()
+		WHERE
+			id = ?
+			AND walk_around_check_id = ?
+	`
+
+	for _, c := range req.VConditions {
+		_, err := tx.ExecContext(ctx, r.db.Rebind(queryConditionNotes), c.Notes, c.Id, req.Id)
+		if err != nil {
+			log.Error().Err(err).Any("payload", req).Msg("repo::toCompletedWAC - Failed to update walk around check conditions")
+			return err
+		}
+	}
+
 	_, err := tx.ExecContext(ctx, r.db.Rebind(query), followUpAt, req.Id)
 	if err != nil {
 		log.Error().Err(err).Any("payload", req).Msg("repo::toCompletedWAC - Failed to update walk around check record")

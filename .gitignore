@@ -6,6 +6,7 @@ digihub-app
 # directories to ignore
 .idea
 .vscode
+backups
 logs
 storage
 tmp

@@ -77,6 +77,9 @@ type Config struct {
 			RedirectURL  string `env:"GOOGLE_REDIRECT_URL"`
 		}
 	}
+	Dropbox struct {
+		AccessToken string `env:"DROPBOX_ACCESS_TOKEN"`
+	}
 	VenamonGolog struct {
 		Token    string `env:"VENAMON_GOLOG_TOKEN" env-default:"6418397550:AAEUTeuJUwBcR1j0fUNRGwzztfSyuuzmLKI"`
 		ChatId   int64  `env:"VENAMON_GOLOG_CHAT_ID" env-default:"-1002247847967"`
