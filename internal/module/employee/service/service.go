@@ -159,6 +159,10 @@ func (s *employeeService) ImportEmployees(ctx context.Context, req *entity.Impor
 			continue
 		}
 
+		if len(row) < 7 {
+			return errmsg.NewCustomErrors(400).SetMessage("Data pada baris " + fmt.Sprintf("%d", i+1) + " tidak lengkap")
+		}
+
 		rowname := fmt.Sprintf("file[%d]", i)
 
 		var (
