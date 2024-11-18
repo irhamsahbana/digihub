@@ -218,6 +218,7 @@ func (s *employeeService) ImportEmployees(ctx context.Context, req *entity.Impor
 				errExcelValidation.Add(rowname+".email", "email duplikat ditemukan")
 			} else {
 				mapEmails[email] = true
+				r.Email = email
 			}
 
 			err = s.repo.IsEmailExist(ctx, email)
