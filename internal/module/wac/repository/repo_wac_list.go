@@ -20,8 +20,7 @@ func (r *wacRepository) GetWACs(ctx context.Context, req *entity.GetWACsRequest)
 		res   entity.GetWACsResponse
 		data  = make([]dao, 0, req.Paginate)
 	)
-	// res.Items = make(map[string][]entity.WacItem)
-	res.Items = make([]entity.WacItem, 0, req.Paginate)
+	res.Items = make(map[string][]entity.WacItem)
 
 	query.WriteString(`
 		SELECT
@@ -67,12 +66,19 @@ func (r *wacRepository) GetWACs(ctx context.Context, req *entity.GetWACsRequest)
 		return res, err
 	}
 
-	if len(data) > 0 {
-		res.Meta.TotalData = data[0].TotalData
-	}
+	uniqueItems := make(map[string]struct{})
 
 	for _, d := range data {
-		res.Items = append(res.Items, d.WacItem)
+		date := d.CreatedAt.UTC().Format("2006-01-02")
+
+		if _, ok := uniqueItems[d.Id]; !ok {
+			uniqueItems[d.Id] = struct{}{}
+			res.Items[date] = append(res.Items[date], d.WacItem)
+		}
+	}
+
+	if len(data) > 0 {
+		res.Meta.TotalData = data[0].TotalData
 	}
 
 	res.Meta.CountTotalPage(req.Page, req.Paginate, res.Meta.TotalData)
