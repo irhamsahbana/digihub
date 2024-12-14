@@ -55,6 +55,18 @@ func (r *wacRepository) GetWACs(ctx context.Context, req *entity.GetWACsRequest)
 		args = append(args, req.Status)
 	}
 
+	query.WriteString(`
+		GROUP BY
+			wac.id,
+			c.name,
+			wac.status,
+			wac.total_potential_leads,
+			wac.total_leads,
+			wac.total_leads_completed,
+			wac.total_follow_ups,
+			wac.created_at
+	`)
+
 	query.WriteString(" ORDER BY wac.created_at DESC")
 
 	query.WriteString(" LIMIT ? OFFSET ?")
@@ -66,15 +78,12 @@ func (r *wacRepository) GetWACs(ctx context.Context, req *entity.GetWACsRequest)
 		return res, err
 	}
 
-	uniqueItems := make(map[string]struct{})
-
 	for _, d := range data {
 		date := d.CreatedAt.UTC().Format("2006-01-02")
-
-		if _, ok := uniqueItems[d.Id]; !ok {
-			uniqueItems[d.Id] = struct{}{}
-			res.Items[date] = append(res.Items[date], d.WacItem)
+		if _, ok := res.Items[date]; !ok {
+			res.Items[date] = make([]entity.WacItem, 0)
 		}
+		res.Items[date] = append(res.Items[date], d.WacItem)
 	}
 
 	if len(data) > 0 {
