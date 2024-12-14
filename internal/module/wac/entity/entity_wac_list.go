@@ -25,8 +25,8 @@ func (r *GetWACsRequest) SetDefault() {
 }
 
 type GetWACsResponse struct {
-	Items map[string][]WacItem `json:"items"`
-	Meta  types.Meta           `json:"meta"`
+	Items []WacItem  `json:"items"`
+	Meta  types.Meta `json:"meta"`
 }
 
 type WacItem struct {
