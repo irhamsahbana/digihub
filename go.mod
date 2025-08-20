@@ -5,6 +5,7 @@ go 1.22.0
 require (
 	github.com/LukaGiorgadze/gonull v1.2.0
 	github.com/brianvoe/gofakeit/v7 v7.0.2
+	github.com/dropbox/dropbox-sdk-go-unofficial/v6 v6.0.5
 	github.com/go-playground/validator/v10 v10.19.0
 	github.com/gofiber/fiber/v2 v2.52.2
 	github.com/golang-jwt/jwt/v5 v5.2.1
@@ -33,7 +34,6 @@ require (
 	cloud.google.com/go/iam v1.1.12 // indirect
 	cloud.google.com/go/longrunning v0.5.9 // indirect
 	cloud.google.com/go/storage v1.41.0 // indirect
-	github.com/dropbox/dropbox-sdk-go-unofficial/v6 v6.0.5 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect

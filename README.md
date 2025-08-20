@@ -1,6 +1,44 @@
 # Digihub Backend
 
-Backend of Digihub project.
+## Project Overview
+
+### Problem Statement
+
+In the automotive industry, dealerships often face operational inefficiencies due to disconnected systems and manual processes. Key challenges include:
+
+* **Inefficient Vehicle Inspections:** Manual walk-around checks are slow, inconsistent, and difficult to track, leading to delays and potential oversights.
+* **Fragmented Data:** Information on clients, vehicles, promotions, and sales activities is often scattered across different platforms, hindering a unified view of the business.
+* **Limited Performance Insight:** Without a central data hub, it's difficult for management to monitor key performance indicators and make informed, strategic decisions.
+
+### The Proposed Solution
+
+**Digihub** is a comprehensive backend system engineered to digitalize and streamline automotive dealership operations. It acts as a central nervous system, providing a suite of robust APIs to unify data, automate workflows, and enhance communication.
+
+By connecting previously disparate modules, Digihub empowers dealerships to:
+
+* Improve the speed and quality of vehicle inspections.
+* Maintain a single source of truth for all operational data.
+* Securely manage user access with a flexible role-based system.
+* Enable activity tracking.
+
+### Key Features
+
+* **Walk-Around Check (WAC) Management:** A complete digital workflow for conducting vehicle inspections, including condition tracking, follow-up logs, and activity monitoring.
+* **Master Data Management:** Centralized control over core business entities like Branches, Vehicle Types, and Promotions.
+* **User & Client Management:** A secure system for managing employee and customer data.
+* **Role-Based Access Control (RBAC):** Ensures users can only access features and data appropriate for their roles.
+* **Secure Authentication:** Features a robust authentication system using JWT, including email verification and password reset capabilities.
+* **Local File Storage:** Store and manage files securely within the application’s local storage.
+* **Application Monitoring:** Provides comprehensive application logging for tracking system health and user activities.
+
+### Tech Stack
+
+* **Language & Framework:** **Go** with the **Fiber** framework
+* **Database:** **PostgreSQL** with **sqlx**
+* **Authentication:** **JSON Web Token (JWT)**
+* **Logging:** **Zerolog**
+* **Excel Processing:** **Excelize** (`github.com/xuri/excelize/v2`)
+* **Task Runner:** **Go-Task**
 
 ## Developer Guide
 
